@@ -27,7 +27,9 @@ h1,h2,h3{line-height:1.12;margin:0 0 .5rem}
 .flashes{width:100%;padding:0 var(--gutter)}
 .flash{padding:.75rem 1rem;border-radius:10px;margin:.5rem 0;font-weight:600}
 .flash.ok{background:#dff4e6;color:#0f5a2b}
+.flash.exito{background:#17803d;color:#fff;font-size:1.1rem;padding:1rem 1.25rem;border:3px solid #0f5a2b;box-shadow:0 4px 12px rgba(23,128,61,.3);animation:slideIn .5s ease-out}
 .flash.error{background:#fde8e6;color:#9b1c12}
+@keyframes slideIn{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
 
 /* Controles */
 button,.boton{background:var(--azul);color:#fff;border:0;border-radius:999px;padding:.75rem 1.4rem;
@@ -226,6 +228,11 @@ label>input,label>select,label>textarea{margin-top:.25rem;font-weight:400}
   box-shadow:2px 2px 0 rgba(18,24,58,.2);z-index:1}
 .badge-vencido{position:absolute;top:1rem;left:1rem;background:#e8392b;color:#fff;padding:.4rem .8rem;
   border-radius:999px;font-weight:700;font-size:.85rem;z-index:1}
+.badge-usado{position:absolute;top:1rem;left:1rem;background:#17803d;color:#fff;padding:.4rem .8rem;
+  border-radius:999px;font-weight:700;font-size:.85rem;z-index:1;animation:aparecer .5s ease-out}
+.card-cupon.usado{opacity:.75;position:relative}
+.card-cupon.usado::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(23,128,61,.08) 10px,rgba(23,128,61,.08) 20px);pointer-events:none;border-radius:20px}
+@keyframes aparecer{from{transform:scale(0) rotate(-12deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
 
 .card-cupon-body{padding:1.25rem;text-align:center;min-height:140px;display:flex;flex-direction:column;
   justify-content:center}
@@ -301,6 +308,12 @@ label>input,label>select,label>textarea{margin-top:.25rem;font-weight:400}
 .fila-oferta{display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between;align-items:center;
   background:#fff;border:2px solid var(--linea);border-radius:16px;padding:1rem;margin-bottom:.75rem}
 .fila-oferta .nums{display:flex;flex-direction:column;font-size:.9rem;color:var(--gris)}
+.fila-oferta .nums .reclamados{color:var(--gris);font-weight:600}
+.fila-oferta .nums .canjeados{color:var(--gris);font-weight:600;padding:.3rem .7rem;border-radius:8px;background:#f5f5f5}
+.fila-oferta .nums .canjeados.con-canjes{background:#d4f4dd;color:#17803d;border:2px solid #17803d;font-weight:700;animation:pulse 2s ease-in-out infinite}
+.fila-oferta .nums .canjeados strong{font-size:1.2rem}
+.fila-oferta .nums .porcentaje{font-size:.85rem;opacity:.85;margin-left:.25rem}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
 
 .foot{text-align:center;color:var(--gris);font-size:.9rem;padding:2rem 1rem 3rem}
 .foot p{margin:.25rem 0}

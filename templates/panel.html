@@ -61,8 +61,13 @@
         </p>
       </div>
       <div class="nums">
-        <span>{{ o.reclamados }}/{{ o.cupos }} reclamados</span>
-        <span>{{ o.canjeados }} canjeados</span>
+        <span class="reclamados">📱 {{ o.reclamados }}/{{ o.cupos }} reclamados</span>
+        <span class="canjeados {{ 'con-canjes' if o.canjeados > 0 }}">
+          ✅ <strong>{{ o.canjeados }}</strong> canjeados
+          {% if o.canjeados > 0 %}
+            <span class="porcentaje">({{ "%.0f"|format((o.canjeados / o.reclamados * 100) if o.reclamados > 0 else 0) }}%)</span>
+          {% endif %}
+        </span>
       </div>
       <div class="acciones">
         <a class="boton-sec" href="{{ url_for('editar_oferta', oferta_id=o.id) }}">Editar</a>

@@ -474,7 +474,7 @@ def api_qr(codigo):
 def api_cupon(codigo):
     """API para obtener información completa de un cupón incluyendo foto."""
     c = get_db().execute(
-        """SELECT cu.codigo, o.titulo, o.descuento, o.foto, o.categoria, o.valido_hasta,
+        """SELECT cu.codigo, cu.estado, cu.canjeado_en, o.titulo, o.descuento, o.foto, o.categoria, o.valido_hasta,
                   o.ciudad, co.nombre AS comercio
            FROM cupones cu
            JOIN ofertas o ON o.id = cu.oferta_id
@@ -498,6 +498,8 @@ def api_cupon(codigo):
         "ciudad": c["ciudad"],
         "categoria": c["categoria"],
         "validoHasta": c["valido_hasta"],
+        "estado": c["estado"],
+        "canjeadoEn": c["canjeado_en"],
         "foto": url_for("static", filename=f"uploads/{c['foto']}_m.jpg", _external=True) if c["foto"] else None,
         "qr": generar_qr(c["codigo"], info_qr)
     })
@@ -975,17 +977,17 @@ def canjear():
             (codigo, session["comercio_id"])).fetchone()
 
     if not c:
-        flash(f"El código {codigo or '—'} no existe en tu comercio.", "error")
+        flash(f"❌ El código {codigo or '—'} no existe en tu comercio.", "error")
     elif c["estado"] == "canjeado":
-        flash(f"El cupón {codigo} ya fue usado el {formato_fecha(c['canjeado_en'])}.", "error")
+        flash(f"⚠️ El cupón {codigo} ya fue usado el {formato_fecha(c['canjeado_en'])}.", "error")
     elif c["valido_hasta"] < hoy():
-        flash(f"El cupón {codigo} venció el {formato_fecha(c['valido_hasta'])}.", "error")
+        flash(f"⏰ El cupón {codigo} venció el {formato_fecha(c['valido_hasta'])}.", "error")
     else:
         db.execute("UPDATE cupones SET estado='canjeado', canjeado_en=date('now') WHERE id = ?",
                    (c["id"],))
         db.commit()
-        flash(f"✔ Cupón válido: aplicá {c['descuento']}% de descuento en «{c['titulo']}» "
-              f"a {c['nombre']}.", "ok")
+        # Mensaje de éxito más destacado
+        flash(f"🎉 ¡CUPÓN CANJEADO! Aplicá {c['descuento']}% de descuento en «{c['titulo']}» a {c['nombre']}.", "exito")
     return redirect(url_for("panel"))
 
 

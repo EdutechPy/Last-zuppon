@@ -70,6 +70,7 @@
         </div>
         <span class="card-cupon-descuento">-${cupon.descuento}%</span>
         ${vencido ? '<span class="badge-vencido">Vencido</span>' : ''}
+        <span class="badge-estado" style="display:none"></span>
       </div>
       <div class="card-cupon-body">
         <h3>${cupon.titulo}</h3>
@@ -99,7 +100,7 @@
     
     listaCupones.appendChild(card);
     
-    // Cargar información completa incluyendo foto
+    // Cargar información completa incluyendo foto Y ESTADO
     cargarInfoCupon(cupon.codigo);
   });
   
@@ -151,6 +152,7 @@
         
         const imagenDiv = card.querySelector('.card-cupon-imagen');
         const placeholder = card.querySelector('.imagen-placeholder');
+        const badgeEstado = card.querySelector('.badge-estado');
         
         // Aplicar color de categoría
         imagenDiv.style.setProperty('--c-cat', getColorCategoria(data.categoria));
@@ -158,6 +160,22 @@
         // Si hay foto, reemplazar el placeholder
         if (data.foto) {
           placeholder.innerHTML = `<img src="${data.foto}" alt="${data.titulo}" class="card-imagen">`;
+        }
+        
+        // Mostrar estado del cupón
+        if (data.estado === 'canjeado') {
+          card.classList.add('usado');
+          badgeEstado.textContent = '✅ Canjeado';
+          badgeEstado.className = 'badge-usado';
+          badgeEstado.style.display = 'block';
+          
+          // Agregar fecha de canje en el footer
+          if (data.canjeadoEn) {
+            const fechaSpan = card.querySelector('.fecha-mini');
+            fechaSpan.textContent = `Canjeado el ${formatearFecha(data.canjeadoEn)}`;
+            fechaSpan.style.color = '#17803d';
+            fechaSpan.style.fontWeight = '700';
+          }
         }
       })
       .catch(err => {
