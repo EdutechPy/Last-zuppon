@@ -460,6 +460,103 @@ def api_cupon(codigo):
     })
 
 
+@app.route("/api/validate-coupon", methods=["POST"])
+def validate_coupon():
+    """API para validar y canjear cupones desde la app Android Zuppon Scanner."""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                "status": "error",
+                "code": "INVALID_REQUEST",
+                "message": "Solicitud inválida"
+            }), 400
+        
+        coupon_id = data.get("coupon_id", "").strip().upper()
+        device_id = data.get("device_id", "")
+        
+        if not coupon_id:
+            return jsonify({
+                "status": "error",
+                "code": "MISSING_COUPON_ID",
+                "message": "Falta el ID del cupón"
+            }), 400
+        
+        db = get_db()
+        
+        # Buscar el cupón con toda su información
+        c = db.execute(
+            """SELECT cu.*, o.titulo, o.descuento, o.precio_normal, o.valido_hasta,
+                      o.direccion, o.ciudad, o.categoria, co.nombre AS comercio
+               FROM cupones cu
+               JOIN ofertas o ON o.id = cu.oferta_id
+               JOIN comercios co ON co.id = o.comercio_id
+               WHERE cu.codigo = ?""", (coupon_id,)).fetchone()
+        
+        # 1. Cupón no existe
+        if not c:
+            return jsonify({
+                "status": "error",
+                "code": "NOT_FOUND",
+                "message": "Cupón no encontrado"
+            }), 404
+        
+        # 2. Cupón expirado
+        if c["valido_hasta"] < hoy():
+            return jsonify({
+                "status": "error",
+                "code": "EXPIRED",
+                "message": "Este cupón ha expirado",
+                "expired_at": c["valido_hasta"]
+            }), 410
+        
+        # 3. Cupón ya fue usado
+        if c["estado"] == "canjeado":
+            return jsonify({
+                "status": "error",
+                "code": "ALREADY_USED",
+                "message": "Este cupón ya fue utilizado",
+                "used_at": c["canjeado_en"],
+                "used_by_device": device_id
+            }), 409
+        
+        # 4. Cupón válido - marcarlo como canjeado
+        db.execute(
+            "UPDATE cupones SET estado='canjeado', canjeado_en=date('now') WHERE id = ?",
+            (c["id"],)
+        )
+        db.commit()
+        
+        # Calcular precio con descuento
+        precio_original = c["precio_normal"] if c["precio_normal"] else 0
+        precio_con_descuento = int(precio_original * (1 - c["descuento"] / 100)) if precio_original else 0
+        
+        # 5. Respuesta exitosa
+        return jsonify({
+            "status": "success",
+            "message": "Cupón validado correctamente",
+            "coupon": {
+                "id": c["codigo"],
+                "store": c["comercio"],
+                "discount": f"{c['descuento']}%",
+                "original_price": precio_original,
+                "discounted_price": precio_con_descuento,
+                "title": c["titulo"],
+                "city": c["ciudad"],
+                "address": c["direccion"]
+            },
+            "validated_at": hoy()
+        }), 200
+        
+    except Exception as e:
+        app.logger.error(f"Error validando cupón: {e}")
+        return jsonify({
+            "status": "error",
+            "code": "SERVER_ERROR",
+            "message": "Error interno del servidor"
+        }), 500
+
+
 
 
 
