@@ -6,6 +6,23 @@
   <p class="quien">{{ comercio.nombre }}</p>
 
   <form method="post" enctype="multipart/form-data">
+    {% if es_admin and todos_comercios %}
+    <label>
+      <span>🏪 Negocio para esta oferta</span>
+      <select name="comercio_id" id="comercio-select" required>
+        <option value="">Seleccionar negocio</option>
+        {% for com in todos_comercios %}
+          <option value="{{ com.id }}" data-ciudad="{{ com.ciudad }}" 
+                  {{ 'selected' if com.id == oferta.comercio_id }}
+                  style="{{ 'display:none' if com.ciudad != oferta.ciudad }}">
+            {{ com.nombre }} ({{ com.ciudad }})
+          </option>
+        {% endfor %}
+      </select>
+      <small>Solo se muestran negocios de la ciudad seleccionada abajo.</small>
+    </label>
+    {% endif %}
+
     <label>
       <span>Título de la oferta</span>
       <input name="titulo" maxlength="120" value="{{ oferta.titulo }}" required>
@@ -27,7 +44,7 @@
       </label>
       <label>
         <span>Ciudad</span>
-        <select name="ciudad" required>
+        <select name="ciudad" id="ciudad-select" required>
           {% for c in CIUDADES %}
           <option value="{{ c }}" {{ 'selected' if c == oferta.ciudad }}>{{ c }}</option>
           {% endfor %}
@@ -100,4 +117,40 @@
     </div>
   </form>
 </section>
+
+{% if es_admin and todos_comercios %}
+<script>
+  // Filtrar negocios por ciudad seleccionada
+  const ciudadSelect = document.getElementById("ciudad-select");
+  const comercioSelect = document.getElementById("comercio-select");
+  const todasOpciones = Array.from(comercioSelect.querySelectorAll("option[data-ciudad]"));
+  const comercioActual = comercioSelect.value; // Guardar el negocio actual
+  
+  function filtrarNegocios() {
+    const ciudadSeleccionada = ciudadSelect.value;
+    
+    // Ocultar todas las opciones primero
+    todasOpciones.forEach(opt => opt.style.display = "none");
+    
+    if (!ciudadSeleccionada) {
+      return;
+    }
+    
+    // Mostrar solo las de la ciudad seleccionada
+    const opcionesFiltradas = todasOpciones.filter(opt => opt.dataset.ciudad === ciudadSeleccionada);
+    opcionesFiltradas.forEach(opt => opt.style.display = "block");
+    
+    // Si el negocio actual no está en la nueva ciudad, resetear
+    const negocioSeleccionado = comercioSelect.querySelector(`option[value="${comercioSelect.value}"]`);
+    if (negocioSeleccionado && negocioSeleccionado.dataset.ciudad !== ciudadSeleccionada) {
+      comercioSelect.value = "";
+    }
+  }
+  
+  ciudadSelect.addEventListener("change", filtrarNegocios);
+  
+  // Filtrar al cargar la página
+  filtrarNegocios();
+</script>
+{% endif %}
 {% endblock %}

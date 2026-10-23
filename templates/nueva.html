@@ -12,6 +12,7 @@
       </label>
       <p class="chico">Una foto real de lo que ofrecés se ve mucho mejor que cualquier dibujo. JPG, PNG o WebP.</p>
     </div>
+    
     <label>Título <input name="titulo" required maxlength="80" placeholder="30% en asado de tira" value="{{ f.titulo }}"></label>
     <label>Descripción <textarea name="descripcion" rows="3" placeholder="Condiciones, horarios, qué incluye…">{{ f.descripcion }}</textarea></label>
     <label>Rubro
@@ -20,10 +21,26 @@
       </select>
     </label>
     <label>Ciudad
-      <select name="ciudad" required>
+      <select name="ciudad" id="ciudad-select" required>
         {% for c in CIUDADES %}<option {{ 'selected' if (f.ciudad or comercio.ciudad) == c }}>{{ c }}</option>{% endfor %}
       </select>
     </label>
+    
+    {% if es_admin and todos_comercios %}
+    <label>
+      <span>🏪 Negocio para esta oferta</span>
+      <select name="comercio_id" id="comercio-select" required>
+        <option value="">Primero elegí una ciudad arriba ↑</option>
+        {% for com in todos_comercios %}
+          <option value="{{ com.id }}" data-ciudad="{{ com.ciudad }}" style="display:none">
+            {{ com.nombre }} ({{ com.ciudad }})
+          </option>
+        {% endfor %}
+      </select>
+      <small>Solo se muestran negocios de la ciudad seleccionada.</small>
+    </label>
+    {% endif %}
+    
     <label>Dirección del local <input name="direccion" required value="{{ f.direccion or comercio.direccion }}"></label>
     <label>
       <span>Coordenadas GPS (opcional)</span>
@@ -52,5 +69,42 @@
     if (!f) return;
     v.src = URL.createObjectURL(f); v.hidden = false;
   });
+  
+  {% if es_admin and todos_comercios %}
+  // Filtrar negocios por ciudad seleccionada
+  const ciudadSelect = document.getElementById("ciudad-select");
+  const comercioSelect = document.getElementById("comercio-select");
+  const todasOpciones = Array.from(comercioSelect.querySelectorAll("option[data-ciudad]"));
+  
+  function filtrarNegocios() {
+    const ciudadSeleccionada = ciudadSelect.value;
+    
+    // Ocultar todas las opciones primero
+    todasOpciones.forEach(opt => opt.style.display = "none");
+    
+    // Resetear selección
+    comercioSelect.value = "";
+    
+    if (!ciudadSeleccionada) {
+      comercioSelect.querySelector("option[value='']").textContent = "Primero elegí una ciudad arriba ↑";
+      return;
+    }
+    
+    // Mostrar solo las de la ciudad seleccionada
+    const opcionesFiltradas = todasOpciones.filter(opt => opt.dataset.ciudad === ciudadSeleccionada);
+    
+    if (opcionesFiltradas.length === 0) {
+      comercioSelect.querySelector("option[value='']").textContent = `No hay negocios en ${ciudadSeleccionada}`;
+    } else {
+      comercioSelect.querySelector("option[value='']").textContent = "Seleccionar negocio";
+      opcionesFiltradas.forEach(opt => opt.style.display = "block");
+    }
+  }
+  
+  ciudadSelect.addEventListener("change", filtrarNegocios);
+  
+  // Filtrar al cargar la página
+  filtrarNegocios();
+  {% endif %}
 </script>
 {% endblock %}

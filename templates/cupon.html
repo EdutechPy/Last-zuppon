@@ -3,11 +3,21 @@
 {% block content %}
 <section class="cupon-wrap">
   {% if c.estado == 'canjeado' %}
-    <p class="aviso">Este cupón ya fue usado el {{ c.canjeado_en|fecha }}.</p>
+    <div class="alerta alerta-usado">
+      <span class="icono-grande">✅</span>
+      <h2>Cupón ya canjeado</h2>
+      <p>Este cupón fue usado el <strong>{{ c.canjeado_en|fecha }}</strong>.</p>
+      <p class="chico">No se puede volver a usar.</p>
+    </div>
   {% elif vencido %}
-    <p class="aviso">Este cupón venció el {{ c.valido_hasta|fecha }}.</p>
+    <div class="alerta alerta-vencido">
+      <span class="icono-grande">⏰</span>
+      <h2>Cupón vencido</h2>
+      <p>Este cupón venció el <strong>{{ c.valido_hasta|fecha }}</strong>.</p>
+      <p class="chico">Ya no se puede canjear.</p>
+    </div>
   {% else %}
-    <p class="guia">Mostrá este código en el local para recibir tu descuento.</p>
+    <p class="guia">✨ Mostrá este código en el local para recibir tu descuento.</p>
   {% endif %}
 
   <div class="ticket {{ 'usado' if c.estado == 'canjeado' or vencido }}" style="--c:{{ (c.categoria|cat).color }}">
@@ -20,19 +30,37 @@
     </div>
     <div class="perforado"></div>
     <div class="ticket-bottom">
-      <p class="meta">Código de cupón</p>
-      <div class="qr-container">
-        <img src="{{ qr_data }}" alt="Código QR" class="codigo-qr">
-        <div class="qr-logo">
-          <img src="{{ url_for('static', filename='logo.png') }}" alt="ZupponPy">
+      {% if c.estado == 'canjeado' or vencido %}
+        <div class="qr-bloqueado">
+          <span class="icono-bloqueado">🚫</span>
+          <p class="texto-bloqueado">
+            {% if c.estado == 'canjeado' %}
+              <strong>Ya fue canjeado</strong><br>
+              <span class="fecha-bloqueado">{{ c.canjeado_en|fecha }}</span>
+            {% else %}
+              <strong>Cupón vencido</strong><br>
+              <span class="fecha-bloqueado">Expiró: {{ c.valido_hasta|fecha }}</span>
+            {% endif %}
+          </p>
         </div>
-      </div>
+      {% else %}
+        <p class="meta">Código de cupón</p>
+        <div class="qr-container">
+          <img src="{{ qr_data }}" alt="Código QR" class="codigo-qr">
+          <div class="qr-logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="ZupponPy">
+          </div>
+        </div>
+      {% endif %}
       <p class="codigo">{{ c.codigo }}</p>
       <p class="meta">Válido hasta el {{ c.valido_hasta|fecha }}</p>
     </div>
   </div>
 
-  <p class="chico">Este cupón se guardó automáticamente en tu dispositivo. Podés verlo en cualquier momento desde "Mis cupones".</p>
+  {% if c.estado != 'canjeado' and not vencido %}
+    <p class="chico">Este cupón se guardó automáticamente en tu dispositivo. Podés verlo en cualquier momento desde "Mis cupones".</p>
+  {% endif %}
+  
   <a class="boton" href="{{ url_for('mis_cupones') }}">📱 Ver todos mis cupones</a>
   <a class="volver" href="{{ url_for('index', ciudad=c.ciudad) }}">‹ Ver más ofertas en {{ c.ciudad }}</a>
 </section>

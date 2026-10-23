@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} · ZupponPy{% endblock %}
+{% block content %}
+<section class="formulario">
+  <a class="volver" href="{{ url_for('panel', vista='negocios') }}">‹ Volver a negocios</a>
+  <h1>{{ titulo }}</h1>
+  
+  <form method="post">
+    <label>
+      Nombre del negocio
+      <input type="text" name="nombre" value="{{ negocio.nombre if negocio }}" required>
+    </label>
+    
+    <label>
+      Email (para iniciar sesión)
+      <input type="email" name="email" value="{{ negocio.email if negocio }}" required>
+    </label>
+    
+    <label>
+      Contraseña {{ '(dejar vacío para mantener la actual)' if negocio else ''}}
+      <input type="password" name="password" minlength="6" {{ 'required' if not negocio }}>
+      {% if not negocio %}<span class="chico">Mínimo 6 caracteres</span>{% endif %}
+    </label>
+    
+    <label>
+      Teléfono (opcional)
+      <input type="tel" name="telefono" value="{{ negocio.telefono if negocio }}">
+    </label>
+    
+    <label>
+      Ciudad
+      <select name="ciudad" required>
+        <option value="">Elegí una ciudad</option>
+        {% for c in CIUDADES %}
+          <option value="{{ c }}" {{ 'selected' if negocio and negocio.ciudad == c }}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    
+    <label>
+      Dirección
+      <input type="text" name="direccion" value="{{ negocio.direccion if negocio }}" required>
+    </label>
+    
+    {% if negocio %}
+    <div class="info-credenciales">
+      <h3>📋 Credenciales actuales</h3>
+      <p><strong>Email:</strong> <code>{{ negocio.email }}</code></p>
+      <p class="chico">El negocio puede iniciar sesión con este email y la contraseña configurada.</p>
+    </div>
+    {% endif %}
+    
+    <button type="submit">{{ 'Actualizar negocio' if negocio else 'Crear negocio' }}</button>
+  </form>
+</section>
+{% endblock %}

@@ -138,6 +138,8 @@ def init_db():
         db.execute("ALTER TABLE ofertas ADD COLUMN coordenadas TEXT")
     if "whatsapp" not in columnas:
         db.execute("ALTER TABLE ofertas ADD COLUMN whatsapp TEXT")
+    if "principal" not in columnas:
+        db.execute("ALTER TABLE ofertas ADD COLUMN principal INTEGER NOT NULL DEFAULT 0")
     db.commit()
     db.close()
 
@@ -346,9 +348,19 @@ def index():
     if q:
         sql += " AND (o.titulo LIKE ? OR o.descripcion LIKE ? OR c.nombre LIKE ?)"
         params += [f"%{q}%"] * 3
-    sql += " ORDER BY o.id DESC"
+    sql += " ORDER BY COALESCE(o.principal, 0) DESC, o.id DESC"  # Priorizar ofertas principales
 
-    ofertas = enriquecer(get_db().execute(sql, params).fetchall())
+    todas_ofertas = enriquecer(get_db().execute(sql, params).fetchall())
+    
+    # FILTRAR: Solo mostrar 1 oferta por negocio (la más reciente)
+    ofertas_vistas = {}
+    ofertas_filtradas = []
+    for oferta in todas_ofertas:
+        if oferta["comercio_id"] not in ofertas_vistas:
+            ofertas_vistas[oferta["comercio_id"]] = True
+            ofertas_filtradas.append(oferta)
+    
+    ofertas = ofertas_filtradas
     vivas = [o for o in ofertas if o["restantes"] > 0]
 
     destacada, pronto, resto = None, [], ofertas
@@ -395,11 +407,22 @@ def obtener_oferta(oferta_id):
 
 @app.route("/oferta/<int:oferta_id>")
 def oferta(oferta_id):
+    db = get_db()
     o = obtener_oferta(oferta_id)
     vigente = o["activa"] and o["valido_hasta"] >= hoy()
     restantes = o["cupos"] - o["reclamados"]
     dias = (date.fromisoformat(o["valido_hasta"]) - date.today()).days
-    return render_template("oferta.html", o=o, vigente=vigente, restantes=restantes, dias=dias)
+    
+    # Obtener otras ofertas del mismo negocio (excluyendo la actual)
+    otras_ofertas_negocio = enriquecer(db.execute(
+        OFERTA_SELECT + """ WHERE o.comercio_id = ? AND o.id != ? 
+                           AND o.activa = 1 AND o.valido_hasta >= ?
+                           ORDER BY o.id DESC LIMIT 10""",
+        (o["comercio_id"], oferta_id, hoy())
+    ).fetchall())
+    
+    return render_template("oferta.html", o=o, vigente=vigente, restantes=restantes, dias=dias,
+                          otras_ofertas=otras_ofertas_negocio)
 
 
 @app.route("/oferta/<int:oferta_id>/reclamar", methods=["POST"])
@@ -552,7 +575,13 @@ def validate_coupon():
                 "status": "error",
                 "code": "EXPIRED",
                 "message": "Este cupón ha expirado",
-                "expired_at": c["valido_hasta"]
+                "expired_at": c["valido_hasta"],
+                "coupon": {
+                    "id": c["codigo"],
+                    "store": c["comercio"],
+                    "title": c["titulo"],
+                    "discount": f"{c['descuento']}%"
+                }
             }), 410
         
         # 3. Cupón ya fue usado
@@ -562,7 +591,13 @@ def validate_coupon():
                 "code": "ALREADY_USED",
                 "message": "Este cupón ya fue utilizado",
                 "used_at": c["canjeado_en"],
-                "used_by_device": device_id
+                "used_by_device": device_id,
+                "coupon": {
+                    "id": c["codigo"],
+                    "store": c["comercio"],
+                    "title": c["titulo"],
+                    "discount": f"{c['descuento']}%"
+                }
             }), 409
         
         # 4. Cupón válido - marcarlo como canjeado
@@ -665,6 +700,7 @@ def panel():
                           (session["comercio_id"],)).fetchone()
     
     es_admin = comercio["email"] == "admin@gmail.com"
+    vista = request.args.get("vista", "ofertas")  # "ofertas" o "negocios"
     categoria = request.args.get("categoria", "").strip()
     ciudad = request.args.get("ciudad", "").strip()
     
@@ -674,7 +710,8 @@ def panel():
                       (SELECT COUNT(*) FROM cupones WHERE oferta_id = o.id) AS reclamados,
                       (SELECT COUNT(*) FROM cupones WHERE oferta_id = o.id AND estado='canjeado') AS canjeados,
                       COALESCE(o.destacada, 0) AS destacada,
-                      COALESCE(o.urgente, 0) AS urgente
+                      COALESCE(o.urgente, 0) AS urgente,
+                      COALESCE(o.principal, 0) AS principal
                FROM ofertas o
                JOIN comercios c ON c.id = o.comercio_id"""
         params = []
@@ -700,11 +737,23 @@ def panel():
         ofertas = [dict(row) for row in db.execute(
             """SELECT o.*,
                       (SELECT COUNT(*) FROM cupones WHERE oferta_id = o.id) AS reclamados,
-                      (SELECT COUNT(*) FROM cupones WHERE oferta_id = o.id AND estado='canjeado') AS canjeados
+                      (SELECT COUNT(*) FROM cupones WHERE oferta_id = o.id AND estado='canjeado') AS canjeados,
+                      COALESCE(o.principal, 0) AS principal
                FROM ofertas o WHERE o.comercio_id = ? ORDER BY o.id DESC""",
             (session["comercio_id"],)).fetchall()]
     
-    return render_template("panel.html", comercio=comercio, ofertas=ofertas, hoy=hoy(), es_admin=es_admin)
+    # Si es admin y vista es "negocios", cargar todos los negocios
+    negocios = []
+    if es_admin and vista == "negocios":
+        negocios = db.execute(
+            """SELECT c.*, 
+                      (SELECT COUNT(*) FROM ofertas WHERE comercio_id = c.id) AS total_ofertas,
+                      (SELECT COUNT(*) FROM ofertas WHERE comercio_id = c.id AND activa = 1) AS ofertas_activas
+               FROM comercios c ORDER BY c.id DESC"""
+        ).fetchall()
+    
+    return render_template("panel.html", comercio=comercio, ofertas=ofertas, negocios=negocios, 
+                          hoy=hoy(), es_admin=es_admin, vista=vista)
 
 
 @app.route("/panel/nueva", methods=["GET", "POST"])
@@ -713,6 +762,13 @@ def nueva_oferta():
     db = get_db()
     comercio = db.execute("SELECT * FROM comercios WHERE id = ?",
                           (session["comercio_id"],)).fetchone()
+    es_admin = comercio["email"] == "admin@gmail.com"
+    
+    # Si es admin, cargar todos los comercios
+    todos_comercios = []
+    if es_admin:
+        todos_comercios = db.execute("SELECT id, nombre, ciudad FROM comercios ORDER BY ciudad, nombre").fetchall()
+    
     if request.method == "POST":
         f = request.form
         titulo = f.get("titulo", "").strip()
@@ -724,6 +780,9 @@ def nueva_oferta():
         cupos = a_entero(f.get("cupos"))
         precio = a_entero(f.get("precio_normal")) if f.get("precio_normal", "").strip() else None
         hasta = f.get("valido_hasta", "")
+        
+        # Si es admin, puede seleccionar el comercio
+        comercio_id_seleccionado = a_entero(f.get("comercio_id")) if es_admin else session["comercio_id"]
 
         errores = []
         if not titulo:
@@ -738,6 +797,8 @@ def nueva_oferta():
             errores.append("Indicá cuántos cupones disponés (mínimo 1).")
         if hasta < hoy():
             errores.append("La fecha límite debe ser hoy o posterior.")
+        if es_admin and not comercio_id_seleccionado:
+            errores.append("Seleccioná un negocio para la oferta.")
 
         archivo = request.files.get("foto")
         foto = None
@@ -754,14 +815,15 @@ def nueva_oferta():
                 """INSERT INTO ofertas (comercio_id, titulo, descripcion, categoria, ciudad,
                                         direccion, coordenadas, whatsapp, precio_normal, descuento, valido_hasta, cupos, foto)
                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                (session["comercio_id"], titulo, f.get("descripcion", "").strip(), categoria,
+                (comercio_id_seleccionado, titulo, f.get("descripcion", "").strip(), categoria,
                  ciudad, direccion, coordenadas if coordenadas else None, whatsapp if whatsapp else None, 
                  precio, descuento, hasta, cupos, foto))
             db.commit()
             flash("Oferta publicada. Ya la pueden ver en tu ciudad.", "ok")
             return redirect(url_for("panel"))
     por_defecto = (date.today() + timedelta(days=14)).isoformat()
-    return render_template("nueva.html", comercio=comercio, hoy=hoy(), por_defecto=por_defecto)
+    return render_template("nueva.html", comercio=comercio, hoy=hoy(), por_defecto=por_defecto, 
+                          es_admin=es_admin, todos_comercios=todos_comercios)
 
 
 @app.route("/panel/oferta/<int:oferta_id>/editar", methods=["GET", "POST"])
@@ -777,11 +839,14 @@ def editar_oferta(oferta_id):
         oferta = db.execute(
             """SELECT o.*, (SELECT COUNT(*) FROM cupones WHERE oferta_id = o.id) AS reclamados
                FROM ofertas o WHERE o.id = ?""", (oferta_id,)).fetchone()
+        # Cargar todos los comercios con sus ciudades para el selector
+        todos_comercios = db.execute("SELECT id, nombre, ciudad FROM comercios ORDER BY ciudad, nombre").fetchall()
     else:
         oferta = db.execute(
             """SELECT o.*, (SELECT COUNT(*) FROM cupones WHERE oferta_id = o.id) AS reclamados
                FROM ofertas o WHERE o.id = ? AND o.comercio_id = ?""",
             (oferta_id, session["comercio_id"])).fetchone()
+        todos_comercios = []
     
     if not oferta:
         abort(404)
@@ -797,6 +862,9 @@ def editar_oferta(oferta_id):
         cupos = a_entero(f.get("cupos"))
         precio = a_entero(f.get("precio_normal")) if f.get("precio_normal", "").strip() else None
         hasta = f.get("valido_hasta", "")
+        
+        # Si es admin, puede cambiar el comercio asignado
+        comercio_id_nuevo = a_entero(f.get("comercio_id")) if es_admin else session["comercio_id"]
 
         errores = []
         if not titulo:
@@ -811,6 +879,8 @@ def editar_oferta(oferta_id):
             errores.append(f"Los cupones disponibles no pueden ser menos que los ya reclamados ({oferta['reclamados']}).")
         if hasta < hoy():
             errores.append("La fecha límite debe ser hoy o posterior.")
+        if es_admin and not comercio_id_nuevo:
+            errores.append("Seleccioná un comercio para la oferta.")
 
         # Procesar nueva foto si se subió
         archivo = request.files.get("foto")
@@ -831,6 +901,11 @@ def editar_oferta(oferta_id):
                      direccion, coordenadas if coordenadas else None, whatsapp if whatsapp else None, 
                      precio, descuento, hasta, cupos]
             
+            # Si es admin, actualizar también el comercio_id
+            if es_admin:
+                sql += ", comercio_id=?"
+                params.append(comercio_id_nuevo)
+            
             # Si hay nueva foto, actualizarla
             if nueva_foto:
                 sql += ", foto=?"
@@ -847,7 +922,8 @@ def editar_oferta(oferta_id):
             flash("Oferta actualizada correctamente.", "ok")
             return redirect(url_for("panel"))
     
-    return render_template("editar.html", comercio=comercio, oferta=oferta, hoy=hoy())
+    return render_template("editar.html", comercio=comercio, oferta=oferta, hoy=hoy(), 
+                          es_admin=es_admin, todos_comercios=todos_comercios if es_admin else [])
 
 
 @app.route("/panel/oferta/<int:oferta_id>/foto", methods=["POST"])
@@ -951,6 +1027,164 @@ def marcar_urgente(oferta_id):
     mensaje = "Oferta marcada como urgente." if nuevo_estado == 1 else "Oferta desmarcada como urgente."
     flash(mensaje, "ok")
     return redirect(url_for("panel"))
+
+
+@app.route("/panel/oferta/<int:oferta_id>/marcar-principal", methods=["POST"])
+@login_requerido
+def marcar_principal(oferta_id):
+    db = get_db()
+    comercio = db.execute("SELECT email FROM comercios WHERE id = ?",
+                          (session["comercio_id"],)).fetchone()
+    
+    # Obtener la oferta y su comercio
+    oferta = db.execute("SELECT comercio_id, principal FROM ofertas WHERE id = ?", (oferta_id,)).fetchone()
+    
+    if not oferta:
+        abort(404)
+    
+    # Verificar permisos
+    es_admin = comercio["email"] == "admin@gmail.com"
+    if not es_admin and oferta["comercio_id"] != session["comercio_id"]:
+        abort(403)
+    
+    if oferta["principal"] == 1:
+        # Si ya es principal, desmarcala
+        db.execute("UPDATE ofertas SET principal = 0 WHERE id = ?", (oferta_id,))
+        flash("Oferta desmarcada como principal.", "ok")
+    else:
+        # Desmarcar TODAS las ofertas principales del mismo negocio
+        db.execute("UPDATE ofertas SET principal = 0 WHERE comercio_id = ?", (oferta["comercio_id"],))
+        # Marcar solo esta como principal
+        db.execute("UPDATE ofertas SET principal = 1 WHERE id = ?", (oferta_id,))
+        flash("Esta oferta ahora aparecerá en la página principal. Las demás ofertas de este negocio estarán en su página.", "exito")
+    
+    db.commit()
+    return redirect(url_for("panel"))
+
+
+@app.route("/panel/negocio/nuevo", methods=["GET", "POST"])
+@login_requerido
+def nuevo_negocio():
+    db = get_db()
+    comercio = db.execute("SELECT email FROM comercios WHERE id = ?",
+                          (session["comercio_id"],)).fetchone()
+    
+    if comercio["email"] != "admin@gmail.com":
+        abort(403)
+    
+    if request.method == "POST":
+        f = request.form
+        nombre = f.get("nombre", "").strip()
+        email = f.get("email", "").strip().lower()
+        password = f.get("password", "")
+        telefono = solo_digitos(f.get("telefono"))
+        ciudad = f.get("ciudad", "")
+        direccion = f.get("direccion", "").strip()
+        
+        errores = []
+        if not nombre or not email or not direccion:
+            errores.append("Completá todos los campos obligatorios.")
+        if ciudad not in CIUDADES:
+            errores.append("Elegí una ciudad válida.")
+        if len(password) < 6:
+            errores.append("La contraseña debe tener al menos 6 caracteres.")
+        
+        if errores:
+            for e in errores:
+                flash(e, "error")
+        else:
+            try:
+                db.execute(
+                    "INSERT INTO comercios (nombre, email, password_hash, telefono, ciudad, direccion) VALUES (?,?,?,?,?,?)",
+                    (nombre, email, generate_password_hash(password), telefono, ciudad, direccion))
+                db.commit()
+                flash(f"Negocio '{nombre}' creado exitosamente.", "exito")
+                return redirect(url_for("panel", vista="negocios"))
+            except sqlite3.IntegrityError:
+                flash("Ya existe un negocio con ese correo.", "error")
+    
+    return render_template("negocio_form.html", comercio=comercio, negocio=None, titulo="Crear nuevo negocio")
+
+
+@app.route("/panel/negocio/<int:negocio_id>/editar", methods=["GET", "POST"])
+@login_requerido
+def editar_negocio(negocio_id):
+    db = get_db()
+    comercio = db.execute("SELECT email FROM comercios WHERE id = ?",
+                          (session["comercio_id"],)).fetchone()
+    
+    if comercio["email"] != "admin@gmail.com":
+        abort(403)
+    
+    negocio = db.execute("SELECT * FROM comercios WHERE id = ?", (negocio_id,)).fetchone()
+    if not negocio:
+        abort(404)
+    
+    if request.method == "POST":
+        f = request.form
+        nombre = f.get("nombre", "").strip()
+        email = f.get("email", "").strip().lower()
+        password = f.get("password", "")
+        telefono = solo_digitos(f.get("telefono"))
+        ciudad = f.get("ciudad", "")
+        direccion = f.get("direccion", "").strip()
+        
+        errores = []
+        if not nombre or not email or not direccion:
+            errores.append("Completá todos los campos obligatorios.")
+        if ciudad not in CIUDADES:
+            errores.append("Elegí una ciudad válida.")
+        
+        if errores:
+            for e in errores:
+                flash(e, "error")
+        else:
+            try:
+                # Si hay nueva contraseña, actualizarla
+                if password and len(password) >= 6:
+                    db.execute(
+                        "UPDATE comercios SET nombre=?, email=?, password_hash=?, telefono=?, ciudad=?, direccion=? WHERE id=?",
+                        (nombre, email, generate_password_hash(password), telefono, ciudad, direccion, negocio_id))
+                else:
+                    # Mantener la contraseña actual
+                    db.execute(
+                        "UPDATE comercios SET nombre=?, email=?, telefono=?, ciudad=?, direccion=? WHERE id=?",
+                        (nombre, email, telefono, ciudad, direccion, negocio_id))
+                db.commit()
+                flash(f"Negocio '{nombre}' actualizado exitosamente.", "exito")
+                return redirect(url_for("panel", vista="negocios"))
+            except sqlite3.IntegrityError:
+                flash("Ya existe un negocio con ese correo.", "error")
+    
+    return render_template("negocio_form.html", comercio=comercio, negocio=negocio, titulo="Editar negocio")
+
+
+@app.route("/panel/negocio/<int:negocio_id>/eliminar", methods=["POST"])
+@login_requerido
+def eliminar_negocio(negocio_id):
+    db = get_db()
+    comercio = db.execute("SELECT email FROM comercios WHERE id = ?",
+                          (session["comercio_id"],)).fetchone()
+    
+    if comercio["email"] != "admin@gmail.com":
+        abort(403)
+    
+    # No permitir eliminar al admin
+    negocio = db.execute("SELECT email FROM comercios WHERE id = ?", (negocio_id,)).fetchone()
+    if negocio and negocio["email"] == "admin@gmail.com":
+        flash("No se puede eliminar la cuenta de administrador.", "error")
+        return redirect(url_for("panel", vista="negocios"))
+    
+    # Verificar si tiene ofertas
+    ofertas = db.execute("SELECT COUNT(*) as total FROM ofertas WHERE comercio_id = ?", (negocio_id,)).fetchone()
+    if ofertas["total"] > 0:
+        flash(f"No se puede eliminar el negocio porque tiene {ofertas['total']} ofertas asociadas. Eliminá las ofertas primero.", "error")
+    else:
+        db.execute("DELETE FROM comercios WHERE id = ?", (negocio_id,))
+        db.commit()
+        flash("Negocio eliminado exitosamente.", "exito")
+    
+    return redirect(url_for("panel", vista="negocios"))
 
 
 @app.route("/panel/canjear", methods=["POST"])

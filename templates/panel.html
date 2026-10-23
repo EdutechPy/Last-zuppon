@@ -14,85 +14,150 @@
     </div>
   </form>
 
-  <div class="encabezado">
-    <h2>Mis ofertas</h2>
-    <div>
-      <a class="boton" href="{{ url_for('nueva_oferta') }}">Nueva oferta</a>
-    </div>
-  </div>
-
   {% if es_admin %}
-  <div class="chips con-scroll">
-    <a class="chip {{ 'on' if not request.args.get('categoria') and not request.args.get('ciudad') }}" 
-       style="--c: var(--papel)" 
-       href="{{ url_for('panel') }}">✨ Todo</a>
-    {% for cat_nombre in CATEGORIAS %}
-      {% set meta = cat_nombre|cat %}
-      <a class="chip {{ 'on' if request.args.get('categoria') == cat_nombre }}" 
-         style="--c: {{ meta.color }}" 
-         href="{{ url_for('panel', categoria=cat_nombre) }}">{{ meta.emoji }} {{ cat_nombre }}</a>
-    {% endfor %}
-  </div>
-  
-  <div class="filtro-ciudad">
-    <label for="ciudad-select">🏙️ Filtrar por ciudad:</label>
-    <select id="ciudad-select" onchange="window.location.href = this.value">
-      <option value="{{ url_for('panel') }}" {{ 'selected' if not request.args.get('ciudad') }}>Todas las ciudades</option>
-      {% for c in CIUDADES %}
-        <option value="{{ url_for('panel', ciudad=c, categoria=request.args.get('categoria', '')) }}" 
-                {{ 'selected' if request.args.get('ciudad') == c }}>{{ c }}</option>
-      {% endfor %}
-    </select>
+  <div class="pestanas">
+    <a href="{{ url_for('panel', vista='ofertas') }}" class="pestana {{ 'activa' if vista == 'ofertas' }}">
+      📦 Ofertas
+    </a>
+    <a href="{{ url_for('panel', vista='negocios') }}" class="pestana {{ 'activa' if vista == 'negocios' }}">
+      🏪 Negocios
+    </a>
   </div>
   {% endif %}
 
-  {% if ofertas %}
-  <div class="tabla">
-    {% for o in ofertas %}
-    <div class="fila-oferta">
-      {% if o.foto %}<img class="mini" src="{{ foto_url(o.foto, 'm') }}" alt="">
-      {% else %}<span class="mini vacia" aria-hidden="true">📷</span>{% endif %}
-      <div class="info">
-        <strong>{{ o.titulo }}</strong>
-        {% if es_admin %}<p class="chico">Comercio: {{ o.comercio_nombre }}</p>{% endif %}
-        <p class="meta">
-          -{{ o.descuento }}% · hasta {{ o.valido_hasta|fecha }}
-          {% if not o.activa %}· Pausada{% elif o.valido_hasta < hoy %}· Vencida{% endif %}
-        </p>
-      </div>
-      <div class="nums">
-        <span class="reclamados">📱 {{ o.reclamados }}/{{ o.cupos }} reclamados</span>
-        <span class="canjeados {{ 'con-canjes' if o.canjeados > 0 }}">
-          ✅ <strong>{{ o.canjeados }}</strong> canjeados
-          {% if o.canjeados > 0 %}
-            <span class="porcentaje">({{ "%.0f"|format((o.canjeados / o.reclamados * 100) if o.reclamados > 0 else 0) }}%)</span>
-          {% endif %}
-        </span>
-      </div>
-      <div class="acciones">
-        <a class="boton-sec" href="{{ url_for('editar_oferta', oferta_id=o.id) }}">Editar</a>
-        {% if es_admin %}
-        <form method="post" action="{{ url_for('marcar_destacada', oferta_id=o.id) }}" style="display:inline">
-          <button class="sec destacar" type="submit">{{ '⭐ Destacada' if o['destacada'] else '☆ Destacar' }}</button>
-        </form>
-        <form method="post" action="{{ url_for('marcar_urgente', oferta_id=o.id) }}" style="display:inline">
-          <button class="sec urgente-btn" type="submit">{{ '⏰ Urgente' if o['urgente'] else '⏱️ Urgentar' }}</button>
-        </form>
-        {% endif %}
-        <form method="post" enctype="multipart/form-data" action="{{ url_for('cambiar_foto', oferta_id=o.id) }}">
-          <label class="subir chica">{{ 'Cambiar foto' if o.foto else 'Agregar foto' }}
-            <input type="file" name="foto" accept="image/*" hidden onchange="this.form.submit()">
-          </label>
-        </form>
-        <form method="post" action="{{ url_for('alternar_oferta', oferta_id=o.id) }}">
-          <button class="sec" type="submit">{{ 'Pausar' if o.activa else 'Reactivar' }}</button>
-        </form>
+  {% if vista == 'negocios' and es_admin %}
+    {# Vista de Negocios #}
+    <div class="encabezado">
+      <h2>Gestión de Negocios</h2>
+      <div>
+        <a class="boton" href="{{ url_for('nuevo_negocio') }}">➕ Crear negocio</a>
       </div>
     </div>
-    {% endfor %}
-  </div>
+
+    {% if negocios %}
+    <div class="tabla-negocios">
+      {% for n in negocios %}
+      <div class="fila-negocio">
+        <div class="negocio-icono">🏪</div>
+        <div class="negocio-info">
+          <strong>{{ n.nombre }}</strong>
+          <p class="meta">
+            📍 {{ n.ciudad }} · {{ n.direccion }}
+          </p>
+          <p class="credenciales">
+            <span class="label">Email:</span> <code>{{ n.email }}</code>
+          </p>
+          <p class="estadisticas">
+            {{ n.total_ofertas }} ofertas totales · {{ n.ofertas_activas }} activas
+          </p>
+        </div>
+        <div class="negocio-acciones">
+          <a class="boton-sec" href="{{ url_for('editar_negocio', negocio_id=n.id) }}">✏️ Editar</a>
+          {% if n.email != 'admin@gmail.com' %}
+          <form method="post" action="{{ url_for('eliminar_negocio', negocio_id=n.id) }}" 
+                onsubmit="return confirm('¿Estás seguro de eliminar este negocio?')" style="display:inline">
+            <button class="sec peligro" type="submit">🗑️ Eliminar</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+      <div class="vacio"><p>No hay negocios registrados todavía.</p></div>
+    {% endif %}
+
   {% else %}
-    <div class="vacio"><p>Todavía no publicaste ofertas. Creá la primera y aparecerá en {{ comercio.ciudad }}.</p></div>
+    {# Vista de Ofertas #}
+    <div class="encabezado">
+      <h2>Mis ofertas</h2>
+      <div>
+        <a class="boton" href="{{ url_for('nueva_oferta') }}">Nueva oferta</a>
+      </div>
+    </div>
+
+    {% if es_admin %}
+    <div class="chips con-scroll">
+      <a class="chip {{ 'on' if not request.args.get('categoria') and not request.args.get('ciudad') }}" 
+         style="--c: var(--papel)" 
+         href="{{ url_for('panel') }}">✨ Todo</a>
+      {% for cat_nombre in CATEGORIAS %}
+        {% set meta = cat_nombre|cat %}
+        <a class="chip {{ 'on' if request.args.get('categoria') == cat_nombre }}" 
+           style="--c: {{ meta.color }}" 
+           href="{{ url_for('panel', categoria=cat_nombre) }}">{{ meta.emoji }} {{ cat_nombre }}</a>
+      {% endfor %}
+    </div>
+    
+    <div class="filtro-ciudad">
+      <label for="ciudad-select">🏙️ Filtrar por ciudad:</label>
+      <select id="ciudad-select" onchange="window.location.href = this.value">
+        <option value="{{ url_for('panel') }}" {{ 'selected' if not request.args.get('ciudad') }}>Todas las ciudades</option>
+        {% for c in CIUDADES %}
+          <option value="{{ url_for('panel', ciudad=c, categoria=request.args.get('categoria', '')) }}" 
+                  {{ 'selected' if request.args.get('ciudad') == c }}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+
+    {% if ofertas %}
+    <div class="tabla">
+      {% for o in ofertas %}
+      <div class="fila-oferta">
+        {% if o.foto %}<img class="mini" src="{{ foto_url(o.foto, 'm') }}" alt="">
+        {% else %}<span class="mini vacia" aria-hidden="true">📷</span>{% endif %}
+        <div class="info">
+          <strong>{{ o.titulo }}</strong>
+          {% if es_admin %}<p class="chico">Comercio: {{ o.comercio_nombre }}</p>{% endif %}
+          <p class="meta">
+            -{{ o.descuento }}% · hasta {{ o.valido_hasta|fecha }}
+            {% if not o.activa %}· Pausada{% elif o.valido_hasta < hoy %}· Vencida{% endif %}
+          </p>
+        </div>
+        <div class="nums">
+          <span class="reclamados">📱 {{ o.reclamados }}/{{ o.cupos }} reclamados</span>
+          <span class="canjeados {{ 'con-canjes' if o.canjeados > 0 }}">
+            ✅ <strong>{{ o.canjeados }}</strong> canjeados
+            {% if o.canjeados > 0 %}
+              <span class="porcentaje">({{ "%.0f"|format((o.canjeados / o.reclamados * 100) if o.reclamados > 0 else 0) }}%)</span>
+            {% endif %}
+          </span>
+        </div>
+        <div class="acciones">
+          <a class="boton-sec" href="{{ url_for('editar_oferta', oferta_id=o.id) }}">Editar</a>
+          
+          {# Botón para marcar como principal (disponible para admin y dueño) #}
+          <form method="post" action="{{ url_for('marcar_principal', oferta_id=o.id) }}" style="display:inline">
+            <button class="sec principal-btn" type="submit" title="Elegir esta oferta para mostrar en la página principal">
+              {{ '⭐ Principal' if o.get('principal', 0) else '☆ Promocionar' }}
+            </button>
+          </form>
+          
+          {% if es_admin %}
+          <form method="post" action="{{ url_for('marcar_destacada', oferta_id=o.id) }}" style="display:inline">
+            <button class="sec destacar" type="submit">{{ '⭐ Destacada' if o['destacada'] else '☆ Destacar' }}</button>
+          </form>
+          <form method="post" action="{{ url_for('marcar_urgente', oferta_id=o.id) }}" style="display:inline">
+            <button class="sec urgente-btn" type="submit">{{ '⏰ Urgente' if o['urgente'] else '⏱️ Urgentar' }}</button>
+          </form>
+          {% endif %}
+          
+          <form method="post" enctype="multipart/form-data" action="{{ url_for('cambiar_foto', oferta_id=o.id) }}">
+            <label class="subir chica">{{ 'Cambiar foto' if o.foto else 'Agregar foto' }}
+              <input type="file" name="foto" accept="image/*" hidden onchange="this.form.submit()">
+            </label>
+          </form>
+          <form method="post" action="{{ url_for('alternar_oferta', oferta_id=o.id) }}">
+            <button class="sec" type="submit">{{ 'Pausar' if o.activa else 'Reactivar' }}</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+      <div class="vacio"><p>Todavía no publicaste ofertas. Creá la primera y aparecerá en {{ comercio.ciudad }}.</p></div>
+    {% endif %}
   {% endif %}
 </section>
 {% endblock %}

@@ -68,4 +68,51 @@
     </form>
   {% endif %}
 </article>
+
+{# Otras ofertas del mismo negocio #}
+{% if otras_ofertas %}
+<section class="seccion-negocio">
+  <div class="negocio-header">
+    <div class="negocio-info-header">
+      <span class="negocio-icono">🏪</span>
+      <div>
+        <h2 class="negocio-titulo">Más ofertas de {{ o.comercio }}</h2>
+        <p class="negocio-subtitulo">{{ otras_ofertas|length }} {{ 'oferta' if otras_ofertas|length == 1 else 'ofertas' }} disponibles</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="fila-scroll ofertas-negocio">
+    {% for oferta in otras_ofertas %}
+      {% set meta = oferta.categoria|cat %}
+      {% set viva = oferta.restantes > 0 %}
+      <a class="card card-negocio {{ 'agotada' if not viva }}" href="{{ url_for('oferta', oferta_id=oferta.id) }}" style="--c:{{ meta.color }}">
+        <div class="arte">
+          {% if oferta.foto %}<img src="{{ foto_url(oferta.foto, 'm') }}" alt="{{ oferta.titulo }}">
+          {% else %}<span class="emoji" aria-hidden="true">{{ meta.emoji }}</span>{% endif %}
+          <span class="sticker">-{{ oferta.descuento }}%</span>
+        </div>
+        <div class="cuerpo">
+          <h3>{{ oferta.titulo }}</h3>
+          {% if oferta.precio_normal %}
+            <p class="precio">
+              <s>{{ oferta.precio_normal|gs }}</s>
+              <strong>{{ (oferta.precio_normal * (100 - oferta.descuento) // 100)|gs }}</strong>
+            </p>
+          {% endif %}
+          <p class="meta {{ 'urgente' if oferta.dias <= 3 }}">
+            {% if viva %}
+              <span class="disponibles">📱 {{ oferta.restantes }} disponibles</span>
+              <span class="separador">•</span>
+              <span class="tiempo">{{ oferta.dias|cuando }}</span>
+            {% else %}
+              <span class="agotado-badge">Agotado</span>
+            {% endif %}
+          </p>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 {% endblock %}
