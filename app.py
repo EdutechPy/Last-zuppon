@@ -14,6 +14,7 @@ import sqlite3
 from datetime import date, timedelta
 from functools import wraps
 from io import BytesIO
+from urllib.parse import urlencode
 import base64
 
 from flask import (Flask, abort, flash, g, jsonify, make_response, redirect,
@@ -169,15 +170,36 @@ def generar_codigo(db):
     raise RuntimeError("No se pudo generar un código único")
 
 
-def generar_qr(codigo):
-    """Genera un código QR y lo devuelve como data URI en base64."""
+def generar_qr(codigo, info_cupon=None):
+    """Genera un código QR y lo devuelve como data URI en base64.
+    
+    Si info_cupon es None, genera solo el código.
+    Si info_cupon tiene datos (comercio, descuento), genera URL completa para la app.
+    """
+    # Si tenemos info del cupón, generar URL completa para la app Android
+    if info_cupon:
+        params = {
+            'id': codigo,
+            'cupon': codigo,  # app puede buscar ambos parámetros
+            'store': info_cupon.get('comercio', ''),
+            'comercio': info_cupon.get('comercio', ''),
+            'descuento': f"{info_cupon.get('descuento', '')}%",
+            'discount': f"{info_cupon.get('descuento', '')}%"
+        }
+        # Usar la URL base configurada o localhost por defecto
+        base_url = request.url_root.rstrip('/') if request else 'http://localhost:5000'
+        qr_content = f"{base_url}/cupon?{urlencode(params)}"
+    else:
+        # Formato anterior para compatibilidad
+        qr_content = codigo
+    
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_H,
         box_size=10,
         border=2,
     )
-    qr.add_data(codigo)
+    qr.add_data(qr_content)
     qr.make(fit=True)
     
     img = qr.make_image(fill_color="#12183a", back_color="white")
@@ -412,7 +434,12 @@ def cupon(codigo):
     if not c:
         abort(404)
     vencido = c["valido_hasta"] < hoy()
-    qr_data = generar_qr(c["codigo"])
+    # Generar QR con URL completa para que funcione con la app Android
+    info_qr = {
+        'comercio': c["comercio"],
+        'descuento': c["descuento"]
+    }
+    qr_data = generar_qr(c["codigo"], info_qr)
     return render_template("cupon.html", c=c, vencido=vencido, qr_data=qr_data)
 
 
@@ -425,11 +452,21 @@ def mis_cupones():
 @app.route("/api/qr/<codigo>")
 def api_qr(codigo):
     """API para generar QR de un cupón específico."""
-    c = get_db().execute("SELECT codigo FROM cupones WHERE codigo = ?", (codigo.upper(),)).fetchone()
+    c = get_db().execute(
+        """SELECT cu.codigo, o.descuento, co.nombre AS comercio
+           FROM cupones cu
+           JOIN ofertas o ON o.id = cu.oferta_id
+           JOIN comercios co ON co.id = o.comercio_id
+           WHERE cu.codigo = ?""", (codigo.upper(),)).fetchone()
     if not c:
         return jsonify({"error": "Cupón no encontrado"}), 404
     
-    qr_data = generar_qr(c["codigo"])
+    # Generar QR con URL completa para la app
+    info_qr = {
+        'comercio': c["comercio"],
+        'descuento': c["descuento"]
+    }
+    qr_data = generar_qr(c["codigo"], info_qr)
     return jsonify({"qr": qr_data, "codigo": c["codigo"]})
 
 
@@ -447,6 +484,12 @@ def api_cupon(codigo):
     if not c:
         return jsonify({"error": "Cupón no encontrado"}), 404
     
+    # Generar QR con URL completa para la app
+    info_qr = {
+        'comercio': c["comercio"],
+        'descuento': c["descuento"]
+    }
+    
     return jsonify({
         "codigo": c["codigo"],
         "titulo": c["titulo"],
@@ -456,7 +499,7 @@ def api_cupon(codigo):
         "categoria": c["categoria"],
         "validoHasta": c["valido_hasta"],
         "foto": url_for("static", filename=f"uploads/{c['foto']}_m.jpg", _external=True) if c["foto"] else None,
-        "qr": generar_qr(c["codigo"])
+        "qr": generar_qr(c["codigo"], info_qr)
     })
 
 
