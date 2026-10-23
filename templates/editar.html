@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Editar oferta · ZupponPy{% endblock %}
+{% block content %}
+<section class="formulario">
+  <h1>Editar oferta</h1>
+  <p class="quien">{{ comercio.nombre }}</p>
+
+  <form method="post" enctype="multipart/form-data">
+    <label>
+      <span>Título de la oferta</span>
+      <input name="titulo" maxlength="120" value="{{ oferta.titulo }}" required>
+    </label>
+
+    <label>
+      <span>Descripción (opcional)</span>
+      <textarea name="descripcion" rows="3" maxlength="500">{{ oferta.descripcion or '' }}</textarea>
+    </label>
+
+    <div class="fila dos">
+      <label>
+        <span>Categoría</span>
+        <select name="categoria" required>
+          {% for c in CATEGORIAS %}
+          <option value="{{ c }}" {{ 'selected' if c == oferta.categoria }}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        <span>Ciudad</span>
+        <select name="ciudad" required>
+          {% for c in CIUDADES %}
+          <option value="{{ c }}" {{ 'selected' if c == oferta.ciudad }}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+
+    <label>
+      <span>Dirección del local</span>
+      <input name="direccion" maxlength="200" value="{{ oferta.direccion }}" required>
+    </label>
+
+    <label>
+      <span>Coordenadas GPS (opcional)</span>
+      <input name="coordenadas" placeholder="-26.524660, -55.264036" value="{{ oferta.coordenadas or '' }}">
+      <small>Formato: latitud, longitud (ejemplo: -26.524660, -55.264036). Se usará para enlace a Google Maps.</small>
+    </label>
+
+    <label>
+      <span>WhatsApp del comercio (opcional)</span>
+      <input name="whatsapp" type="tel" placeholder="0981 123 456" value="{{ oferta.whatsapp or '' }}">
+      <small>Número de contacto para consultas. Se mostrará con enlace directo a WhatsApp.</small>
+    </label>
+
+    <div class="fila dos">
+      <label>
+        <span>Precio normal (opcional)</span>
+        <input type="text" inputmode="numeric" name="precio_normal" placeholder="45.000"
+               value="{{ '{:,}'.format(oferta.precio_normal).replace(',', '.') if oferta.precio_normal else '' }}">
+        <small>Ejemplo: 45000 o 45.000 Gs.</small>
+      </label>
+      <label>
+        <span>% de descuento</span>
+        <input type="number" name="descuento" min="1" max="99" value="{{ oferta.descuento }}" required>
+      </label>
+    </div>
+
+    <div class="fila dos">
+      <label>
+        <span>Válido hasta</span>
+        <input type="date" name="valido_hasta" min="{{ hoy }}" value="{{ oferta.valido_hasta }}" required>
+      </label>
+      <label>
+        <span>Cupones disponibles</span>
+        <input type="number" name="cupos" min="{{ oferta.reclamados }}" value="{{ oferta.cupos }}" required>
+        <small>Reclamados hasta ahora: {{ oferta.reclamados }}</small>
+      </label>
+    </div>
+
+    {% if oferta.foto %}
+    <div class="preview-foto">
+      <p><strong>Foto actual:</strong></p>
+      <img src="{{ foto_url(oferta.foto, 'm') }}" alt="Foto de la oferta" style="max-width: 300px; border-radius: 8px;">
+      <label class="subir">
+        Cambiar foto
+        <input type="file" name="foto" accept="image/*" hidden>
+      </label>
+    </div>
+    {% else %}
+    <label class="subir">
+      <span>Agregar foto (opcional)</span>
+      <input type="file" name="foto" accept="image/*" hidden>
+      <small>JPG, PNG o WebP hasta 12 MB</small>
+    </label>
+    {% endif %}
+
+    <div class="fila botones">
+      <a class="boton sec" href="{{ url_for('panel') }}">Cancelar</a>
+      <button type="submit">Guardar cambios</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

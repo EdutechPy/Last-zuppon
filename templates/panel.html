@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Mi panel · ZupponPy{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>{{ comercio.nombre }}</h1>
+  <p class="quien">{{ comercio.direccion }}, {{ comercio.ciudad }}</p>
+
+  <form class="canje" method="post" action="{{ url_for('canjear') }}">
+    <h2>Validar un cupón</h2>
+    <p class="chico">El cliente te muestra su código de 6 caracteres. Ingresalo acá y aplicá el descuento.</p>
+    <div class="fila">
+      <input name="codigo" maxlength="8" placeholder="K7M2QX" autocomplete="off" autocapitalize="characters" required>
+      <button type="submit">Validar y canjear</button>
+    </div>
+  </form>
+
+  <div class="encabezado">
+    <h2>Mis ofertas</h2>
+    <div>
+      <a class="boton" href="{{ url_for('nueva_oferta') }}">Nueva oferta</a>
+    </div>
+  </div>
+
+  {% if es_admin %}
+  <div class="chips con-scroll">
+    <a class="chip {{ 'on' if not request.args.get('categoria') and not request.args.get('ciudad') }}" 
+       style="--c: var(--papel)" 
+       href="{{ url_for('panel') }}">✨ Todo</a>
+    {% for cat_nombre in CATEGORIAS %}
+      {% set meta = cat_nombre|cat %}
+      <a class="chip {{ 'on' if request.args.get('categoria') == cat_nombre }}" 
+         style="--c: {{ meta.color }}" 
+         href="{{ url_for('panel', categoria=cat_nombre) }}">{{ meta.emoji }} {{ cat_nombre }}</a>
+    {% endfor %}
+  </div>
+  
+  <div class="filtro-ciudad">
+    <label for="ciudad-select">🏙️ Filtrar por ciudad:</label>
+    <select id="ciudad-select" onchange="window.location.href = this.value">
+      <option value="{{ url_for('panel') }}" {{ 'selected' if not request.args.get('ciudad') }}>Todas las ciudades</option>
+      {% for c in CIUDADES %}
+        <option value="{{ url_for('panel', ciudad=c, categoria=request.args.get('categoria', '')) }}" 
+                {{ 'selected' if request.args.get('ciudad') == c }}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% endif %}
+
+  {% if ofertas %}
+  <div class="tabla">
+    {% for o in ofertas %}
+    <div class="fila-oferta">
+      {% if o.foto %}<img class="mini" src="{{ foto_url(o.foto, 'm') }}" alt="">
+      {% else %}<span class="mini vacia" aria-hidden="true">📷</span>{% endif %}
+      <div class="info">
+        <strong>{{ o.titulo }}</strong>
+        {% if es_admin %}<p class="chico">Comercio: {{ o.comercio_nombre }}</p>{% endif %}
+        <p class="meta">
+          -{{ o.descuento }}% · hasta {{ o.valido_hasta|fecha }}
+          {% if not o.activa %}· Pausada{% elif o.valido_hasta < hoy %}· Vencida{% endif %}
+        </p>
+      </div>
+      <div class="nums">
+        <span>{{ o.reclamados }}/{{ o.cupos }} reclamados</span>
+        <span>{{ o.canjeados }} canjeados</span>
+      </div>
+      <div class="acciones">
+        <a class="boton-sec" href="{{ url_for('editar_oferta', oferta_id=o.id) }}">Editar</a>
+        {% if es_admin %}
+        <form method="post" action="{{ url_for('marcar_destacada', oferta_id=o.id) }}" style="display:inline">
+          <button class="sec destacar" type="submit">{{ '⭐ Destacada' if o['destacada'] else '☆ Destacar' }}</button>
+        </form>
+        <form method="post" action="{{ url_for('marcar_urgente', oferta_id=o.id) }}" style="display:inline">
+          <button class="sec urgente-btn" type="submit">{{ '⏰ Urgente' if o['urgente'] else '⏱️ Urgentar' }}</button>
+        </form>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data" action="{{ url_for('cambiar_foto', oferta_id=o.id) }}">
+          <label class="subir chica">{{ 'Cambiar foto' if o.foto else 'Agregar foto' }}
+            <input type="file" name="foto" accept="image/*" hidden onchange="this.form.submit()">
+          </label>
+        </form>
+        <form method="post" action="{{ url_for('alternar_oferta', oferta_id=o.id) }}">
+          <button class="sec" type="submit">{{ 'Pausar' if o.activa else 'Reactivar' }}</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <div class="vacio"><p>Todavía no publicaste ofertas. Creá la primera y aparecerá en {{ comercio.ciudad }}.</p></div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Registrar comercio · ZupponPy{% endblock %}
+{% block content %}
+<section class="formulario">
+  <h1>Registrá tu comercio</h1>
+  <p class="chico">Publicá ofertas gratis y recibí clientes nuevos en tu ciudad.</p>
+  <form method="post">
+    <label>Nombre del comercio <input name="nombre" required value="{{ request.form.nombre }}"></label>
+    <label>Ciudad
+      <select name="ciudad" required>
+        <option value="">Elegí tu ciudad</option>
+        {% for c in CIUDADES %}<option {{ 'selected' if request.form.ciudad == c }}>{{ c }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Dirección del local <input name="direccion" required value="{{ request.form.direccion }}"></label>
+    <label>Celular / WhatsApp <input name="telefono" type="tel" value="{{ request.form.telefono }}"></label>
+    <label>Correo <input type="email" name="email" required value="{{ request.form.email }}"></label>
+    <label>Contraseña (mínimo 6 caracteres) <input type="password" name="password" required minlength="6" autocomplete="new-password"></label>
+    <button type="submit">Crear cuenta</button>
+  </form>
+  <p class="chico">¿Ya tenés cuenta? <a href="{{ url_for('login') }}">Ingresá</a>.</p>
+</section>
+{% endblock %}

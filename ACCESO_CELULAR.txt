@@ -1,0 +1,98 @@
+═══════════════════════════════════════════════════════════
+  CÓMO ACCEDER A ZUPPONPY DESDE TU CELULAR
+═══════════════════════════════════════════════════════════
+
+📱 PASO 1: EJECUTAR EL SERVIDOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Abre PowerShell o terminal en la carpeta del proyecto
+2. Ejecuta:
+   
+   python app.py
+
+3. Verás algo como:
+   * Running on http://0.0.0.0:5000
+   * Running on http://192.168.50.179:5000
+
+
+📱 PASO 2: CONECTAR TU CELULAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Asegúrate que tu CELULAR y tu PC estén en la MISMA red WiFi
+
+2. En tu celular, abre el navegador (Chrome, Safari, etc.)
+
+3. Escribe esta dirección:
+
+   http://192.168.50.179:5000
+
+   ⚠️ IMPORTANTE: Usa la IP de TU PC (puede cambiar)
+
+
+📱 PASO 3: OBTENER TU IP ACTUAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Si la IP 192.168.50.179 no funciona, obtén tu IP actual:
+
+En PowerShell ejecuta:
+   ipconfig
+
+Busca "Dirección IPv4" y usa ese número.
+Ejemplo: 192.168.1.100, 192.168.0.50, etc.
+
+
+📱 SOLUCIÓN DE PROBLEMAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ "No se puede acceder"
+   → Verifica que ambos dispositivos estén en la misma WiFi
+   → Verifica que el servidor esté corriendo (python app.py)
+   → Prueba desactivar el firewall temporalmente
+
+❌ "Conexión rechazada"
+   → Verifica que el puerto 5000 no esté bloqueado
+   → Prueba reiniciar el servidor
+
+❌ "Página no carga"
+   → Verifica que escribiste http:// (no https://)
+   → Prueba desde otro navegador en el celular
+
+
+📱 ACCESO RÁPIDO (QR)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Puedes generar un código QR de la URL para acceso rápido:
+https://www.qr-code-generator.com/
+
+URL a codificar: http://192.168.50.179:5000
+
+
+📱 PARA ACCESO DESDE INTERNET (OPCIONAL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Si quieres que cualquiera acceda desde internet:
+
+1. Usa ngrok: https://ngrok.com/
+   
+   ngrok http 5000
+
+2. Te dará una URL pública temporal tipo:
+   https://abc123.ngrok.io
+
+3. Comparte esa URL
+
+
+═══════════════════════════════════════════════════════════
+  TU CONFIGURACIÓN ACTUAL
+═══════════════════════════════════════════════════════════
+
+✅ IP de tu PC: 192.168.50.179
+✅ Puerto: 5000
+✅ URL completa: http://192.168.50.179:5000
+
+📱 Accede desde tu celular:
+   http://192.168.50.179:5000
+
+🎉 ¡Listo para escanear cupones!
+
+═══════════════════════════════════════════════════════════

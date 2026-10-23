@@ -1,0 +1,13 @@
+Fotos para las ofertas de ejemplo
+=================================
+Poné acá una foto por oferta, con estos nombres (JPG, PNG o WebP), y corré:
+
+    flask --app app seed
+
+Nombres: asado, combo-parrillero, lomito, pizza, chipa, pan, vitaminas,
+herramientas, remeras, peluqueria, verduras, helado, pan-santa-rita
+
+Ej.: demo_fotos/asado.jpg
+
+Usá fotos tuyas o de bancos gratuitos con licencia de uso comercial
+(Unsplash, Pexels). Para comercios reales, lo ideal es que suban su propia foto.

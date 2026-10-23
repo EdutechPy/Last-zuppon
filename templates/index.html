@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% from "_card.html" import card %}
+{% block content %}
+
+<section class="hero">
+  <h1>Descubrí qué hay de bueno hoy {{ 'en ' ~ ciudad if ciudad else 'en Paraguay' }}</h1>
+  <p class="sub">
+    {{ total }} {{ 'oferta disponible' if total == 1 else 'ofertas disponibles' }} ahora.
+    Reclamás el cupón desde acá y lo mostrás en el local.
+  </p>
+  <form class="busca" method="get" action="{{ url_for('index') }}">
+    <input type="search" name="q" value="{{ q }}" placeholder="¿Qué se te antoja? Carne, pizza, helado…" aria-label="Buscar ofertas">
+    {% if categoria %}<input type="hidden" name="categoria" value="{{ categoria }}">{% endif %}
+    <button type="submit">Buscar</button>
+  </form>
+</section>
+
+<nav class="chips" aria-label="Rubros">
+  <a class="chip {{ 'on' if not categoria }}" style="--c:#fff" href="{{ url_for('index') }}">✨ Todo</a>
+  {% for c in CATEGORIAS %}
+    <a class="chip {{ 'on' if c == categoria }}" style="--c:{{ (c|cat).color }}"
+       href="{{ url_for('index', categoria=c) }}">{{ (c|cat).emoji }} {{ c }}</a>
+  {% endfor %}
+</nav>
+
+{% if destacada %}
+  {% set k = destacada.categoria|cat %}
+  <section class="seccion">
+    <h2>Lo más pedido ahora</h2>
+    <a class="destacada" style="--c:{{ k.color }}" href="{{ url_for('oferta', oferta_id=destacada.id) }}">
+      <div class="d-arte">
+        {% if destacada.foto %}<img src="{{ foto_url(destacada.foto) }}" alt="{{ destacada.titulo }}">
+        {% else %}<span class="emoji" aria-hidden="true">{{ k.emoji }}</span>{% endif %}
+        <span class="sticker grande">-{{ destacada.descuento }}%</span>
+      </div>
+      <div class="d-texto">
+        <h3>{{ destacada.titulo }}</h3>
+        <p class="quien">{{ destacada.comercio }}{% if not ciudad %} · {{ destacada.ciudad }}{% endif %}</p>
+        {% if destacada.precio_normal %}
+          <p class="precio"><s>{{ destacada.precio_normal|gs }}</s>
+            <strong>{{ (destacada.precio_normal * (100 - destacada.descuento) // 100)|gs }}</strong></p>
+        {% endif %}
+        <p class="meta">{{ destacada.reclamados }} personas ya lo reclamaron · {{ destacada.dias|cuando }}</p>
+        <span class="boton">Quiero mi cupón</span>
+      </div>
+    </a>
+  </section>
+{% endif %}
+
+{% if pronto %}
+  <section class="seccion urgente">
+    <h2>Se terminan pronto</h2>
+    <div class="fila-scroll">
+      {% for o in pronto %}{{ card(o) }}{% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+<section class="seccion">
+  {% if destacada %}
+    {% if resto %}<h2>Más para descubrir</h2>{% endif %}
+  {% else %}
+    <h2>{{ ofertas|length }} {{ 'resultado' if ofertas|length == 1 else 'resultados' }}{% if categoria %} en {{ categoria }}{% endif %}{% if q %} para «{{ q }}»{% endif %}</h2>
+  {% endif %}
+
+  {% if resto %}
+    <div class="grid">{% for o in resto %}{{ card(o) }}{% endfor %}</div>
+  {% elif not ofertas %}
+    <div class="vacio">
+      <p><strong>Todavía no hay ofertas acá.</strong></p>
+      <p>Probá con otro rubro o ciudad. Si tenés un comercio, <a href="{{ url_for('registro') }}">publicá la primera</a>.</p>
+    </div>
+  {% endif %}
+</section>
+
+{% if otras %}
+<section class="seccion">
+  <h2>Seguí descubriendo</h2>
+  <div class="ciudades">
+    {% for r in otras %}
+      <a href="{{ url_for('index', ciudad=r.ciudad) }}">{{ r.ciudad }} <span>{{ r.n }}</span></a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

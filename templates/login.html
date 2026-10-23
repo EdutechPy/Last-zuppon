@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Ingresar · ZupponPy{% endblock %}
+{% block content %}
+<section class="formulario">
+  <h1>Ingresá a tu comercio</h1>
+  <form method="post">
+    <label>Correo <input type="email" name="email" required autocomplete="email"></label>
+    <label>Contraseña <input type="password" name="password" required autocomplete="current-password"></label>
+    <button type="submit">Ingresar</button>
+  </form>
+  <p class="chico">¿Todavía no tenés cuenta? <a href="{{ url_for('registro') }}">Registrá tu comercio</a>.</p>
+</section>
+{% endblock %}

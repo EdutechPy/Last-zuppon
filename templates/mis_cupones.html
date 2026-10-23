@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block title %}Mis cupones · ZupponPy{% endblock %}
+{% block content %}
+<section class="mis-cupones-section">
+  <div class="hero-cupones">
+    <h1>📱 Mis cupones</h1>
+    <p class="sub">Todos tus cupones guardados en este dispositivo.</p>
+  </div>
+  
+  <div id="lista-cupones" class="grid-cupones">
+    <div class="cargando">Cargando cupones...</div>
+  </div>
+  
+  <div id="cupones-vacios" class="vacio" style="display:none">
+    <p><strong>No tenés cupones guardados todavía.</strong></p>
+    <p class="chico">Cuando reclames una oferta, tus cupones aparecerán acá automáticamente.</p>
+    <a class="boton" href="{{ url_for('index') }}">🎁 Ver ofertas</a>
+  </div>
+</section>
+
+<!-- Modal para mostrar cupón en pantalla completa -->
+<div id="modal-cupon" class="modal-cupon" style="display:none">
+  <div class="modal-cupon-content">
+    <button class="modal-close" onclick="cerrarModal()">✕</button>
+    <div class="modal-body">
+      <div class="modal-header">
+        <h2 id="modal-titulo"></h2>
+        <p id="modal-comercio"></p>
+      </div>
+      <div class="modal-qr">
+        <div id="modal-qr-container" class="qr-grande-container">
+          <div class="qr-loader">Cargando QR...</div>
+        </div>
+      </div>
+      <p class="modal-codigo" id="modal-codigo"></p>
+      <p class="modal-instruccion">Mostrá este código en el comercio</p>
+      <a id="modal-link-completo" class="boton-secundario" href="#">Ver cupón completo</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const listaCupones = document.getElementById('lista-cupones');
+  const cuponesVacios = document.getElementById('cupones-vacios');
+  const cupones = JSON.parse(localStorage.getItem('zuppon_cupones') || '[]');
+  
+  if (cupones.length === 0) {
+    listaCupones.style.display = 'none';
+    cuponesVacios.style.display = 'block';
+    return;
+  }
+  
+  listaCupones.innerHTML = '';
+  
+  // Crear cards y cargar información completa de cada cupón
+  cupones.forEach(cupon => {
+    const fecha = new Date(cupon.validoHasta);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const vencido = fecha < hoy;
+    
+    const card = document.createElement('div');
+    card.className = 'card-cupon' + (vencido ? ' vencido' : '');
+    card.setAttribute('data-codigo', cupon.codigo);
+    card.innerHTML = `
+      <div class="card-cupon-imagen" data-categoria="${cupon.categoria || 'Otros'}">
+        <div class="imagen-placeholder">
+          <span class="emoji-grande">${getEmojiCategoria(cupon.categoria || 'Otros')}</span>
+        </div>
+        <span class="card-cupon-descuento">-${cupon.descuento}%</span>
+        ${vencido ? '<span class="badge-vencido">Vencido</span>' : ''}
+      </div>
+      <div class="card-cupon-body">
+        <h3>${cupon.titulo}</h3>
+        <p class="card-comercio">${cupon.comercio}</p>
+        <p class="card-ciudad">📍 ${cupon.ciudad}</p>
+      </div>
+      <div class="card-cupon-footer">
+        <span class="codigo-mini">${cupon.codigo}</span>
+        <span class="fecha-mini">${vencido ? 'Venció' : 'Válido hasta'} ${formatearFecha(cupon.validoHasta)}</span>
+      </div>
+    `;
+    
+    // Detectar si es móvil y agregar evento click
+    if (window.innerWidth <= 768 && !vencido) {
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', function(e) {
+        e.preventDefault();
+        abrirModalCupon(cupon);
+      });
+    } else {
+      // En desktop, hacer que sea un enlace
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', function() {
+        window.location.href = `/cupon/${cupon.codigo}`;
+      });
+    }
+    
+    listaCupones.appendChild(card);
+    
+    // Cargar información completa incluyendo foto
+    cargarInfoCupon(cupon.codigo);
+  });
+  
+  function formatearFecha(iso) {
+    const [y, m, d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
+  
+  function getEmojiCategoria(categoria) {
+    const emojis = {
+      'Carnicería': '🥩',
+      'Supermercado': '🛒',
+      'Restaurante': '🍔',
+      'Panadería': '🥐',
+      'Farmacia': '💊',
+      'Ferretería': '🔧',
+      'Ropa y calzado': '👕',
+      'Belleza': '💇',
+      'Café y helados': '🍦',
+      'Servicios': '🛠️',
+      'Otros': '🎁'
+    };
+    return emojis[categoria] || '🎁';
+  }
+  
+  function getColorCategoria(categoria) {
+    const colores = {
+      'Carnicería': '#ff9aa2',
+      'Supermercado': '#ffe27a',
+      'Restaurante': '#ffb366',
+      'Panadería': '#d4b8ff',
+      'Farmacia': '#8fe3c0',
+      'Ferretería': '#9cc9ff',
+      'Ropa y calzado': '#b8f0a5',
+      'Belleza': '#ffb8e1',
+      'Café y helados': '#a8ecee',
+      'Servicios': '#bcc7d9',
+      'Otros': '#e4e1d8'
+    };
+    return colores[categoria] || '#e4e1d8';
+  }
+  
+  function cargarInfoCupon(codigo) {
+    fetch(`/api/cupon/${codigo}`)
+      .then(r => r.json())
+      .then(data => {
+        const card = document.querySelector(`.card-cupon[data-codigo="${codigo}"]`);
+        if (!card) return;
+        
+        const imagenDiv = card.querySelector('.card-cupon-imagen');
+        const placeholder = card.querySelector('.imagen-placeholder');
+        
+        // Aplicar color de categoría
+        imagenDiv.style.setProperty('--c-cat', getColorCategoria(data.categoria));
+        
+        // Si hay foto, reemplazar el placeholder
+        if (data.foto) {
+          placeholder.innerHTML = `<img src="${data.foto}" alt="${data.titulo}" class="card-imagen">`;
+        }
+      })
+      .catch(err => {
+        console.error('Error cargando info del cupón:', err);
+      });
+  }
+  
+  // Función para abrir modal con cupón
+  window.abrirModalCupon = function(cupon) {
+    const modal = document.getElementById('modal-cupon');
+    document.getElementById('modal-titulo').textContent = cupon.titulo;
+    document.getElementById('modal-comercio').textContent = cupon.comercio;
+    document.getElementById('modal-codigo').textContent = cupon.codigo;
+    document.getElementById('modal-link-completo').href = `/cupon/${cupon.codigo}`;
+    
+    // Mostrar modal
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
+    // Cargar QR
+    const qrContainer = document.getElementById('modal-qr-container');
+    qrContainer.innerHTML = '<div class="qr-loader">Cargando QR...</div>';
+    
+    fetch(`/api/cupon/${cupon.codigo}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.qr) {
+          qrContainer.innerHTML = `
+            <img src="${data.qr}" alt="QR ${cupon.codigo}" class="qr-grande">
+            <div class="qr-logo-grande">
+              <img src="/static/logo.png" alt="ZupponPy">
+            </div>
+          `;
+        }
+      })
+      .catch(err => {
+        console.error('Error cargando QR:', err);
+        qrContainer.innerHTML = '<div class="qr-error">Error al cargar QR</div>';
+      });
+  };
+  
+  // Función para cerrar modal
+  window.cerrarModal = function() {
+    const modal = document.getElementById('modal-cupon');
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+  };
+  
+  // Cerrar con ESC
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      cerrarModal();
+    }
+  });
+})();
+</script>
+{% endblock %}

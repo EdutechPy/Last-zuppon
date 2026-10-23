@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Nueva oferta · ZupponPy{% endblock %}
+{% block content %}
+<section class="formulario">
+  <h1>Nueva oferta</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% set f = request.form %}
+    <div class="foto-campo">
+      <img id="vista" alt="" hidden>
+      <label class="subir">📷 Agregar foto del producto
+        <input type="file" name="foto" id="foto" accept="image/*" hidden>
+      </label>
+      <p class="chico">Una foto real de lo que ofrecés se ve mucho mejor que cualquier dibujo. JPG, PNG o WebP.</p>
+    </div>
+    <label>Título <input name="titulo" required maxlength="80" placeholder="30% en asado de tira" value="{{ f.titulo }}"></label>
+    <label>Descripción <textarea name="descripcion" rows="3" placeholder="Condiciones, horarios, qué incluye…">{{ f.descripcion }}</textarea></label>
+    <label>Rubro
+      <select name="categoria" required>
+        {% for c in CATEGORIAS %}<option {{ 'selected' if f.categoria == c }}>{{ c }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Ciudad
+      <select name="ciudad" required>
+        {% for c in CIUDADES %}<option {{ 'selected' if (f.ciudad or comercio.ciudad) == c }}>{{ c }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Dirección del local <input name="direccion" required value="{{ f.direccion or comercio.direccion }}"></label>
+    <label>
+      <span>Coordenadas GPS (opcional)</span>
+      <input name="coordenadas" placeholder="-26.524660, -55.264036" value="{{ f.coordenadas or '' }}">
+      <small>Formato: latitud, longitud. Se usará para enlace a Google Maps.</small>
+    </label>
+    <label>
+      <span>WhatsApp del comercio (opcional)</span>
+      <input name="whatsapp" type="tel" placeholder="0981 123 456" value="{{ f.whatsapp or '' }}">
+      <small>Número de contacto para consultas. Se mostrará con enlace directo a WhatsApp.</small>
+    </label>
+    <div class="dos">
+      <label>Descuento (%) <input name="descuento" type="number" min="1" max="99" required value="{{ f.descuento }}"></label>
+      <label>Precio normal en Gs. (opcional) <input name="precio_normal" inputmode="numeric" value="{{ f.precio_normal }}"></label>
+    </div>
+    <div class="dos">
+      <label>Cantidad de cupones <input name="cupos" type="number" min="1" required value="{{ f.cupos or 50 }}"></label>
+      <label>Válido hasta <input name="valido_hasta" type="date" min="{{ hoy }}" required value="{{ f.valido_hasta or por_defecto }}"></label>
+    </div>
+    <button type="submit">Publicar oferta</button>
+  </form>
+</section>
+<script>
+  document.getElementById("foto").addEventListener("change", function () {
+    var v = document.getElementById("vista"), f = this.files[0];
+    if (!f) return;
+    v.src = URL.createObjectURL(f); v.hidden = false;
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% macro card(o) %}
+  {% set k = o.categoria|cat %}
+  <a class="card {{ 'agotada' if o.restantes <= 0 }}" style="--c:{{ k.color }}" href="{{ url_for('oferta', oferta_id=o.id) }}">
+    <div class="arte">
+      {% if o.foto %}<img src="{{ foto_url(o.foto, 'm') }}" alt="{{ o.titulo }}" loading="lazy">
+      {% else %}<span class="emoji" aria-hidden="true">{{ k.emoji }}</span>{% endif %}
+      <span class="sticker">-{{ o.descuento }}%</span>
+    </div>
+    <div class="cuerpo">
+      <h3>{{ o.titulo }}</h3>
+      <p class="quien">{{ o.comercio }}{% if not ciudad_actual %} · {{ o.ciudad }}{% endif %}</p>
+      {% if o.precio_normal %}
+        <p class="precio"><s>{{ o.precio_normal|gs }}</s> <strong>{{ (o.precio_normal * (100 - o.descuento) // 100)|gs }}</strong></p>
+      {% endif %}
+      <p class="meta {{ 'urgente' if o.restantes > 0 and o.dias <= 3 }}">
+        {% if o.restantes <= 0 %}Agotado{% else %}{{ o.dias|cuando }}{% endif %}
+      </p>
+    </div>
+  </a>
+{% endmacro %}

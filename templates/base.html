@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es-PY">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ZupponPy · Descubrí ofertas cerca tuyo{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+  {% block meta %}{% endblock %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1010">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="{{ url_for('index') }}">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="ZupponPy" class="logo">
+    Zuppon<span>Py</span>
+  </a>
+  <form class="lugar" method="get" action="{{ url_for('index') }}">
+    <span aria-hidden="true">📍</span>
+    <select name="ciudad" aria-label="Tu ciudad" onchange="this.form.submit()">
+      <option value="">Todo Paraguay</option>
+      {% for c in CIUDADES %}
+        <option value="{{ c }}" {{ 'selected' if c == ciudad_actual }}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </form>
+  <nav>
+    <a href="{{ url_for('mis_cupones') }}">📱 Mis cupones</a>
+    <a href="{{ url_for('panel') }}">Admin</a>
+    {% if session.comercio_id %}
+      <a href="{{ url_for('salir') }}">Salir</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Soy comercio</a>
+    {% endif %}
+  </nav>
+</header>
+
+{% with mensajes = get_flashed_messages(with_categories=true) %}
+  {% if mensajes %}
+  <div class="flashes">
+    {% for cat, msg in mensajes %}<p class="flash {{ cat }}">{{ msg }}</p>{% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer class="foot">
+  <p>ZupponPy · Reclamá tu cupón, mostralo en el local y ahorrá.</p>
+  <p><a href="{{ url_for('registro') }}">¿Tenés un comercio? Publicá tus ofertas gratis</a></p>
+</footer>
+</body>
+</html>
