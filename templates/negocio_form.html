@@ -5,7 +5,9 @@
   <a class="volver" href="{{ url_for('panel', vista='negocios') }}">‹ Volver a negocios</a>
   <h1>{{ titulo }}</h1>
   
-  <form method="post">
+  <form method="post" enctype="multipart/form-data">
+    <h3>📋 Información básica</h3>
+    
     <label>
       Nombre del negocio
       <input type="text" name="nombre" value="{{ negocio.nombre if negocio }}" required>
@@ -42,10 +44,63 @@
       <input type="text" name="direccion" value="{{ negocio.direccion if negocio }}" required>
     </label>
     
+    <h3 style="margin-top: 2rem;">🎨 Personalización de la página</h3>
+    
+    <label>
+      Descripción del negocio (opcional)
+      <textarea name="descripcion" rows="3" maxlength="300" placeholder="Contanos sobre tu negocio, qué ofrecés, tu historia...">{{ negocio.descripcion if negocio }}</textarea>
+      <span class="chico">Aparecerá en la página pública del negocio.</span>
+    </label>
+    
+    <label>
+      Color de marca (opcional)
+      <input type="color" name="color_marca" value="{{ negocio.color_marca or '#5a87db' if negocio else '#5a87db' }}">
+      <span class="chico">Color principal que se usará en la página del negocio.</span>
+    </label>
+    
+    {% if negocio and negocio.logo %}
+    <div class="preview-foto">
+      <div class="preview-header">
+        <p><strong>Logo actual:</strong></p>
+      </div>
+      <img src="{{ url_for('static', filename='uploads/' + negocio.logo + '.jpg') }}" alt="Logo" class="preview-logo">
+      <p class="preview-hint">Subí una nueva imagen para reemplazarlo</p>
+    </div>
+    {% endif %}
+    
+    <label class="subir">
+      <span>🏪 {{ 'Cambiar logo' if negocio and negocio.logo else 'Agregar logo (opcional)' }}</span>
+      <input type="file" name="logo" accept="image/*" hidden>
+      <small>Logo del negocio para su página. Recomendado: imagen cuadrada, mínimo 300x300px.</small>
+    </label>
+    
+    {% if negocio and negocio.fondo %}
+    <div class="preview-foto">
+      <div class="preview-header">
+        <p><strong>Imagen de fondo actual:</strong></p>
+      </div>
+      <img src="{{ url_for('static', filename='uploads/' + negocio.fondo + '.jpg') }}" alt="Fondo" class="preview-fondo">
+      <p class="preview-hint">Subí una nueva imagen para reemplazarla</p>
+    </div>
+    {% endif %}
+    
+    <label class="subir">
+      <span>🖼️ {{ 'Cambiar imagen de fondo' if negocio and negocio.fondo else 'Agregar imagen de fondo (opcional)' }}</span>
+      <input type="file" name="fondo" accept="image/*" hidden>
+      <small>Imagen de portada para el hero de la página. Recomendado: imagen horizontal (16:9), mínimo 1200x675px.</small>
+    </label>
+    
     {% if negocio %}
     <div class="info-credenciales">
-      <h3>📋 Credenciales actuales</h3>
+      <h3>📋 Información actual</h3>
       <p><strong>Email:</strong> <code>{{ negocio.email }}</code></p>
+      {% if negocio.slug %}
+        <p><strong>Página del negocio:</strong><br>
+          <a href="{{ url_for('pagina_negocio', slug=negocio.slug) }}" target="_blank" class="link-pagina-preview">
+            zuppon.es/{{ negocio.slug }} ↗
+          </a>
+        </p>
+      {% endif %}
       <p class="chico">El negocio puede iniciar sesión con este email y la contraseña configurada.</p>
     </div>
     {% endif %}
