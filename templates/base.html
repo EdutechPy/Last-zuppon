@@ -3,15 +3,77 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  {# Título y descripción SEO #}
   <title>{% block title %}ZupponPy · Descubrí ofertas cerca tuyo{% endblock %}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
-  {% block meta %}{% endblock %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1010">
+  <meta name="description" content="{% block description %}Descubrí las mejores ofertas y descuentos en tu ciudad. Cupones gratis para restaurantes, supermercados, farmacias y más en Paraguay.{% endblock %}">
+  <meta name="keywords" content="ofertas Paraguay, cupones descuento, promociones, ahorro, descuentos Paraguay">
+  <meta name="author" content="ZupponPy">
+  <meta name="robots" content="index, follow">
+  
+  {# Open Graph / Facebook / WhatsApp #}
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:url" content="{{ request.url }}">
+  <meta property="og:title" content="{% block og_title %}ZupponPy · Ofertas y descuentos en Paraguay{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Descubrí las mejores ofertas cerca tuyo. Cupones gratis para ahorrar en tus compras.{% endblock %}">
+  <meta property="og:image" content="{% block og_image %}{{ url_for('static', filename='logo.jpg', _external=True) }}{% endblock %}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="es_PY">
+  <meta property="og:site_name" content="ZupponPy">
+  
+  {# Twitter Card #}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="{{ request.url }}">
+  <meta name="twitter:title" content="{% block twitter_title %}ZupponPy · Ofertas y descuentos{% endblock %}">
+  <meta name="twitter:description" content="{% block twitter_description %}Descubrí las mejores ofertas cerca tuyo{% endblock %}">
+  <meta name="twitter:image" content="{{ url_for('static', filename='logo.jpg', _external=True) }}">
+  
+  {# Favicon y App Icons #}
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo.jpg') }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='logo.jpg') }}">
+  
+  {# Web App Manifest #}
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <meta name="theme-color" content="#5a87db">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="ZupponPy">
+  
+  {# Canonical URL #}
+  <link rel="canonical" href="{{ request.url }}">
+  
+  {# Fonts #}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+  
+  {# CSS #}
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1010">
+  
+  {# Bloque para meta adicionales por página #}
+  {% block meta %}{% endblock %}
+  
+  {# Schema.org JSON-LD para Google #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "ZupponPy",
+    "url": "{{ request.url_root }}",
+    "description": "Plataforma de ofertas y cupones de descuento en Paraguay",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "{{ request.url_root }}?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  
+  {% block schema %}{% endblock %}
 </head>
 <body>
 <header class="top">

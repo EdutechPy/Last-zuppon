@@ -1,0 +1,51 @@
+{
+  "name": "ZupponPy - Ofertas y Descuentos",
+  "short_name": "ZupponPy",
+  "description": "Descubrí las mejores ofertas y descuentos cerca tuyo en Paraguay",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#5a87db",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Mis Cupones",
+      "short_name": "Cupones",
+      "description": "Ver mis cupones guardados",
+      "url": "/mis-cupones",
+      "icons": [
+        {
+          "src": "/static/logo.jpg",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Panel Admin",
+      "short_name": "Admin",
+      "description": "Panel de administración",
+      "url": "/panel",
+      "icons": [
+        {
+          "src": "/static/logo.jpg",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

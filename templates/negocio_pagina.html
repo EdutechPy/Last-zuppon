@@ -1,11 +1,34 @@
 {% extends "base.html" %}
 {% block title %}{{ negocio.nombre }} · ZupponPy{% endblock %}
-{% block meta %}
-  <meta property="og:title" content="{{ negocio.nombre }} · Ofertas y descuentos">
-  <meta property="og:description" content="Descubrí todas las ofertas de {{ negocio.nombre }} en {{ negocio.ciudad }}. {{ stats.ofertas_activas }} ofertas activas.">
-  {% if negocio.logo %}
-  <meta property="og:image" content="{{ url_for('static', filename='uploads/' + negocio.logo + '.jpg', _external=True) }}">
-  {% endif %}
+{% block description %}{{ negocio.descripcion or 'Descubrí todas las ofertas de ' + negocio.nombre + ' en ' + negocio.ciudad }}{% endblock %}
+{% block og_type %}business.business{% endblock %}
+{% block og_title %}{{ negocio.nombre }} · Ofertas y descuentos{% endblock %}
+{% block og_description %}{{ negocio.descripcion or 'Descubrí todas las ofertas de ' + negocio.nombre + ' en ' + negocio.ciudad + '. ' + stats.ofertas_activas|string + ' ofertas activas.' }}{% endblock %}
+{% block og_image %}{% if negocio.logo %}{{ url_for('static', filename='uploads/' + negocio.logo + '.jpg', _external=True) }}{% else %}{{ url_for('static', filename='logo.jpg', _external=True) }}{% endif %}{% endblock %}
+
+{% block schema %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "{{ negocio.nombre }}",
+  "image": {% if negocio.logo %}"{{ url_for('static', filename='uploads/' + negocio.logo + '.jpg', _external=True) }}"{% else %}"{{ url_for('static', filename='logo.jpg', _external=True) }}"{% endif %},
+  {% if negocio.descripcion %}"description": "{{ negocio.descripcion }}",{% endif %}
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "{{ negocio.direccion }}",
+    "addressLocality": "{{ negocio.ciudad }}",
+    "addressCountry": "PY"
+  },
+  {% if negocio.telefono %}"telephone": "+595{{ negocio.telefono[1:] if negocio.telefono.startswith('0') else negocio.telefono }}",{% endif %}
+  "url": "{{ url_for('pagina_negocio', slug=negocio.slug, _external=True) }}",
+  "priceRange": "$$",
+  "numberOfEmployees": {
+    "@type": "QuantitativeValue",
+    "value": "{{ stats.ofertas_activas }}"
+  }
+}
+</script>
 {% endblock %}
 {% block content %}
 

@@ -1347,6 +1347,86 @@ def no_encontrado(_e):
     return render_template("404.html"), 404
 
 
+# ---------- SEO: Sitemap y Robots ----------
+@app.route("/sitemap.xml")
+def sitemap():
+    """Genera el sitemap XML para que Google indexe todas las páginas."""
+    from flask import Response
+    db = get_db()
+    
+    # Obtener todas las ofertas activas
+    ofertas = db.execute(
+        "SELECT id, valido_hasta FROM ofertas WHERE activa = 1 AND valido_hasta >= ? ORDER BY id DESC",
+        (hoy(),)
+    ).fetchall()
+    
+    # Obtener todos los negocios con slug
+    negocios = db.execute(
+        "SELECT slug FROM comercios WHERE slug IS NOT NULL ORDER BY id DESC"
+    ).fetchall()
+    
+    # Obtener todas las ciudades con ofertas
+    ciudades = db.execute(
+        "SELECT DISTINCT ciudad FROM ofertas WHERE activa = 1 AND valido_hasta >= ?",
+        (hoy(),)
+    ).fetchall()
+    
+    xml = ['<?xml version="1.0" encoding="UTF-8"?>']
+    xml.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    
+    # Página principal
+    xml.append('  <url>')
+    xml.append(f'    <loc>{url_for("index", _external=True)}</loc>')
+    xml.append('    <changefreq>daily</changefreq>')
+    xml.append('    <priority>1.0</priority>')
+    xml.append('  </url>')
+    
+    # Páginas por ciudad
+    for ciudad in ciudades:
+        xml.append('  <url>')
+        xml.append(f'    <loc>{url_for("index", ciudad=ciudad["ciudad"], _external=True)}</loc>')
+        xml.append('    <changefreq>daily</changefreq>')
+        xml.append('    <priority>0.9</priority>')
+        xml.append('  </url>')
+    
+    # Páginas de negocios
+    for negocio in negocios:
+        xml.append('  <url>')
+        xml.append(f'    <loc>{url_for("pagina_negocio", slug=negocio["slug"], _external=True)}</loc>')
+        xml.append('    <changefreq>weekly</changefreq>')
+        xml.append('    <priority>0.8</priority>')
+        xml.append('  </url>')
+    
+    # Páginas de ofertas individuales
+    for oferta in ofertas:
+        xml.append('  <url>')
+        xml.append(f'    <loc>{url_for("oferta", oferta_id=oferta["id"], _external=True)}</loc>')
+        xml.append('    <changefreq>daily</changefreq>')
+        xml.append('    <priority>0.7</priority>')
+        xml.append('  </url>')
+    
+    xml.append('</urlset>')
+    
+    return Response('\n'.join(xml), mimetype='application/xml')
+
+
+@app.route("/robots.txt")
+def robots():
+    """Archivo robots.txt para indicar a los buscadores qué indexar."""
+    from flask import Response
+    txt = [
+        "User-agent: *",
+        "Allow: /",
+        "Disallow: /panel",
+        "Disallow: /ingresar",
+        "Disallow: /registro",
+        "Disallow: /api/",
+        "",
+        f"Sitemap: {url_for('sitemap', _external=True)}"
+    ]
+    return Response('\n'.join(txt), mimetype='text/plain')
+
+
 # Ruta catch-all para páginas de negocio — DEBE IR AL FINAL
 @app.route("/<slug>")
 def pagina_negocio(slug):
