@@ -47,14 +47,6 @@
           <p class="credenciales">
             <span class="label">Email:</span> <code>{{ n.email }}</code>
           </p>
-          {% if n.slug %}
-          <p class="link-negocio">
-            <span class="label">Página:</span> 
-            <a href="{{ url_for('pagina_negocio', slug=n.slug) }}" target="_blank" class="link-pagina">
-              www.zuppon.es/{{ n.slug }} ↗
-            </a>
-          </p>
-          {% endif %}
           <p class="estadisticas">
             {{ n.total_ofertas }} ofertas totales · {{ n.ofertas_activas }} activas
           </p>

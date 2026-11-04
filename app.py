@@ -67,12 +67,7 @@ CREATE TABLE IF NOT EXISTS comercios (
     password_hash TEXT NOT NULL,
     telefono TEXT,
     ciudad TEXT NOT NULL,
-    direccion TEXT NOT NULL,
-    slug TEXT,
-    descripcion TEXT,
-    logo TEXT,
-    fondo TEXT,
-    color_marca TEXT
+    direccion TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS ofertas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -129,26 +124,6 @@ def close_db(_exc=None):
         db.close()
 
 
-# ---------- Utilidades ----------
-def hoy():
-    return date.today().isoformat()
-
-
-def solo_digitos(texto):
-    return re.sub(r"\D", "", texto or "")
-
-
-def generar_slug(nombre):
-    """Genera un slug URL-friendly desde el nombre del negocio."""
-    import unicodedata
-    # Normalizar caracteres especiales
-    slug = unicodedata.normalize('NFKD', nombre).encode('ascii', 'ignore').decode('ascii')
-    # Convertir a minúsculas y reemplazar espacios por guiones
-    slug = re.sub(r'[^\w\s-]', '', slug.lower())
-    slug = re.sub(r'[-\s]+', '-', slug).strip('-')
-    return slug[:50]  # Limitar longitud
-
-
 def init_db():
     db = sqlite3.connect(DB_PATH)
     db.executescript(SCHEMA)
@@ -165,44 +140,20 @@ def init_db():
         db.execute("ALTER TABLE ofertas ADD COLUMN whatsapp TEXT")
     if "principal" not in columnas:
         db.execute("ALTER TABLE ofertas ADD COLUMN principal INTEGER NOT NULL DEFAULT 0")
-    
-    # Agregar campos para página de negocio
-    columnas_comercios = [fila[1] for fila in db.execute("PRAGMA table_info(comercios)")]
-    if "slug" not in columnas_comercios:
-        db.execute("ALTER TABLE comercios ADD COLUMN slug TEXT")
-    if "descripcion" not in columnas_comercios:
-        db.execute("ALTER TABLE comercios ADD COLUMN descripcion TEXT")
-    if "logo" not in columnas_comercios:
-        db.execute("ALTER TABLE comercios ADD COLUMN logo TEXT")
-    if "fondo" not in columnas_comercios:
-        db.execute("ALTER TABLE comercios ADD COLUMN fondo TEXT")
-    if "color_marca" not in columnas_comercios:
-        db.execute("ALTER TABLE comercios ADD COLUMN color_marca TEXT")
-    
-    # Generar slugs para negocios existentes que no tengan
-    negocios_sin_slug = db.execute("SELECT id, nombre FROM comercios WHERE slug IS NULL OR slug = ''").fetchall()
-    for negocio in negocios_sin_slug:
-        slug_base = generar_slug(negocio[1])  # negocio[1] es el nombre
-        slug = slug_base
-        contador = 1
-        while db.execute("SELECT 1 FROM comercios WHERE slug = ? AND id != ?", (slug, negocio[0])).fetchone():
-            slug = f"{slug_base}-{contador}"
-            contador += 1
-        db.execute("UPDATE comercios SET slug = ? WHERE id = ?", (slug, negocio[0]))
-    
-    # Crear índice único para slug después de llenar valores
-    indices = [idx[1] for idx in db.execute("PRAGMA index_list(comercios)").fetchall()]
-    if "idx_comercios_slug" not in indices:
-        try:
-            db.execute("CREATE UNIQUE INDEX idx_comercios_slug ON comercios(slug)")
-        except:
-            pass  # Si ya existe o hay duplicados, ignorar
-    
     db.commit()
     db.close()
 
 
 init_db()
+
+
+# ---------- Utilidades ----------
+def hoy():
+    return date.today().isoformat()
+
+
+def solo_digitos(texto):
+    return re.sub(r"\D", "", texto or "")
 
 
 def a_entero(valor, defecto=None):
@@ -339,12 +290,6 @@ def cuando(dias):
     return f"Quedan {dias} días"
 
 
-@app.template_filter("urlencode")
-def filtro_urlencode(s):
-    from urllib.parse import quote_plus
-    return quote_plus(str(s))
-
-
 def enriquecer(filas):
     """Agrega cupones restantes y días que faltan para que termine la oferta."""
     salida = []
@@ -460,7 +405,6 @@ def obtener_oferta(oferta_id):
     return oferta
 
 
-
 @app.route("/oferta/<int:oferta_id>")
 def oferta(oferta_id):
     db = get_db()
@@ -468,9 +412,6 @@ def oferta(oferta_id):
     vigente = o["activa"] and o["valido_hasta"] >= hoy()
     restantes = o["cupos"] - o["reclamados"]
     dias = (date.fromisoformat(o["valido_hasta"]) - date.today()).days
-    
-    # Obtener el slug del comercio
-    comercio = db.execute("SELECT slug FROM comercios WHERE id = ?", (o["comercio_id"],)).fetchone()
     
     # Obtener otras ofertas del mismo negocio (excluyendo la actual)
     otras_ofertas_negocio = enriquecer(db.execute(
@@ -481,7 +422,7 @@ def oferta(oferta_id):
     ).fetchall())
     
     return render_template("oferta.html", o=o, vigente=vigente, restantes=restantes, dias=dias,
-                          otras_ofertas=otras_ofertas_negocio, comercio_slug=comercio["slug"] if comercio else None)
+                          otras_ofertas=otras_ofertas_negocio)
 
 
 @app.route("/oferta/<int:oferta_id>/reclamar", methods=["POST"])
@@ -1153,19 +1094,11 @@ def nuevo_negocio():
                 flash(e, "error")
         else:
             try:
-                # Generar slug único
-                slug_base = generar_slug(nombre)
-                slug = slug_base
-                contador = 1
-                while db.execute("SELECT 1 FROM comercios WHERE slug = ?", (slug,)).fetchone():
-                    slug = f"{slug_base}-{contador}"
-                    contador += 1
-                
                 db.execute(
-                    "INSERT INTO comercios (nombre, email, password_hash, telefono, ciudad, direccion, slug) VALUES (?,?,?,?,?,?,?)",
-                    (nombre, email, generate_password_hash(password), telefono, ciudad, direccion, slug))
+                    "INSERT INTO comercios (nombre, email, password_hash, telefono, ciudad, direccion) VALUES (?,?,?,?,?,?)",
+                    (nombre, email, generate_password_hash(password), telefono, ciudad, direccion))
                 db.commit()
-                flash(f"Negocio '{nombre}' creado exitosamente. Página: /negocio/{slug}", "exito")
+                flash(f"Negocio '{nombre}' creado exitosamente.", "exito")
                 return redirect(url_for("panel", vista="negocios"))
             except sqlite3.IntegrityError:
                 flash("Ya existe un negocio con ese correo.", "error")
@@ -1195,8 +1128,6 @@ def editar_negocio(negocio_id):
         telefono = solo_digitos(f.get("telefono"))
         ciudad = f.get("ciudad", "")
         direccion = f.get("direccion", "").strip()
-        descripcion = f.get("descripcion", "").strip()
-        color_marca = f.get("color_marca", "").strip()
         
         errores = []
         if not nombre or not email or not direccion:
@@ -1204,69 +1135,21 @@ def editar_negocio(negocio_id):
         if ciudad not in CIUDADES:
             errores.append("Elegí una ciudad válida.")
         
-        # Procesar logo si se subió
-        archivo_logo = request.files.get("logo")
-        nuevo_logo = None
-        if archivo_logo and archivo_logo.filename:
-            nuevo_logo = guardar_foto(archivo_logo)
-            if nuevo_logo is None:
-                errores.append("No pudimos leer el logo. Subí una imagen JPG, PNG o WebP.")
-        
-        # Procesar fondo si se subió
-        archivo_fondo = request.files.get("fondo")
-        nuevo_fondo = None
-        if archivo_fondo and archivo_fondo.filename:
-            nuevo_fondo = guardar_foto(archivo_fondo)
-            if nuevo_fondo is None:
-                errores.append("No pudimos leer la imagen de fondo. Subí una imagen JPG, PNG o WebP.")
-        
         if errores:
             for e in errores:
                 flash(e, "error")
         else:
             try:
-                # Si cambió el nombre, regenerar slug
-                slug = negocio["slug"]
-                if nombre != negocio["nombre"]:
-                    slug_base = generar_slug(nombre)
-                    slug = slug_base
-                    contador = 1
-                    while db.execute("SELECT 1 FROM comercios WHERE slug = ? AND id != ?", (slug, negocio_id)).fetchone():
-                        slug = f"{slug_base}-{contador}"
-                        contador += 1
-                
                 # Si hay nueva contraseña, actualizarla
                 if password and len(password) >= 6:
-                    sql = """UPDATE comercios SET nombre=?, email=?, password_hash=?, telefono=?, ciudad=?, 
-                            direccion=?, slug=?, descripcion=?, color_marca=?"""
-                    params = [nombre, email, generate_password_hash(password), telefono, ciudad, direccion, 
-                             slug, descripcion, color_marca]
+                    db.execute(
+                        "UPDATE comercios SET nombre=?, email=?, password_hash=?, telefono=?, ciudad=?, direccion=? WHERE id=?",
+                        (nombre, email, generate_password_hash(password), telefono, ciudad, direccion, negocio_id))
                 else:
                     # Mantener la contraseña actual
-                    sql = """UPDATE comercios SET nombre=?, email=?, telefono=?, ciudad=?, direccion=?, 
-                            slug=?, descripcion=?, color_marca=?"""
-                    params = [nombre, email, telefono, ciudad, direccion, slug, descripcion, color_marca]
-                
-                # Si hay nuevo logo, actualizarlo
-                if nuevo_logo:
-                    sql += ", logo=?"
-                    params.append(nuevo_logo)
-                    # Borrar logo anterior si existía
-                    if negocio["logo"]:
-                        borrar_foto(negocio["logo"])
-                
-                # Si hay nuevo fondo, actualizarlo
-                if nuevo_fondo:
-                    sql += ", fondo=?"
-                    params.append(nuevo_fondo)
-                    # Borrar fondo anterior si existía
-                    if negocio["fondo"]:
-                        borrar_foto(negocio["fondo"])
-                
-                sql += " WHERE id=?"
-                params.append(negocio_id)
-                
-                db.execute(sql, params)
+                    db.execute(
+                        "UPDATE comercios SET nombre=?, email=?, telefono=?, ciudad=?, direccion=? WHERE id=?",
+                        (nombre, email, telefono, ciudad, direccion, negocio_id))
                 db.commit()
                 flash(f"Negocio '{nombre}' actualizado exitosamente.", "exito")
                 return redirect(url_for("panel", vista="negocios"))
@@ -1345,46 +1228,6 @@ def canjear():
 @app.errorhandler(404)
 def no_encontrado(_e):
     return render_template("404.html"), 404
-
-
-# Ruta catch-all para páginas de negocio — DEBE IR AL FINAL
-@app.route("/<slug>")
-def pagina_negocio(slug):
-    """Página pública del negocio con todas sus ofertas."""
-    db = get_db()
-    
-    # Buscar el negocio por slug
-    negocio = db.execute(
-        "SELECT * FROM comercios WHERE slug = ?", (slug,)
-    ).fetchone()
-    
-    if not negocio:
-        abort(404)
-    
-    # Obtener todas las ofertas activas del negocio
-    ofertas = enriquecer(db.execute(
-        OFERTA_SELECT + """ WHERE o.comercio_id = ? 
-                           AND o.activa = 1 AND o.valido_hasta >= ?
-                           ORDER BY COALESCE(o.principal, 0) DESC, o.id DESC""",
-        (negocio["id"], hoy())
-    ).fetchall())
-    
-    # Estadísticas del negocio
-    stats = db.execute(
-        """SELECT 
-            COUNT(*) as total_ofertas,
-            SUM(CASE WHEN o.activa = 1 AND o.valido_hasta >= ? THEN 1 ELSE 0 END) as ofertas_activas,
-            (SELECT COUNT(*) FROM cupones cu 
-             JOIN ofertas o2 ON cu.oferta_id = o2.id 
-             WHERE o2.comercio_id = ?) as cupones_totales,
-            (SELECT COUNT(*) FROM cupones cu 
-             JOIN ofertas o2 ON cu.oferta_id = o2.id 
-             WHERE o2.comercio_id = ? AND cu.estado = 'canjeado') as cupones_canjeados
-        FROM ofertas o WHERE o.comercio_id = ?""",
-        (hoy(), negocio["id"], negocio["id"], negocio["id"])
-    ).fetchone()
-    
-    return render_template("negocio_pagina.html", negocio=negocio, ofertas=ofertas, stats=stats)
 
 
 # ---------- Datos de ejemplo: flask --app app seed ----------
