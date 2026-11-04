@@ -63,6 +63,7 @@
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "ZupponPy",
+    "alternateName": "Zuppon Paraguay",
     "url": "{{ request.url_root }}",
     "description": "Plataforma de ofertas y cupones de descuento en Paraguay",
     "potentialAction": {
@@ -70,6 +71,31 @@
       "target": "{{ request.url_root }}?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
+  }
+  </script>
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "ZupponPy",
+    "alternateName": "Zuppon",
+    "url": "{{ request.url_root }}",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ url_for('static', filename='logo.jpg', _external=True) }}",
+      "width": 512,
+      "height": 512
+    },
+    "description": "Descubrí las mejores ofertas y descuentos en Paraguay. Cupones gratis para restaurantes, supermercados, farmacias y más.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "PY"
+    },
+    "sameAs": [
+      "https://facebook.com/zupponpy",
+      "https://instagram.com/zupponpy"
+    ]
   }
   </script>
   

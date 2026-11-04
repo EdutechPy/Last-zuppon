@@ -1,8 +1,9 @@
 {
-  "name": "ZupponPy - Ofertas y Descuentos",
+  "name": "ZupponPy - Ofertas y Descuentos en Paraguay",
   "short_name": "ZupponPy",
-  "description": "Descubrí las mejores ofertas y descuentos cerca tuyo en Paraguay",
+  "description": "Descubrí las mejores ofertas y descuentos cerca tuyo en Paraguay. Cupones gratis para ahorrar.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#5a87db",
@@ -21,7 +22,7 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["shopping", "lifestyle"],
+  "categories": ["shopping", "lifestyle", "business"],
   "shortcuts": [
     {
       "name": "Mis Cupones",
@@ -47,5 +48,7 @@
         }
       ]
     }
-  ]
+  ],
+  "lang": "es-PY",
+  "dir": "ltr"
 }
