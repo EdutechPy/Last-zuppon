@@ -531,6 +531,62 @@ def mis_cupones():
     return render_template("mis_cupones.html")
 
 
+@app.route("/mapa")
+def mapa():
+    """Muestra el mapa de Google Maps con todas las ofertas que tienen coordenadas."""
+    db = get_db()
+    ciudad = request.args.get("ciudad", "")
+    categoria = request.args.get("categoria", "")
+    
+    # Obtener ofertas activas con coordenadas
+    sql = """
+        SELECT o.*, c.nombre AS comercio, c.slug AS comercio_slug, c.logo AS comercio_logo,
+               (SELECT COUNT(*) FROM cupones WHERE oferta_id = o.id) AS reclamados
+        FROM ofertas o 
+        JOIN comercios c ON c.id = o.comercio_id
+        WHERE o.activa = 1 
+          AND o.valido_hasta >= ? 
+          AND o.coordenadas IS NOT NULL 
+          AND o.coordenadas != ''
+    """
+    params = [hoy()]
+    
+    if ciudad and ciudad in CIUDADES:
+        sql += " AND o.ciudad = ?"
+        params.append(ciudad)
+    
+    if categoria and categoria in CATEGORIAS:
+        sql += " AND o.categoria = ?"
+        params.append(categoria)
+    
+    sql += " ORDER BY o.id DESC LIMIT 100"
+    
+    ofertas = enriquecer(db.execute(sql, params).fetchall())
+    
+    # Convertir a JSON para JavaScript
+    ofertas_json = []
+    for o in ofertas:
+        if o["restantes"] > 0:  # Solo ofertas disponibles
+            ofertas_json.append({
+                "id": o["id"],
+                "titulo": o["titulo"],
+                "comercio": o["comercio"],
+                "comercio_slug": o["comercio_slug"],
+                "comercio_logo": o["comercio_logo"],
+                "descuento": o["descuento"],
+                "categoria": o["categoria"],
+                "ciudad": o["ciudad"],
+                "direccion": o["direccion"],
+                "coordenadas": o["coordenadas"],
+                "restantes": o["restantes"],
+                "dias": o["dias"],
+                "foto": o["foto"],
+                "url": url_for("oferta", oferta_id=o["id"])
+            })
+    
+    return render_template("mapa.html", ofertas_json=ofertas_json, ciudad=ciudad, categoria=categoria)
+
+
 @app.route("/api/qr/<codigo>")
 def api_qr(codigo):
     """API para generar QR de un cupón específico."""

@@ -1,0 +1,546 @@
+{% extends "base.html" %}
+{% block title %}Mapa de Ofertas · ZupponPy{% endblock %}
+{% block description %}Descubrí ofertas cerca tuyo en el mapa. {{ ofertas_json|length }} ofertas disponibles{% if ciudad %} en {{ ciudad }}{% endif %}.{% endblock %}
+{% block content %}
+
+<div class="mapa-container">
+  <div class="mapa-header">
+    <h1>🗺️ Mapa de Ofertas</h1>
+    <div class="mapa-controles">
+      <form method="get" action="{{ url_for('mapa') }}" class="mapa-filtro">
+        <select name="ciudad" aria-label="Filtrar por ciudad" onchange="this.form.submit()">
+          <option value="">Todas las ciudades</option>
+          {% for c in CIUDADES %}
+            <option value="{{ c }}" {{ 'selected' if c == ciudad }}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </form>
+      <form method="get" action="{{ url_for('mapa') }}" class="mapa-filtro">
+        {% if ciudad %}
+        <input type="hidden" name="ciudad" value="{{ ciudad }}">
+        {% endif %}
+        <select name="categoria" aria-label="Filtrar por categoría" onchange="this.form.submit()">
+          <option value="">Todas las categorías</option>
+          {% for cat in CATEGORIAS %}
+            <option value="{{ cat }}" {{ 'selected' if cat == categoria }}>{{ (cat|cat).emoji }} {{ cat }}</option>
+          {% endfor %}
+        </select>
+      </form>
+      <a href="{{ url_for('index', ciudad=ciudad) }}" class="btn-volver-lista">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <line x1="9" y1="22" x2="9" y2="12"/>
+          <line x1="15" y1="22" x2="15" y2="12"/>
+        </svg>
+        Ver lista
+      </a>
+    </div>
+  </div>
+  
+  {% if ofertas_json %}
+    <div class="mapa-info">
+      <p>📍 Mostrando <strong>{{ ofertas_json|length }}</strong> {{ 'oferta' if ofertas_json|length == 1 else 'ofertas' }} con ubicación
+      {% if ciudad %} en <strong>{{ ciudad }}</strong>{% endif %}
+      {% if categoria %} · Categoría: <strong>{{ (categoria|cat).emoji }} {{ categoria }}</strong>{% endif %}
+      </p>
+    </div>
+    
+    <div id="map" class="google-map"></div>
+    
+    <div class="mapa-leyenda">
+      <h3>🎯 Cómo usar el mapa</h3>
+      <ul>
+        <li>🏠 <strong>Marcadores con logo</strong> = Ofertas disponibles</li>
+        <li>👆 <strong>Haz clic</strong> en un marcador para ver detalles</li>
+        <li>🖱️ <strong>Pasa el mouse</strong> sobre un marcador para ver el nombre del negocio</li>
+        <li>📱 <strong>Toca</strong> "Ver oferta" para reclamar tu cupón</li>
+      </ul>
+    </div>
+  {% else %}
+    <div class="mapa-vacio">
+      <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+        <circle cx="12" cy="10" r="3"/>
+        <line x1="12" y1="2" x2="12" y2="6"/>
+        <line x1="12" y1="14" x2="12" y2="18"/>
+      </svg>
+      <h2>No hay ofertas con ubicación</h2>
+      <p>
+        {% if ciudad and categoria %}
+          No se encontraron ofertas de <strong>{{ categoria }}</strong> en <strong>{{ ciudad }}</strong> con coordenadas.
+        {% elif ciudad %}
+          No se encontraron ofertas en <strong>{{ ciudad }}</strong> con coordenadas.
+        {% elif categoria %}
+          No se encontraron ofertas de <strong>{{ categoria }}</strong> con coordenadas.
+        {% else %}
+          Las ofertas con coordenadas aparecerán aquí en el mapa.
+        {% endif %}
+      </p>
+      <a href="{{ url_for('index') }}" class="boton">Ver todas las ofertas</a>
+    </div>
+  {% endif %}
+</div>
+
+{% if ofertas_json %}
+<script>
+// Datos de ofertas desde el servidor
+const ofertas = {{ ofertas_json|tojson }};
+
+// Inicializar mapa
+function initMap() {
+  // Centro de Paraguay por defecto
+  const paraguayCenter = { lat: -25.2637, lng: -57.5759 };
+  
+  // Crear mapa con controles mínimos
+  const map = new google.maps.Map(document.getElementById('map'), {
+    zoom: {% if ciudad %}12{% else %}7{% endif %},
+    center: paraguayCenter,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false,
+    zoomControl: true,
+    zoomControlOptions: {
+      position: google.maps.ControlPosition.RIGHT_CENTER
+    },
+    mapTypeId: 'roadmap',
+    styles: [
+      {
+        featureType: 'poi',
+        elementType: 'labels',
+        stylers: [{ visibility: 'off' }]
+      },
+      {
+        featureType: 'transit',
+        elementType: 'labels.icon',
+        stylers: [{ visibility: 'off' }]
+      }
+    ]
+  });
+  
+  // Bounds para ajustar el zoom automáticamente
+  const bounds = new google.maps.LatLngBounds();
+  
+  // Crear marcadores con logo personalizado
+  ofertas.forEach(oferta => {
+    // Parsear coordenadas (formato: "-25.2637,-57.5759")
+    const [lat, lng] = oferta.coordenadas.split(',').map(c => parseFloat(c.trim()));
+    
+    if (isNaN(lat) || isNaN(lng)) {
+      console.warn('Coordenadas inválidas:', oferta.coordenadas);
+      return;
+    }
+    
+    const position = { lat, lng };
+    
+    // Determinar qué logo usar: del negocio o el genérico de ZupponPy
+    const logoUrl = oferta.comercio_logo 
+      ? `/static/uploads/${oferta.comercio_logo}.jpg`
+      : '/static/logo.jpg';
+    
+    // Crear HTML para marcador personalizado estilo Google Maps
+    const markerHTML = `
+      <div class="custom-marker" title="${oferta.comercio}">
+        <img src="${logoUrl}" alt="${oferta.comercio}">
+        <div class="marker-badge">-${oferta.descuento}%</div>
+      </div>
+    `;
+    
+    // Crear overlay personalizado
+    class CustomMarker extends google.maps.OverlayView {
+      constructor(position, map) {
+        super();
+        this.position = position;
+        this.setMap(map);
+      }
+      
+      onAdd() {
+        this.div = document.createElement('div');
+        this.div.style.position = 'absolute';
+        this.div.innerHTML = markerHTML;
+        
+        // Evento click
+        this.div.addEventListener('click', () => {
+          if (window.currentInfoWindow) {
+            window.currentInfoWindow.close();
+          }
+          infoWindow.open(map, this);
+          window.currentInfoWindow = infoWindow;
+          map.panTo(position);
+        });
+        
+        const panes = this.getPanes();
+        panes.overlayMouseTarget.appendChild(this.div);
+      }
+      
+      draw() {
+        const overlayProjection = this.getProjection();
+        const pos = overlayProjection.fromLatLngToDivPixel(this.position);
+        if (pos) {
+          this.div.style.left = pos.x - 18 + 'px';
+          this.div.style.top = pos.y - 18 + 'px';
+        }
+      }
+      
+      onRemove() {
+        if (this.div) {
+          this.div.parentNode.removeChild(this.div);
+          this.div = null;
+        }
+      }
+      
+      getPosition() {
+        return this.position;
+      }
+    }
+    
+    const marker = new CustomMarker(position, map);
+    
+    // Contenido del InfoWindow simplificado
+    const infoContent = `
+      <div class="info-ventana">
+        <div class="info-header">
+          <span class="info-descuento">-${oferta.descuento}%</span>
+          <span class="info-categoria">${oferta.categoria}</span>
+        </div>
+        <h3 class="info-titulo">${oferta.titulo}</h3>
+        <p class="info-comercio">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          </svg>
+          ${oferta.comercio}
+        </p>
+        <p class="info-direccion">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          ${oferta.direccion}, ${oferta.ciudad}
+        </p>
+        <div class="info-meta">
+          <span class="info-disponibles">📱 ${oferta.restantes} disponibles</span>
+          <span class="info-tiempo">⏱️ ${oferta.dias <= 0 ? 'Termina hoy' : oferta.dias === 1 ? 'Termina mañana' : 'Quedan ' + oferta.dias + ' días'}</span>
+        </div>
+        <div class="info-acciones">
+          <a href="${oferta.url}" class="btn-ver-oferta">Ver oferta →</a>
+          ${oferta.comercio_slug ? `<a href="/negocio/${oferta.comercio_slug}" class="btn-ver-negocio">Ver negocio</a>` : ''}
+        </div>
+      </div>
+    `;
+    
+    const infoWindow = new google.maps.InfoWindow({
+      content: infoContent,
+      maxWidth: 350
+    });
+    
+    // Mostrar InfoWindow al hacer clic
+    marker.addListener('click', () => {
+      // Cerrar otros InfoWindows
+      if (window.currentInfoWindow) {
+        window.currentInfoWindow.close();
+      }
+      infoWindow.open(map, marker);
+      window.currentInfoWindow = infoWindow;
+      
+      // Centrar en el marcador
+      map.panTo(position);
+    });
+    
+    // Expandir bounds
+    bounds.extend(position);
+  });
+  
+  // Ajustar zoom para mostrar todos los marcadores
+  if (ofertas.length > 0) {
+    map.fitBounds(bounds);
+    
+    // Evitar zoom excesivo si solo hay un marcador
+    google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
+      if (this.getZoom() > 15) {
+        this.setZoom(15);
+      }
+    });
+  }
+}
+
+// Cargar Google Maps API
+window.initMap = initMap;
+</script>
+
+<script async defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAh7KqR2hw0DZ3MFQq1jUDzPVtYv3xVwKk&callback=initMap&libraries=places&language=es&region=PY">
+</script>
+
+<!-- MarkerClusterer para agrupar marcadores cercanos -->
+<script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+{% endif %}
+
+<style>
+/* Estilos del mapa */
+.mapa-container{
+  max-width:1600px;
+  margin:0 auto;
+  padding:2rem var(--gutter);
+}
+.mapa-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1.5rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+.mapa-header h1{
+  font-size:2.5rem;
+  margin:0;
+  color:var(--tinta);
+}
+.mapa-controles{
+  display:flex;
+  gap:1rem;
+  align-items:center;
+}
+.mapa-filtro select{
+  padding:0.75rem 1.25rem;
+  border:2px solid var(--linea);
+  border-radius:12px;
+  font-size:1rem;
+  font-weight:600;
+  background:#fff;
+  cursor:pointer;
+  transition:border-color 0.3s;
+}
+.mapa-filtro select:hover{
+  border-color:var(--azul);
+}
+.btn-volver-lista{
+  display:inline-flex;
+  align-items:center;
+  gap:0.5rem;
+  padding:0.75rem 1.25rem;
+  background:#fff;
+  color:var(--azul);
+  border:2px solid var(--azul);
+  border-radius:12px;
+  text-decoration:none;
+  font-weight:700;
+  transition:all 0.3s;
+}
+.btn-volver-lista:hover{
+  background:var(--azul);
+  color:#fff;
+}
+.mapa-info{
+  background:var(--papel);
+  padding:1rem 1.5rem;
+  border-radius:12px;
+  margin-bottom:1.5rem;
+  border-left:4px solid var(--azul);
+}
+.mapa-info p{
+  margin:0;
+  font-size:1.1rem;
+}
+.google-map{
+  width:100%;
+  height:70vh;
+  min-height:500px;
+  border-radius:16px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.1);
+  border:2px solid var(--linea);
+}
+.mapa-leyenda{
+  margin-top:2rem;
+  background:#f8fafc;
+  padding:1.5rem 2rem;
+  border-radius:16px;
+  border:1px solid var(--linea);
+}
+.mapa-leyenda h3{
+  margin:0 0 1rem;
+  font-size:1.25rem;
+  color:var(--tinta);
+}
+.mapa-leyenda ul{
+  list-style:none;
+  padding:0;
+  margin:0;
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+  gap:0.75rem;
+}
+.mapa-leyenda li{
+  font-size:1rem;
+  color:#475569;
+}
+.mapa-vacio{
+  text-align:center;
+  padding:4rem 2rem;
+  color:#64748b;
+}
+.mapa-vacio svg{
+  margin-bottom:1.5rem;
+  opacity:0.5;
+}
+.mapa-vacio h2{
+  font-size:1.75rem;
+  color:var(--tinta);
+  margin:0 0 0.75rem;
+}
+.mapa-vacio p{
+  font-size:1.1rem;
+  max-width:500px;
+  margin:0 auto 2rem;
+}
+
+/* InfoWindow personalizada */
+.info-ventana{
+  padding:0.5rem;
+  max-width:320px;
+}
+.info-header{
+  display:flex;
+  gap:0.75rem;
+  margin-bottom:0.75rem;
+}
+.info-descuento{
+  display:inline-block;
+  background:#ef4444;
+  color:#fff;
+  padding:0.35rem 0.75rem;
+  border-radius:8px;
+  font-weight:700;
+  font-size:0.95rem;
+}
+.info-categoria{
+  display:inline-block;
+  background:var(--azul);
+  color:#fff;
+  padding:0.35rem 0.75rem;
+  border-radius:8px;
+  font-weight:600;
+  font-size:0.85rem;
+}
+.info-titulo{
+  font-size:1.25rem;
+  margin:0 0 0.75rem;
+  color:var(--tinta);
+  line-height:1.3;
+}
+.info-comercio,.info-direccion{
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+  margin:0.5rem 0;
+  font-size:0.95rem;
+  color:#64748b;
+}
+.info-meta{
+  display:flex;
+  gap:1rem;
+  margin:1rem 0;
+  padding-top:0.75rem;
+  border-top:1px solid #e2e8f0;
+  font-size:0.9rem;
+  color:#475569;
+}
+.info-acciones{
+  display:flex;
+  gap:0.5rem;
+  margin-top:1rem;
+}
+.btn-ver-oferta{
+  flex:1;
+  display:inline-block;
+  padding:0.65rem 1rem;
+  background:var(--azul);
+  color:#fff;
+  text-decoration:none;
+  border-radius:8px;
+  font-weight:700;
+  text-align:center;
+  transition:background 0.3s;
+}
+.btn-ver-oferta:hover{
+  background:#4a71c5;
+}
+.btn-ver-negocio{
+  padding:0.65rem 1rem;
+  background:#fff;
+  color:var(--azul);
+  border:2px solid var(--azul);
+  text-decoration:none;
+  border-radius:8px;
+  font-weight:600;
+  text-align:center;
+  transition:all 0.3s;
+}
+.btn-ver-negocio:hover{
+  background:var(--azul);
+  color:#fff;
+}
+
+/* Marcadores personalizados estilo Google Maps */
+.custom-marker{
+  position:relative;
+  width:36px;
+  height:36px;
+  cursor:pointer;
+  transition:transform 0.2s;
+}
+.custom-marker:hover{
+  transform:scale(1.15);
+  z-index:1000 !important;
+}
+.custom-marker img{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  border:2px solid #fff;
+  box-shadow:0 2px 6px rgba(0,0,0,0.3);
+  object-fit:cover;
+  background:#fff;
+}
+.marker-badge{
+  position:absolute;
+  bottom:-6px;
+  right:-6px;
+  background:#ef4444;
+  color:#fff;
+  font-size:0.65rem;
+  font-weight:800;
+  padding:0.15rem 0.35rem;
+  border-radius:6px;
+  border:2px solid #fff;
+  box-shadow:0 2px 4px rgba(0,0,0,0.3);
+  white-space:nowrap;
+  line-height:1;
+}
+
+/* Responsive */
+@media (max-width:768px){
+  .mapa-header{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .mapa-header h1{
+    font-size:2rem;
+  }
+  .mapa-controles{
+    flex-direction:column;
+  }
+  .mapa-filtro select,
+  .btn-volver-lista{
+    width:100%;
+    justify-content:center;
+  }
+  .google-map{
+    height:60vh;
+    min-height:400px;
+  }
+  .mapa-leyenda ul{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+
+{% endblock %}
