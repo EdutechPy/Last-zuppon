@@ -2,34 +2,33 @@
 {% block title %}Mi Tarjeta Digital · {{ comercio.nombre }}{% endblock %}
 
 {% block head %}
-<!-- Optimización para Android -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="{{ comercio.color_marca or '#5a87db' }}">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="format-detection" content="telephone=yes">
 <meta name="description" content="Tarjeta digital de {{ comercio.nombre }} - {{ comercio.ciudad }}. Escaneá el QR y descubrí nuestras ofertas.">
-<meta property="og:title" content="{{ comercio.nombre }} · Tarjeta Digital">
-<meta property="og:description" content="Descubrí las ofertas de {{ comercio.nombre }} en ZupponPy">
-<meta property="og:type" content="website">
-<meta property="og:url" content="{{ url_negocio }}">
-{% if comercio.logo %}
-<meta property="og:image" content="{{ url_for('static', filename='uploads/' + comercio.logo + '.jpg', _external=True) }}">
-{% endif %}
 {% endblock %}
 
 {% block content %}
 
 <style>
+/* Variables CSS dinámicas */
+:root {
+  --color-marca: {{ comercio.color_marca or '#5a87db' }};
+  --color-marca-oscuro: {{ '#4a71c5' }};
+  {% if comercio.fondo %}
+  --fondo-url: url('{{ foto_url(comercio.fondo) }}');
+  {% endif %}
+}
+
+/* Container principal */
 .tarjeta-container{
-  max-width:900px;
+  max-width:1100px;
   margin:2rem auto;
-  padding:0 var(--gutter);
+  padding:0 1rem;
 }
 .tarjeta-header{
   text-align:center;
-  margin-bottom:2rem;
+  margin-bottom:2.5rem;
   animation:fadeInDown 0.6s ease-out;
 }
 @keyframes fadeInDown{
@@ -37,76 +36,46 @@
   to{ opacity:1; transform:translateY(0); }
 }
 .tarjeta-header h1{
-  font-size:2.5rem;
-  margin:0 0 0.5rem;
+  font-size:2.75rem;
+  margin:0 0 0.75rem;
   color:var(--tinta);
-  background:linear-gradient(135deg, var(--tinta) 0%, var(--azul) 100%);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  background-clip:text;
+  font-weight:800;
 }
 .tarjeta-header p{
   color:#64748b;
-  font-size:1.1rem;
+  font-size:1.15rem;
   margin:0;
 }
+
+/* Botones de acción */
 .tarjeta-acciones{
   display:flex;
   gap:1rem;
   justify-content:center;
-  margin-bottom:2rem;
-  flex-wrap:wrap;
-  animation:fadeIn 0.6s ease-out 0.2s backwards;
-}
-@keyframes fadeIn{
-  from{ opacity:0; }
-  to{ opacity:1; }
-}
-.menu-impresion{
-  display:flex;
-  gap:0.5rem;
+  margin-bottom:3rem;
   flex-wrap:wrap;
 }
 .btn-accion{
   display:inline-flex;
   align-items:center;
-  gap:0.6rem;
-  padding:0.85rem 1.5rem;
-  border-radius:12px;
+  gap:0.7rem;
+  padding:1rem 1.75rem;
+  border-radius:14px;
   font-weight:700;
-  font-size:1rem;
+  font-size:1.05rem;
   text-decoration:none;
-  transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  transition:all 0.3s;
+  box-shadow:0 4px 12px rgba(0,0,0,0.12);
   border:none;
   cursor:pointer;
   font-family:inherit;
-  position:relative;
-  overflow:hidden;
-  -webkit-tap-highlight-color:transparent;
-  touch-action:manipulation;
-  user-select:none;
-  -webkit-user-select:none;
+}
+.btn-accion:hover{
+  transform:translateY(-3px);
+  box-shadow:0 6px 20px rgba(0,0,0,0.18);
 }
 .btn-accion:active{
-  transform:scale(0.97);
-  box-shadow:0 1px 4px rgba(0,0,0,0.1);
-}
-.btn-accion::before{
-  content:'';
-  position:absolute;
-  top:50%;
-  left:50%;
-  width:0;
-  height:0;
-  border-radius:50%;
-  background:rgba(255,255,255,0.3);
-  transform:translate(-50%, -50%);
-  transition:width 0.6s, height 0.6s;
-}
-.btn-accion:active::before{
-  width:300px;
-  height:300px;
+  transform:translateY(-1px);
 }
 .btn-imprimir{
   background:#fff;
@@ -116,552 +85,692 @@
 .btn-imprimir:hover{
   background:var(--azul);
   color:#fff;
-  transform:translateY(-2px);
-  box-shadow:0 4px 12px rgba(90,135,219,0.3);
 }
 .btn-compartir{
   background:linear-gradient(135deg, #10b981 0%, #059669 100%);
   color:#fff;
-  border:none;
-}
-.btn-compartir:hover{
-  transform:translateY(-2px);
-  box-shadow:0 4px 12px rgba(16,185,129,0.3);
 }
 .btn-volver{
   background:#f1f5f9;
-  color:#475569;
+  color:#64748b;
   border:2px solid #e2e8f0;
 }
 .btn-volver:hover{
   background:#e2e8f0;
-  border-color:#cbd5e1;
-  transform:translateY(-2px);
 }
 
-/* Tarjeta Business Card */
+/* Tarjeta Business Card - Diseño profesional mejorado */
 .business-card{
   background:#fff;
-  border-radius:24px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.12);
+  border-radius:16px;
+  box-shadow:0 12px 48px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.05);
   overflow:hidden;
-  margin-bottom:2rem;
-  animation:scaleIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s backwards;
+  margin-bottom:2.5rem;
+  animation:scaleIn 0.8s ease-out 0.3s backwards;
+  max-width:1000px;
+  margin-left:auto;
+  margin-right:auto;
+  transition:transform 0.3s, box-shadow 0.3s;
+}
+.business-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 16px 64px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.08);
 }
 @keyframes scaleIn{
   from{ opacity:0; transform:scale(0.95); }
   to{ opacity:1; transform:scale(1); }
 }
-.card-hero{
-  height:180px;
-  background:linear-gradient(135deg, {{ comercio.color_marca or '#5a87db' }} 0%, {{ comercio.color_marca or '#4a71c5' }} 100%);
+
+.card-horizontal{
+  display:grid;
+  grid-template-columns:38% 62%;
+  min-height:300px;
+}
+
+/* Lado izquierdo con color de marca - MEJORADO */
+.card-left{
+  background:linear-gradient(135deg, var(--color-marca) 0%, var(--color-marca-oscuro) 100%);
+  {% if comercio.fondo %}
+  background-image:var(--fondo-url);
+  background-size:cover;
+  background-position:center;
+  {% endif %}
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:2.5rem 1.5rem;
+  position:relative;
+  overflow:hidden;
+}
+.card-left::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg, rgba(90,135,219,0.93) 0%, rgba(74,113,197,0.93) 100%);
+  {% if comercio.fondo %}
+  backdrop-filter:blur(3px);
+  {% endif %}
+}
+/* Patrón decorativo en el fondo */
+.card-left::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:radial-gradient(circle at 20% 30%, rgba(255,255,255,0.08) 0%, transparent 50%),
+                   radial-gradient(circle at 80% 70%, rgba(255,255,255,0.06) 0%, transparent 50%);
+  pointer-events:none;
+}
+
+.card-logo-container{
+  position:relative;
+  z-index:1;
+  text-align:center;
+}
+.card-logo-horizontal{
+  width:140px;
+  height:140px;
+  border-radius:50%;
+  border:6px solid #fff;
+  box-shadow:0 8px 32px rgba(0,0,0,0.35), 0 0 0 2px rgba(255,255,255,0.1);
+  object-fit:cover;
+  background:#fff;
+  margin-bottom:1.5rem;
+  transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-logo-horizontal:hover{
+  transform:scale(1.08) rotate(5deg);
+  box-shadow:0 12px 40px rgba(0,0,0,0.4), 0 0 0 3px rgba(255,255,255,0.2);
+}
+
+.card-qr-small{
+  width:115px;
+  height:115px;
+  background:#fff;
+  padding:0.6rem;
+  border-radius:14px;
+  margin-top:1.25rem;
+  box-shadow:0 6px 20px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,255,255,0.1);
+  transition:transform 0.3s;
+}
+.card-qr-small:hover{
+  transform:scale(1.05);
+}
+.card-qr-small img{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+/* Lado derecho con información - MEJORADO */
+.card-right{
+  padding:2.5rem 2.75rem;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  background:linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+  position:relative;
+}
+/* Decoración sutil */
+.card-right::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:4px;
+  background:linear-gradient(90deg, var(--color-marca) 0%, transparent 100%);
+}
+
+.card-nombre-h{
+  font-size:2.4rem;
+  font-weight:900;
+  color:var(--tinta);
+  margin:0 0 0.6rem;
+  line-height:1.05;
+  letter-spacing:-0.03em;
+  background:linear-gradient(135deg, var(--tinta) 0%, #1e40af 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.card-slogan{
+  color:var(--color-marca);
+  font-weight:600;
+  font-size:1.1rem;
+  margin:0 0 2rem;
+  line-height:1.45;
+  padding-left:1rem;
+  border-left:4px solid var(--color-marca);
+}
+
+.card-contact{
+  display:flex;
+  flex-direction:column;
+  gap:0.85rem;
+  background:#fff;
+  padding:1.5rem;
+  border-radius:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.06);
+}
+
+.card-contact-item{
+  display:flex;
+  align-items:flex-start;
+  gap:0.85rem;
+  color:#475569;
+  font-size:1rem;
+  line-height:1.5;
+  transition:color 0.2s;
+}
+.card-contact-item:hover{
+  color:var(--tinta);
+}
+.card-contact-item svg{
+  width:20px;
+  height:20px;
+  flex-shrink:0;
+  color:var(--color-marca);
+  margin-top:0.1rem;
+}
+
+.card-footer{
+  margin-top:1.75rem;
+  padding-top:1.5rem;
+  border-top:2px dashed #e2e8f0;
+  text-align:center;
+  background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  margin-left:-2.75rem;
+  margin-right:-2.75rem;
+  margin-bottom:-2.5rem;
+  padding-left:2.75rem;
+  padding-right:2.75rem;
+  padding-bottom:2rem;
+}
+.card-footer-text{
+  font-size:0.9rem;
+  color:#64748b;
+  margin:0;
+  font-weight:500;
+}
+.card-website{
+  font-weight:800;
+  color:var(--color-marca);
+}
+.tarjeta-container{
+  max-width:1100px;
+  margin:2rem auto;
+  padding:0 1rem;
+}
+.tarjeta-header{
+  text-align:center;
+  margin-bottom:2.5rem;
+  animation:fadeInDown 0.6s ease-out;
+}
+@keyframes fadeInDown{
+  from{ opacity:0; transform:translateY(-20px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+.tarjeta-header h1{
+  font-size:2.75rem;
+  margin:0 0 0.75rem;
+  color:var(--tinta);
+  font-weight:800;
+}
+.tarjeta-header p{
+  color:#64748b;
+  font-size:1.15rem;
+  margin:0;
+}
+
+/* Botones de acción */
+.tarjeta-acciones{
+  display:flex;
+  gap:1rem;
+  justify-content:center;
+  margin-bottom:3rem;
+  flex-wrap:wrap;
+}
+.btn-accion{
+  display:inline-flex;
+  align-items:center;
+  gap:0.7rem;
+  padding:1rem 1.75rem;
+  border-radius:14px;
+  font-weight:700;
+  font-size:1.05rem;
+  text-decoration:none;
+  transition:all 0.3s;
+  box-shadow:0 4px 12px rgba(0,0,0,0.12);
+  border:none;
+  cursor:pointer;
+  font-family:inherit;
+}
+.btn-accion:hover{
+  transform:translateY(-3px);
+  box-shadow:0 6px 20px rgba(0,0,0,0.18);
+}
+.btn-accion:active{
+  transform:translateY(-1px);
+}
+.btn-imprimir{
+  background:#fff;
+  color:var(--azul);
+  border:2px solid var(--azul);
+}
+.btn-imprimir:hover{
+  background:var(--azul);
+  color:#fff;
+}
+.btn-compartir{
+  background:linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color:#fff;
+}
+.btn-volver{
+  background:#f1f5f9;
+  color:#64748b;
+  border:2px solid #e2e8f0;
+}
+.btn-volver:hover{
+  background:#e2e8f0;
+}
+
+/* Tarjeta Business Card - Diseño profesional mejorado */
+.business-card{
+  background:#fff;
+  border-radius:16px;
+  box-shadow:0 12px 48px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.05);
+  overflow:hidden;
+  margin-bottom:2.5rem;
+  animation:scaleIn 0.8s ease-out 0.3s backwards;
+  max-width:1000px;
+  margin-left:auto;
+  margin-right:auto;
+  transition:transform 0.3s, box-shadow 0.3s;
+}
+.business-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 16px 64px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.08);
+}
+@keyframes scaleIn{
+  from{ opacity:0; transform:scale(0.95); }
+  to{ opacity:1; transform:scale(1); }
+}
+
+.card-horizontal{
+  display:grid;
+  grid-template-columns:38% 62%;
+  min-height:300px;
+}
+
+/* Lado izquierdo con color de marca - MEJORADO */
+.card-left{
+  background:linear-gradient(135deg, {{ comercio.color_marca or '#5a87db' }} 0%, {{ '#4a71c5' }} 100%);
   {% if comercio.fondo %}
   background-image:url('{{ foto_url(comercio.fondo) }}');
   background-size:cover;
   background-position:center;
   {% endif %}
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
+  padding:2.5rem 1.5rem;
+  position:relative;
+  overflow:hidden;
+}
+.card-left::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg, rgba(90,135,219,0.93) 0%, rgba(74,113,197,0.93) 100%);
+  {% if comercio.fondo %}
+  backdrop-filter:blur(3px);
+  {% endif %}
+}
+/* Patrón decorativo en el fondo */
+.card-left::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:radial-gradient(circle at 20% 30%, rgba(255,255,255,0.08) 0%, transparent 50%),
+                   radial-gradient(circle at 80% 70%, rgba(255,255,255,0.06) 0%, transparent 50%);
+  pointer-events:none;
+}
+
+.card-logo-container{
+  position:relative;
+  z-index:1;
+  text-align:center;
+}
+.card-logo-horizontal{
+  width:140px;
+  height:140px;
+  border-radius:50%;
+  border:6px solid #fff;
+  box-shadow:0 8px 32px rgba(0,0,0,0.35), 0 0 0 2px rgba(255,255,255,0.1);
+  object-fit:cover;
+  background:#fff;
+  margin-bottom:1.5rem;
+  transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-logo-horizontal:hover{
+  transform:scale(1.08) rotate(5deg);
+  box-shadow:0 12px 40px rgba(0,0,0,0.4), 0 0 0 3px rgba(255,255,255,0.2);
+}
+
+.card-qr-small{
+  width:115px;
+  height:115px;
+  background:#fff;
+  padding:0.6rem;
+  border-radius:14px;
+  margin-top:1.25rem;
+  box-shadow:0 6px 20px rgba(0,0,0,0.3), 0 0 0 2px rgba(255,255,255,0.1);
+  transition:transform 0.3s;
+}
+.card-qr-small:hover{
+  transform:scale(1.05);
+}
+.card-qr-small img{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+/* Lado derecho con información - MEJORADO */
+.card-right{
+  padding:2.5rem 2.75rem;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  background:linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
   position:relative;
 }
-.card-hero::before{
+/* Decoración sutil */
+.card-right::before{
   content:'';
   position:absolute;
   top:0;
   left:0;
   right:0;
-  bottom:0;
-  background:linear-gradient(135deg, rgba(90,135,219,0.85) 0%, rgba(74,113,197,0.85) 100%);
-}
-.card-logo-wrapper{
-  position:relative;
-  z-index:1;
-}
-.card-logo{
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  border:5px solid #fff;
-  box-shadow:0 4px 16px rgba(0,0,0,0.2);
-  object-fit:cover;
-  background:#fff;
-}
-.card-body{
-  padding:2.5rem;
-  text-align:center;
-}
-.card-nombre{
-  font-size:2.25rem;
-  font-weight:800;
-  color:var(--tinta);
-  margin:0 0 0.5rem;
-}
-.card-categoria{
-  display:inline-flex;
-  align-items:center;
-  gap:0.5rem;
-  padding:0.5rem 1rem;
-  background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-radius:12px;
-  color:var(--azul);
-  font-weight:600;
-  font-size:1rem;
-  margin-bottom:1.5rem;
-}
-.card-info{
-  background:#f8fafc;
-  border-radius:16px;
-  padding:1.5rem;
-  margin:1.5rem 0;
-  text-align:left;
-}
-.card-info-item{
-  display:flex;
-  align-items:flex-start;
-  gap:0.75rem;
-  margin:0.75rem 0;
-  color:#475569;
-  font-size:1.05rem;
-}
-.card-info-item svg{
-  flex-shrink:0;
-  margin-top:0.1rem;
-  color:var(--azul);
-}
-.card-descripcion{
-  color:#64748b;
-  font-size:1.05rem;
-  line-height:1.6;
-  margin:1.5rem 0;
-  padding:1rem;
-  background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border-radius:12px;
-  border-left:4px solid #f59e0b;
-}
-.card-qr-section{
-  margin-top:2rem;
-  padding-top:2rem;
-  border-top:2px dashed #e2e8f0;
-}
-.card-qr-title{
-  font-size:1.3rem;
-  font-weight:700;
-  color:var(--tinta);
-  margin:0 0 1rem;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:0.5rem;
-}
-.card-qr-wrapper{
-  display:inline-block;
-  padding:1.5rem;
-  background:#fff;
-  border:3px solid var(--azul);
-  border-radius:20px;
-  box-shadow:0 4px 16px rgba(90,135,219,0.2);
-}
-.card-qr-wrapper img{
-  display:block;
-  width:220px;
-  height:220px;
-}
-.card-qr-instruccion{
-  color:#64748b;
-  font-size:1rem;
-  margin-top:1rem;
-}
-.card-stats{
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
-  gap:1rem;
-  margin-top:2rem;
-}
-.card-stat{
-  background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  padding:1.5rem;
-  border-radius:16px;
-  border:2px solid #e2e8f0;
-  text-align:center;
-  transition:all 0.3s;
-}
-.card-stat:hover{
-  border-color:var(--azul);
-  box-shadow:0 4px 12px rgba(90,135,219,0.15);
-  transform:translateY(-2px);
-}
-.card-stat-numero{
-  font-size:2.5rem;
-  font-weight:800;
-  color:var(--azul);
-  margin:0;
-}
-.card-stat-label{
-  color:#64748b;
-  font-size:0.95rem;
-  font-weight:600;
-  margin:0.25rem 0 0;
-}
-.card-url{
-  background:#f8fafc;
-  padding:1rem 1.5rem;
-  border-radius:12px;
-  margin-top:2rem;
-  border:2px dashed #cbd5e1;
-  text-align:center;
-}
-.card-url-label{
-  font-size:0.9rem;
-  color:#64748b;
-  margin:0 0 0.5rem;
-  font-weight:600;
-}
-.card-url-link{
-  color:var(--azul);
-  font-weight:700;
-  font-size:1.1rem;
-  word-break:break-all;
-  text-decoration:none;
-}
-.card-url-link:hover{
-  text-decoration:underline;
+  height:4px;
+  background:linear-gradient(90deg, {{ comercio.color_marca or '#5a87db' }} 0%, transparent 100%);
 }
 
-/* Responsive - Optimizado para Android */
+.card-nombre-h{
+  font-size:2.4rem;
+  font-weight:900;
+  color:var(--tinta);
+  margin:0 0 0.6rem;
+  line-height:1.05;
+  letter-spacing:-0.03em;
+  background:linear-gradient(135deg, var(--tinta) 0%, #1e40af 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.card-slogan{
+  color:{{ comercio.color_marca or '#5a87db' }};
+  font-weight:600;
+  font-size:1.1rem;
+  margin:0 0 2rem;
+  line-height:1.45;
+  padding-left:1rem;
+  border-left:4px solid {{ comercio.color_marca or '#5a87db' }};
+}
+
+.card-contact{
+  display:flex;
+  flex-direction:column;
+  gap:0.85rem;
+  background:#fff;
+  padding:1.5rem;
+  border-radius:12px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.06);
+}
+
+.card-contact-item{
+  display:flex;
+  align-items:flex-start;
+  gap:0.85rem;
+  color:#475569;
+  font-size:1rem;
+  line-height:1.5;
+  transition:color 0.2s;
+}
+.card-contact-item:hover{
+  color:var(--tinta);
+}
+.card-contact-item svg{
+  width:20px;
+  height:20px;
+  flex-shrink:0;
+  color:{{ comercio.color_marca or 'var(--azul)' }};
+  margin-top:0.1rem;
+}
+
+.card-footer{
+  margin-top:1.75rem;
+  padding-top:1.5rem;
+  border-top:2px dashed #e2e8f0;
+  text-align:center;
+  background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  margin-left:-2.75rem;
+  margin-right:-2.75rem;
+  margin-bottom:-2.5rem;
+  padding-left:2.75rem;
+  padding-right:2.75rem;
+  padding-bottom:2rem;
+}
+.card-footer-text{
+  font-size:0.9rem;
+  color:#64748b;
+  margin:0;
+  font-weight:500;
+}
+.card-website{
+  font-weight:800;
+  color:{{ comercio.color_marca or 'var(--azul)' }};
+}
+
+/* Responsive */
 @media (max-width:768px){
-  .tarjeta-container{
-    padding:0.5rem;
-  }
-  .tarjeta-header{
-    padding:1rem;
-    text-align:center;
-  }
   .tarjeta-header h1{
-    font-size:1.75rem;
-    line-height:1.2;
-  }
-  .tarjeta-header p{
-    font-size:0.95rem;
-    line-height:1.4;
+    font-size:2rem;
   }
   .tarjeta-acciones{
     flex-direction:column;
-    align-items:stretch;
-    gap:0.75rem;
-    padding:0 0.5rem;
-  }
-  .menu-impresion{
-    flex-direction:column;
-    width:100%;
-    gap:0.75rem;
+    padding:0 1rem;
   }
   .btn-accion{
     width:100%;
     justify-content:center;
-    padding:1rem 1.25rem;
-    font-size:1.05rem;
-    min-height:52px;
-    touch-action:manipulation;
-    -webkit-tap-highlight-color:transparent;
   }
-  .btn-accion svg{
-    width:22px;
-    height:22px;
-  }
-  
-  /* Business card en móvil */
-  .business-card{
-    border-radius:20px;
-    margin:0.5rem;
-  }
-  .card-hero{
-    height:140px;
-  }
-  .card-logo{
-    width:100px;
-    height:100px;
-    border-width:4px;
-  }
-  .card-body{
-    padding:1.25rem;
-  }
-  .card-nombre{
-    font-size:1.6rem;
-    line-height:1.2;
-  }
-  .card-categoria{
-    font-size:0.9rem;
-    padding:0.5rem 0.9rem;
-  }
-  .card-descripcion{
-    font-size:0.95rem;
-    padding:0.85rem;
-    line-height:1.5;
-  }
-  .card-info{
-    padding:1rem;
-    border-radius:12px;
-  }
-  .card-info-item{
-    font-size:0.95rem;
-    margin:0.65rem 0;
-    gap:0.6rem;
-    line-height:1.4;
-  }
-  .card-info-item svg{
-    width:18px;
-    height:18px;
-    flex-shrink:0;
-  }
-  .card-qr-section{
-    margin-top:1.75rem;
-    padding-top:1.75rem;
-  }
-  .card-qr-title{
-    font-size:1.15rem;
-    margin-bottom:1rem;
-    line-height:1.3;
-  }
-  .card-qr-wrapper{
-    padding:1.25rem;
-    border-radius:16px;
-  }
-  .card-qr-wrapper img{
-    width:200px;
-    height:200px;
-  }
-  .card-qr-instruccion{
-    font-size:0.9rem;
-    margin-top:0.75rem;
-    line-height:1.5;
-  }
-  .card-stats{
+  .card-horizontal{
     grid-template-columns:1fr;
-    gap:0.85rem;
+    min-height:auto;
   }
-  .card-stat{
-    padding:1.25rem;
+  .card-left{
+    padding:2.5rem 1.5rem;
   }
-  .card-stat-numero{
-    font-size:2.25rem;
-  }
-  .card-stat-label{
-    font-size:0.9rem;
-  }
-  .card-url{
-    padding:1rem;
-    margin-top:1.5rem;
-  }
-  .card-url-label{
-    font-size:0.85rem;
-  }
-  .card-url-link{
-    font-size:0.95rem;
-    word-break:break-all;
-    display:block;
-    margin-top:0.5rem;
+  .card-right{
+    padding:2rem 1.5rem;
   }
 }
 
-/* Optimización para pantallas pequeñas Android (< 400px) */
-@media (max-width:400px){
-  .tarjeta-header h1{
-    font-size:1.5rem;
-  }
-  .tarjeta-header p{
-    font-size:0.9rem;
-  }
-  .btn-accion{
-    padding:0.9rem 1rem;
-    font-size:1rem;
-  }
-  .card-hero{
-    height:120px;
-  }
-  .card-logo{
-    width:85px;
-    height:85px;
-  }
-  .card-nombre{
-    font-size:1.4rem;
-  }
-  .card-body{
-    padding:1rem;
-  }
-  .card-qr-wrapper img{
-    width:170px;
-    height:170px;
-  }
-}
-
-/* Estilos para impresión - Formato tarjeta business card */
+/* ESTILOS DE IMPRESIÓN */
 @media print{
   @page{
-    size:A4;
-    margin:10mm;
+    size:A4 landscape;
+    margin:8mm;
   }
-  body{
-    background:#fff;
+  
+  *{
+    print-color-adjust:exact !important;
+    -webkit-print-color-adjust:exact !important;
+    color-adjust:exact !important;
   }
+  
+  body{ 
+    background:#fff !important;
+    margin:0;
+    padding:0;
+  }
+  
   .tarjeta-header,
   .tarjeta-acciones,
   header,
-  footer,
-  .boton,
-  .card-stats,
-  .card-url{
-    display:none !important;
+  nav,
+  footer{ 
+    display:none !important; 
   }
+  
   .tarjeta-container{
-    max-width:100%;
-    padding:0;
-    margin:0;
+    max-width:100% !important;
+    padding:0 !important;
+    margin:0 !important;
+    width:100%;
+    height:100%;
   }
-  .business-card{
+  
+  /* IMPORTANTE: Asegurar que card-left tenga color en impresión */
+  .card-left{
+    print-color-adjust:exact !important;
+    -webkit-print-color-adjust:exact !important;
+    background:linear-gradient(135deg, var(--color-marca) 0%, var(--color-marca-oscuro) 100%) !important;
+    {% if comercio.fondo %}
+    background-image:var(--fondo-url) !important;
+    background-size:cover !important;
+    background-position:center !important;
+    {% endif %}
+  }
+  
+  .card-left::before{
+    background:linear-gradient(135deg, rgba(90,135,219,0.93) 0%, rgba(74,113,197,0.93) 100%) !important;
+    print-color-adjust:exact !important;
+    -webkit-print-color-adjust:exact !important;
+  }
+  
+  /* Tarjeta individual grande */
+  body:not(.printing-multiple) .business-card{
     box-shadow:none;
-    border:2px dashed #cbd5e1;
+    border:2px solid #ddd;
     page-break-inside:avoid;
-    margin-bottom:0;
-    border-radius:12px;
+    margin:0 auto;
+    border-radius:8px;
+    width:auto;
+    max-width:280mm;
   }
-  .card-hero{
-    height:120px;
-    print-color-adjust:exact;
-    -webkit-print-color-adjust:exact;
+  
+  /* 6 tarjetas múltiples en grid 3x2 */
+  body.printing-multiple .tarjeta-container{
+    display:grid !important;
+    grid-template-columns:repeat(3, 90mm) !important;
+    grid-template-rows:repeat(2, 55mm) !important;
+    gap:6mm !important;
+    justify-content:center !important;
+    align-content:center !important;
+    width:297mm !important;
+    height:210mm !important;
+    padding:0 !important;
+    margin:0 !important;
   }
-  .card-logo{
-    width:90px;
-    height:90px;
-    border-width:3px;
+  
+  body.printing-multiple .business-card{
+    width:90mm !important;
+    height:55mm !important;
+    margin:0 !important;
+    padding:0 !important;
+    border:1px dashed #999 !important;
+    box-shadow:none !important;
+    border-radius:4px !important;
+    overflow:hidden !important;
+    page-break-inside:avoid !important;
+    opacity:1 !important;
   }
-  .card-body{
-    padding:1.5rem;
+  
+  body.printing-multiple .card-horizontal{
+    height:55mm !important;
+    min-height:55mm !important;
+    max-height:55mm !important;
+    grid-template-columns:35% 65% !important;
   }
-  .card-nombre{
-    font-size:1.75rem;
-    margin-bottom:0.75rem;
+  
+  body.printing-multiple .card-left{
+    padding:0.5rem !important;
+    background:linear-gradient(135deg, var(--color-marca) 0%, var(--color-marca-oscuro) 100%) !important;
   }
-  .card-categoria{
-    font-size:0.9rem;
-    padding:0.4rem 0.8rem;
-    margin-bottom:1rem;
+  
+  body.printing-multiple .card-logo-horizontal{
+    width:50px !important;
+    height:50px !important;
+    border-width:2px !important;
+    margin-bottom:0.35rem !important;
   }
-  .card-descripcion{
-    font-size:0.95rem;
-    padding:0.75rem;
-    margin:1rem 0;
-    print-color-adjust:exact;
-    -webkit-print-color-adjust:exact;
+  
+  body.printing-multiple .card-qr-small{
+    width:45px !important;
+    height:45px !important;
+    padding:0.2rem !important;
+    margin-top:0.35rem !important;
   }
-  .card-info{
-    padding:1rem;
-    margin:1rem 0;
+  
+  body.printing-multiple .card-right{
+    padding:0.6rem 0.8rem !important;
+    background:#fff !important;
   }
-  .card-info-item{
-    font-size:0.9rem;
-    margin:0.5rem 0;
+  
+  body.printing-multiple .card-right::before{
+    height:2px !important;
   }
-  .card-info-item svg{
-    width:16px;
-    height:16px;
+  
+  body.printing-multiple .card-nombre-h{
+    font-size:0.85rem !important;
+    margin-bottom:0.15rem !important;
+    line-height:1.1 !important;
   }
-  .card-qr-section{
-    margin-top:1.5rem;
-    padding-top:1.5rem;
+  
+  body.printing-multiple .card-slogan{
+    font-size:0.58rem !important;
+    margin-bottom:0.4rem !important;
+    line-height:1.2 !important;
+    padding-left:0.4rem !important;
+    border-left-width:2px !important;
   }
-  .card-qr-title{
-    font-size:1.1rem;
-    margin-bottom:0.75rem;
+  
+  body.printing-multiple .card-contact{
+    gap:0.2rem !important;
+    padding:0.5rem !important;
   }
-  .card-qr-wrapper{
-    padding:1rem;
-    border-width:2px;
+  
+  body.printing-multiple .card-contact-item{
+    font-size:0.55rem !important;
+    gap:0.25rem !important;
+    line-height:1.2 !important;
   }
-  .card-qr-wrapper img{
-    width:160px;
-    height:160px;
+  
+  body.printing-multiple .card-contact-item svg{
+    width:9px !important;
+    height:9px !important;
   }
-  .card-qr-instruccion{
-    font-size:0.85rem;
-    margin-top:0.5rem;
+  
+  body.printing-multiple .card-footer{
+    margin-top:0.4rem !important;
+    padding-top:0.4rem !important;
+    margin-left:-0.8rem !important;
+    margin-right:-0.8rem !important;
+    margin-bottom:-0.6rem !important;
+    padding-left:0.8rem !important;
+    padding-right:0.8rem !important;
+    padding-bottom:0.5rem !important;
   }
-}
-
-/* Estilos para impresión múltiple - Tarjetas pequeñas */
-@media print{
-  .tarjetas-multiples{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:space-around;
-    gap:5mm;
-    max-width:100%;
-  }
-  .tarjetas-multiples .business-card{
-    width:85mm;
-    height:55mm;
-    page-break-inside:avoid;
-    margin:0;
-    flex-shrink:0;
-    display:block;
-  }
-  .tarjetas-multiples .card-hero{
-    height:45px;
-  }
-  .tarjetas-multiples .card-logo{
-    width:40px;
-    height:40px;
-    border-width:2px;
-  }
-  .tarjetas-multiples .card-body{
-    padding:0.5rem;
-  }
-  .tarjetas-multiples .card-nombre{
-    font-size:0.95rem;
-    margin-bottom:0.25rem;
-  }
-  .tarjetas-multiples .card-categoria{
-    font-size:0.65rem;
-    padding:0.2rem 0.4rem;
-    margin-bottom:0.4rem;
-  }
-  .tarjetas-multiples .card-info{
-    padding:0.4rem;
-    margin:0.4rem 0;
-  }
-  .tarjetas-multiples .card-info-item{
-    font-size:0.6rem;
-    margin:0.2rem 0;
-    gap:0.4rem;
-  }
-  .tarjetas-multiples .card-info-item svg{
-    width:10px;
-    height:10px;
-  }
-  .tarjetas-multiples .card-descripcion{
-    font-size:0.65rem;
-    padding:0.3rem;
-    margin:0.4rem 0;
-  }
-  .tarjetas-multiples .card-qr-section{
-    margin-top:0.5rem;
-    padding-top:0.5rem;
-  }
-  .tarjetas-multiples .card-qr-title{
-    font-size:0.7rem;
-    margin-bottom:0.3rem;
-  }
-  .tarjetas-multiples .card-qr-wrapper{
-    padding:0.3rem;
-    border-width:1px;
-  }
-  .tarjetas-multiples .card-qr-wrapper img{
-    width:70px;
-    height:70px;
-  }
-  .tarjetas-multiples .card-qr-instruccion{
-    font-size:0.55rem;
-    margin-top:0.2rem;
+  
+  body.printing-multiple .card-footer-text{
+    font-size:0.48rem !important;
+    line-height:1.1 !important;
   }
 }
 </style>
@@ -669,33 +778,31 @@
 <div class="tarjeta-container">
   <div class="tarjeta-header">
     <h1>🎴 Mi Tarjeta Digital</h1>
-    <p>Compartí tu tarjeta con clientes para que descubran tus ofertas</p>
+    <p>Compartí tu tarjeta con clientes y mostrá tu QR para que descubran tus ofertas</p>
   </div>
 
   <div class="tarjeta-acciones">
-    <div class="menu-impresion">
-      <button class="btn-accion btn-imprimir" onclick="imprimirGrande()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="6 9 6 2 18 2 18 9"/>
-          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-          <rect x="6" y="14" width="12" height="8"/>
-        </svg>
-        Imprimir 1 grande
-      </button>
-      
-      <button class="btn-accion btn-imprimir" onclick="imprimirMultiple()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="7" height="7"/>
-          <rect x="14" y="3" width="7" height="7"/>
-          <rect x="3" y="14" width="7" height="7"/>
-          <rect x="14" y="14" width="7" height="7"/>
-        </svg>
-        Imprimir múltiples
-      </button>
-    </div>
+    <button class="btn-accion btn-imprimir" onclick="imprimirGrande()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 6 2 18 2 18 9"/>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+        <rect x="6" y="14" width="12" height="8"/>
+      </svg>
+      Imprimir 1 Grande
+    </button>
+    
+    <button class="btn-accion btn-imprimir" onclick="imprimirMultiple()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"/>
+        <rect x="14" y="3" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/>
+      </svg>
+      Imprimir 6 Tarjetas
+    </button>
     
     <button class="btn-accion btn-compartir" onclick="compartirTarjeta()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="18" cy="5" r="3"/>
         <circle cx="6" cy="12" r="3"/>
         <circle cx="18" cy="19" r="3"/>
@@ -706,291 +813,153 @@
     </button>
     
     <a href="{{ url_for('panel') }}" class="btn-accion btn-volver">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="19" y1="12" x2="5" y2="12"/>
         <polyline points="12 19 5 12 12 5"/>
       </svg>
-      Volver al panel
+      Volver al Panel
     </a>
   </div>
 
-  <div class="business-card">
-    <div class="card-hero">
-      <div class="card-logo-wrapper">
+  <div class="business-card card-horizontal">
+    <div class="card-left">
+      <div class="card-logo-container">
         {% if comercio.logo %}
-          <img src="{{ foto_url(comercio.logo) }}" alt="{{ comercio.nombre }}" class="card-logo">
+          <img src="{{ foto_url(comercio.logo) }}" alt="{{ comercio.nombre }}" class="card-logo-horizontal">
         {% else %}
-          <img src="{{ url_for('static', filename='logo.jpg') }}" alt="ZupponPy" class="card-logo">
+          <img src="{{ url_for('static', filename='logo.jpg') }}" alt="ZupponPy" class="card-logo-horizontal">
         {% endif %}
+        
+        <div class="card-qr-small">
+          <img src="{{ qr_data }}" alt="QR {{ comercio.nombre }}">
+        </div>
       </div>
     </div>
 
-    <div class="card-body">
-      <h2 class="card-nombre">{{ comercio.nombre }}</h2>
-      
-      <span class="card-categoria">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-        </svg>
-        {{ comercio.ciudad }}
-      </span>
-
+    <div class="card-right">
+      <h2 class="card-nombre-h">{{ comercio.nombre }}</h2>
       {% if comercio.descripcion %}
-      <div class="card-descripcion">
-        <strong>📝 Sobre nosotros:</strong> {{ comercio.descripcion }}
-      </div>
+      <p class="card-slogan">{{ comercio.descripcion[:70] }}{% if comercio.descripcion|length > 70 %}...{% endif %}</p>
+      {% else %}
+      <p class="card-slogan">🎉 Descubrí nuestras ofertas exclusivas en ZupponPy</p>
       {% endif %}
 
-      <div class="card-info">
-        <div class="card-info-item">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="card-contact">
+        <div class="card-contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
             <circle cx="12" cy="10" r="3"/>
           </svg>
-          <span><strong>Dirección:</strong> {{ comercio.direccion }}, {{ comercio.ciudad }}</span>
+          <span>{{ comercio.direccion }}, {{ comercio.ciudad }}</span>
         </div>
         
         {% if comercio.telefono %}
-        <div class="card-info-item">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div class="card-contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
           </svg>
-          <span><strong>Teléfono:</strong> {{ comercio.telefono }}</span>
+          <span>{{ comercio.telefono }}</span>
         </div>
         {% endif %}
         
-        <div class="card-info-item">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div class="card-contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
             <polyline points="22,6 12,13 2,6"/>
           </svg>
-          <span><strong>Email:</strong> {{ comercio.email }}</span>
+          <span>{{ comercio.email }}</span>
         </div>
       </div>
 
-      <div class="card-stats">
-        <div class="card-stat">
-          <p class="card-stat-numero">{{ stats.ofertas_activas or 0 }}</p>
-          <p class="card-stat-label">Ofertas activas</p>
-        </div>
-        <div class="card-stat">
-          <p class="card-stat-numero">{{ stats.cupones_totales or 0 }}</p>
-          <p class="card-stat-label">Cupones generados</p>
-        </div>
-        <div class="card-stat">
-          <p class="card-stat-numero">{{ comercio.ciudad }}</p>
-          <p class="card-stat-label">Ciudad</p>
-        </div>
-      </div>
-
-      <div class="card-qr-section">
-        <h3 class="card-qr-title">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <rect x="7" y="7" width="3" height="3"/>
-            <rect x="14" y="7" width="3" height="3"/>
-            <rect x="7" y="14" width="3" height="3"/>
-            <rect x="14" y="14" width="3" height="3"/>
-          </svg>
-          Escaneá y descubrí nuestras ofertas
-        </h3>
-        <div class="card-qr-wrapper">
-          <img src="{{ qr_data }}" alt="QR {{ comercio.nombre }}">
-        </div>
-        <p class="card-qr-instruccion">
-          📱 Apuntá tu cámara al código QR para ver todas nuestras ofertas
+      <div class="card-footer">
+        <p class="card-footer-text">
+          📱 Escaneá el QR para ver todas nuestras ofertas · <span class="card-website">zuppon.es/{{ comercio.slug }}</span>
         </p>
-      </div>
-
-      <div class="card-url">
-        <p class="card-url-label">🌐 Página web del negocio:</p>
-        <a href="{{ url_negocio }}" target="_blank" class="card-url-link">{{ url_negocio }}</a>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-// Función para imprimir tarjeta grande (1 por hoja)
 function imprimirGrande() {
-  document.querySelector('.tarjeta-container').classList.remove('tarjetas-multiples');
+  // Limpiar clones previos y clase
+  document.querySelectorAll('.business-card-clone').forEach(c => c.remove());
+  document.body.classList.remove('printing-multiple');
   
-  // En Android, mostrar mensaje antes de imprimir
-  if(/android/i.test(navigator.userAgent)){
-    const confirmar = confirm('Se abrirá la vista de impresión. Podés guardar como PDF o imprimir directamente.');
-    if(!confirmar) return;
-  }
-  
-  window.print();
+  setTimeout(() => window.print(), 100);
 }
 
-// Función para imprimir múltiples tarjetas (8 por hoja A4)
 function imprimirMultiple() {
   const container = document.querySelector('.tarjeta-container');
-  const tarjetaOriginal = document.querySelector('.business-card');
+  const original = document.querySelector('.business-card');
   
-  // En Android, mostrar mensaje explicativo
-  if(/android/i.test(navigator.userAgent)){
-    const confirmar = confirm('Se imprimirán 8 tarjetas pequeñas en una hoja A4. Ideal para recortar y repartir. ¿Continuar?');
-    if(!confirmar) return;
+  if(!original) {
+    alert('Error: No se encontró la tarjeta original');
+    return;
   }
   
-  // Clonar la tarjeta 7 veces más (total 8 tarjetas)
-  container.classList.add('tarjetas-multiples');
+  // Limpiar clones previos
+  document.querySelectorAll('.business-card-clone').forEach(c => c.remove());
   
-  // Limpiar tarjetas clonadas anteriores
-  const clones = container.querySelectorAll('.business-card-clone');
-  clones.forEach(c => c.remove());
+  // Agregar clase al body para activar estilos de impresión
+  document.body.classList.add('printing-multiple');
   
-  // Crear 7 copias adicionales
-  for(let i = 0; i < 7; i++) {
-    const clone = tarjetaOriginal.cloneNode(true);
+  // Crear 5 clones (total 6 tarjetas)
+  for(let i = 0; i < 5; i++) {
+    const clone = original.cloneNode(true);
     clone.classList.add('business-card-clone');
+    clone.classList.remove('business-card'); // Quitar clase original para evitar conflictos
+    clone.classList.add('business-card'); // Agregar de nuevo
     container.appendChild(clone);
   }
   
-  // Esperar un momento para que el DOM se actualice
+  console.log('Tarjetas creadas:', document.querySelectorAll('.business-card').length);
+  
   setTimeout(() => {
     window.print();
     
-    // Limpiar después de imprimir
+    // Limpiar después de imprimir (esperar a que termine la impresión)
     setTimeout(() => {
-      container.classList.remove('tarjetas-multiples');
-      const clonesAfter = container.querySelectorAll('.business-card-clone');
-      clonesAfter.forEach(c => c.remove());
-    }, 500);
-  }, 100);
+      document.body.classList.remove('printing-multiple');
+      document.querySelectorAll('.business-card-clone').forEach(c => c.remove());
+    }, 1000);
+  }, 300);
 }
 
-// Función para compartir la tarjeta - Mejorada para Android
 async function compartirTarjeta() {
   const url = '{{ url_negocio }}';
   const texto = '🎉 Descubrí las ofertas de {{ comercio.nombre }} en ZupponPy\n\n';
-  const titulo = '{{ comercio.nombre }} · ZupponPy';
   
-  // Verificar si el navegador soporta Web Share API (Android Chrome sí)
-  if (navigator.share && navigator.canShare) {
+  if (navigator.share) {
     try {
       await navigator.share({
-        title: titulo,
+        title: '{{ comercio.nombre }} · ZupponPy',
         text: texto,
         url: url
       });
-      
-      // Mostrar confirmación en Android
-      if(/android/i.test(navigator.userAgent)){
-        mostrarMensaje('✅ Compartido exitosamente', 'success');
-      }
     } catch (err) {
-      // Si el usuario canceló, no hacer nada
-      if (err.name === 'AbortError') {
-        return;
-      }
-      // Si hubo error, copiar al portapapeles
-      copiarURL();
+      if (err.name !== 'AbortError') copiarURL(url);
     }
   } else {
-    // Fallback: copiar al portapapeles
-    copiarURL();
+    copiarURL(url);
   }
 }
 
-function copiarURL() {
-  const url = '{{ url_negocio }}';
-  
-  // Intentar usar Clipboard API moderna
-  if (navigator.clipboard && navigator.clipboard.writeText) {
+function copiarURL(url) {
+  if (navigator.clipboard) {
     navigator.clipboard.writeText(url).then(() => {
-      mostrarMensaje('✅ URL copiada. Pegala en WhatsApp, redes sociales o donde quieras.', 'success');
+      alert('✅ URL copiada al portapapeles');
     }).catch(() => {
-      // Fallback para navegadores antiguos
-      copiarURLFallback(url);
+      prompt('Copiá esta URL:', url);
     });
   } else {
-    // Fallback para navegadores antiguos
-    copiarURLFallback(url);
+    prompt('Copiá esta URL:', url);
   }
 }
 
-function copiarURLFallback(url) {
-  // Crear input temporal para copiar
-  const input = document.createElement('input');
-  input.value = url;
-  input.style.position = 'fixed';
-  input.style.top = '0';
-  input.style.left = '-9999px';
-  document.body.appendChild(input);
-  input.select();
-  
-  try {
-    document.execCommand('copy');
-    mostrarMensaje('✅ URL copiada al portapapeles', 'success');
-  } catch (err) {
-    // Última opción: mostrar prompt
-    prompt('Copiá esta URL manualmente:', url);
-  }
-  
-  document.body.removeChild(input);
-}
-
-// Función para mostrar mensajes toast en Android
-function mostrarMensaje(mensaje, tipo = 'info') {
-  // Crear elemento de mensaje
-  const toast = document.createElement('div');
-  toast.className = 'toast-message toast-' + tipo;
-  toast.textContent = mensaje;
-  toast.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: ${tipo === 'success' ? '#17803d' : '#2447c5'};
-    color: white;
-    padding: 1rem 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    z-index: 10000;
-    font-weight: 600;
-    font-size: 1rem;
-    max-width: 90%;
-    text-align: center;
-    animation: slideUp 0.3s ease-out;
-  `;
-  
-  document.body.appendChild(toast);
-  
-  // Eliminar después de 3 segundos
-  setTimeout(() => {
-    toast.style.animation = 'slideDown 0.3s ease-out';
-    setTimeout(() => {
-      document.body.removeChild(toast);
-    }, 300);
-  }, 3000);
-}
-
-// Agregar estilos de animación
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes slideUp {
-    from { transform: translate(-50%, 100px); opacity: 0; }
-    to { transform: translate(-50%, 0); opacity: 1; }
-  }
-  @keyframes slideDown {
-    from { transform: translate(-50%, 0); opacity: 1; }
-    to { transform: translate(-50%, 100px); opacity: 0; }
-  }
-`;
-document.head.appendChild(style);
-
-// Prevenir zoom al hacer doble tap en botones (mejor experiencia Android)
-document.addEventListener('DOMContentLoaded', () => {
-  const botones = document.querySelectorAll('.btn-accion');
-  botones.forEach(btn => {
-    btn.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      btn.click();
-    });
-  });
+// Debug: Escuchar cuando se abre el diálogo de impresión
+window.addEventListener('beforeprint', () => {
+  console.log('Imprimiendo...', document.querySelectorAll('.business-card').length, 'tarjetas');
 });
 </script>
 
