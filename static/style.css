@@ -1700,3 +1700,72 @@ label>input,label>select,label>textarea{margin-top:.25rem;font-weight:400}
     display:inline;
   }
 }
+
+/* Tarjeta digital en panel */
+.tarjeta-acceso{
+  background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border:2px solid var(--azul);
+  border-radius:16px;
+  padding:1.5rem;
+  margin:1.5rem 0;
+  box-shadow:0 4px 12px rgba(90,135,219,.15)
+}
+.tarjeta-acceso h3{
+  margin:0 0 .5rem;
+  font-size:1.4rem;
+  color:var(--tinta);
+  display:flex;
+  align-items:center;
+  gap:.5rem
+}
+.tarjeta-acceso p{
+  margin:0 0 1rem;
+  color:#475569;
+  font-size:1.05rem
+}
+.fila-botones{
+  display:flex;
+  gap:1rem;
+  flex-wrap:wrap
+}
+.boton-tarjeta,.boton-pagina{
+  display:inline-flex;
+  align-items:center;
+  gap:.6rem;
+  padding:.85rem 1.25rem;
+  border-radius:12px;
+  font-weight:700;
+  font-size:1rem;
+  text-decoration:none;
+  transition:all .3s;
+  box-shadow:0 2px 8px rgba(0,0,0,.1)
+}
+.boton-tarjeta{
+  background:linear-gradient(135deg, var(--azul) 0%, var(--azul-claro) 100%);
+  color:#fff;
+  border:none
+}
+.boton-tarjeta:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(90,135,219,.3)
+}
+.boton-pagina{
+  background:#fff;
+  color:var(--azul);
+  border:2px solid var(--azul)
+}
+.boton-pagina:hover{
+  background:var(--azul);
+  color:#fff;
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(90,135,219,.3)
+}
+@media (max-width:768px){
+  .tarjeta-acceso .fila-botones{
+    flex-direction:column
+  }
+  .boton-tarjeta,.boton-pagina{
+    width:100%;
+    justify-content:center
+  }
+}

@@ -1360,6 +1360,60 @@ def eliminar_negocio(negocio_id):
     return redirect(url_for("panel", vista="negocios"))
 
 
+@app.route("/panel/mi-tarjeta")
+@login_requerido
+def mi_tarjeta():
+    """Tarjeta digital del negocio con QR que lleva a su página principal."""
+    db = get_db()
+    comercio = db.execute("SELECT * FROM comercios WHERE id = ?",
+                          (session["comercio_id"],)).fetchone()
+    
+    if not comercio:
+        abort(404)
+    
+    # Verificar que el negocio tenga slug
+    if not comercio["slug"]:
+        flash("Tu negocio aún no tiene una página web. Contactá al administrador.", "error")
+        return redirect(url_for("panel"))
+    
+    # URL de la página del negocio
+    url_negocio = url_for("pagina_negocio", slug=comercio["slug"], _external=True)
+    
+    # Generar QR que apunta a la página del negocio
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=12,
+        border=2,
+    )
+    qr.add_data(url_negocio)
+    qr.make(fit=True)
+    
+    img = qr.make_image(fill_color="#12183a", back_color="white")
+    
+    # Convertir a base64
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+    qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+    qr_data = f"data:image/png;base64,{qr_base64}"
+    
+    # Obtener estadísticas del negocio
+    stats = db.execute(
+        """SELECT 
+            COUNT(*) as total_ofertas,
+            SUM(CASE WHEN o.activa = 1 AND o.valido_hasta >= ? THEN 1 ELSE 0 END) as ofertas_activas,
+            (SELECT COUNT(*) FROM cupones cu 
+             JOIN ofertas o2 ON cu.oferta_id = o2.id 
+             WHERE o2.comercio_id = ?) as cupones_totales
+        FROM ofertas o WHERE o.comercio_id = ?""",
+        (hoy(), comercio["id"], comercio["id"])
+    ).fetchone()
+    
+    return render_template("tarjeta_negocio.html", comercio=comercio, qr_data=qr_data, 
+                          url_negocio=url_negocio, stats=stats)
+
+
 @app.route("/panel/canjear", methods=["POST"])
 @login_requerido
 def canjear():

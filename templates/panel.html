@@ -14,6 +14,33 @@
     </div>
   </form>
 
+  {% if not es_admin and comercio.slug %}
+  <div class="tarjeta-acceso">
+    <h3>🎴 Tu Tarjeta Digital</h3>
+    <p>Compartí tu tarjeta con clientes para que descubran tus ofertas con un código QR</p>
+    <div class="fila-botones">
+      <a href="{{ url_for('mi_tarjeta') }}" class="boton-tarjeta">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <rect x="7" y="7" width="3" height="3"/>
+          <rect x="14" y="7" width="3" height="3"/>
+          <rect x="7" y="14" width="3" height="3"/>
+          <rect x="14" y="14" width="3" height="3"/>
+        </svg>
+        Ver mi tarjeta digital
+      </a>
+      <a href="{{ url_for('pagina_negocio', slug=comercio.slug) }}" target="_blank" class="boton-pagina">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+        Ver mi página
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
   {% if es_admin %}
   <div class="pestanas">
     <a href="{{ url_for('panel', vista='ofertas') }}" class="pestana {{ 'activa' if vista == 'ofertas' }}">
