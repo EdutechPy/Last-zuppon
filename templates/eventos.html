@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block title %}Eventos en {{ ciudad or 'Paraguay' }} · ZupponPy{% endblock %}
+{% block content %}
+
+<section class="hero">
+  <h1>📅 Eventos y <span>Actividades</span></h1>
+  <p class="sub">Descubrí qué pasa en tu ciudad: ferias, conciertos, festivales y más.</p>
+</section>
+
+<div class="chips">
+  <a class="chip {{ 'on' if not categoria }}" href="{{ url_for('eventos', ciudad=ciudad) }}">
+    📅 Todos
+  </a>
+  {% for cat in CATEGORIAS_EVENTOS %}
+    <a class="chip {{ 'on' if categoria == cat }}" 
+       href="{{ url_for('eventos', ciudad=ciudad, categoria=cat) }}"
+       style="--c:{{ (cat|cat_eventos).color if cat in CAT_EVENTOS else '#e4e1d8' }}">
+      {{ (cat|cat_eventos).emoji if cat in CAT_EVENTOS }} {{ cat }}
+    </a>
+  {% endfor %}
+</div>
+
+{% if eventos %}
+<section class="seccion">
+  <h2>{{ eventos|length }} {{ 'evento' if eventos|length == 1 else 'eventos' }}{% if ciudad %} en {{ ciudad }}{% endif %}</h2>
+  
+  <div class="eventos-grid">
+    {% for e in eventos %}
+    <article class="evento-card">
+      {% if e.foto %}
+      <div class="evento-foto">
+        <img src="{{ url_for('static', filename='uploads/' + e.foto + '.jpg') }}" alt="{{ e.titulo }}">
+      </div>
+      {% endif %}
+      
+      <div class="evento-info">
+        <div class="evento-header">
+          <span class="evento-categoria" style="background:{{ (e.categoria|cat_eventos).color if e.categoria in CAT_EVENTOS else '#e4e1d8' }}">
+            {{ (e.categoria|cat_eventos).emoji if e.categoria in CAT_EVENTOS }} {{ e.categoria }}
+          </span>
+          {% if e.destacado %}
+          <span class="evento-destacado">⭐ Destacado</span>
+          {% endif %}
+        </div>
+        
+        <h3>{{ e.titulo }}</h3>
+        
+        {% if e.descripcion %}
+        <p class="evento-desc">{{ e.descripcion[:150] }}{% if e.descripcion|length > 150 %}...{% endif %}</p>
+        {% endif %}
+        
+        <div class="evento-detalles">
+          <div class="evento-fecha">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span>{{ e.fecha_inicio }}</span>
+            {% if e.fecha_fin and e.fecha_fin != e.fecha_inicio %}
+            <span>→ {{ e.fecha_fin }}</span>
+            {% endif %}
+          </div>
+          
+          {% if e.hora_inicio %}
+          <div class="evento-hora">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>{{ e.hora_inicio }}</span>
+          </div>
+          {% endif %}
+          
+          <div class="evento-lugar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            <span>{{ e.ciudad }}</span>
+          </div>
+        </div>
+        
+        <a href="{{ url_for('evento', evento_id=e.id) }}" class="btn-ver-evento">
+          Ver detalles →
+        </a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% else %}
+<section class="vacio">
+  <p>📅 No hay eventos{% if categoria %} de {{ categoria }}{% endif %}{% if ciudad %} en {{ ciudad }}{% endif %} próximamente.</p>
+  <a href="{{ url_for('eventos') }}" class="boton">Ver todos los eventos</a>
+</section>
+{% endif %}
+
+<style>
+.eventos-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
+  gap:1.5rem;
+  margin-top:1.5rem;
+}
+.evento-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  transition:all .2s;
+}
+.evento-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 32px rgba(0,0,0,.1);
+}
+.evento-foto img{
+  width:100%;
+  height:200px;
+  object-fit:cover;
+}
+.evento-info{
+  padding:1.25rem;
+}
+.evento-header{
+  display:flex;
+  gap:.5rem;
+  margin-bottom:.75rem;
+  flex-wrap:wrap;
+}
+.evento-categoria{
+  display:inline-flex;
+  align-items:center;
+  gap:.3rem;
+  padding:.35rem .75rem;
+  border-radius:8px;
+  font-size:.85rem;
+  font-weight:700;
+  color:#fff;
+}
+.evento-destacado{
+  padding:.35rem .75rem;
+  border-radius:8px;
+  font-size:.85rem;
+  font-weight:700;
+  background:linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  color:#fff;
+}
+.evento-card h3{
+  font-size:1.3rem;
+  margin-bottom:.5rem;
+  line-height:1.3;
+}
+.evento-desc{
+  color:var(--muted);
+  font-size:.95rem;
+  line-height:1.5;
+  margin-bottom:1rem;
+}
+.evento-detalles{
+  display:flex;
+  flex-direction:column;
+  gap:.5rem;
+  margin-bottom:1rem;
+  padding:.75rem;
+  background:var(--background);
+  border-radius:8px;
+}
+.evento-fecha,
+.evento-hora,
+.evento-lugar{
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+  font-size:.9rem;
+  color:var(--tinta);
+  font-weight:600;
+}
+.evento-fecha svg,
+.evento-hora svg,
+.evento-lugar svg{
+  color:var(--green-dark);
+  flex-shrink:0;
+}
+.btn-ver-evento{
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  padding:.75rem 1.25rem;
+  background:var(--navy);
+  color:#fff;
+  border-radius:8px;
+  font-weight:700;
+  text-decoration:none;
+  transition:all .2s;
+}
+.btn-ver-evento:hover{
+  background:var(--navy-light);
+  transform:translateX(4px);
+}
+.vacio{
+  text-align:center;
+  padding:4rem 2rem;
+  color:var(--muted);
+}
+.vacio p{
+  font-size:1.2rem;
+  margin-bottom:1.5rem;
+}
+</style>
+
+{% endblock %}

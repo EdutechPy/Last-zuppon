@@ -208,6 +208,86 @@ CAT = {
     "Otros":                    {"emoji": "📦", "color": "#e4e1d8"},
 }
 
+# Categorías de EVENTOS
+CATEGORIAS_EVENTOS = [
+    "Feria", "Festival", "Concierto", "Teatro", "Exposición",
+    "Deportivo", "Cultural", "Gastronómico", "Infantil", "Educativo",
+    "Comunitario", "Inauguración", "Promoción", "Charla", "Taller",
+    "Mercado", "Fiesta", "Beneficencia", "Religioso", "Otros"
+]
+
+CAT_EVENTOS = {
+    "Feria":         {"emoji": "🎪", "color": "#f8b4d9"},
+    "Festival":      {"emoji": "🎭", "color": "#d7bde2"},
+    "Concierto":     {"emoji": "🎵", "color": "#af7ac5"},
+    "Teatro":        {"emoji": "🎬", "color": "#85c1e9"},
+    "Exposición":    {"emoji": "🖼️", "color": "#aed6f1"},
+    "Deportivo":     {"emoji": "⚽", "color": "#f1948a"},
+    "Cultural":      {"emoji": "🎨", "color": "#af7ac5"},
+    "Gastronómico":  {"emoji": "🍴", "color": "#f5b7b1"},
+    "Infantil":      {"emoji": "🧒", "color": "#f8b4d9"},
+    "Educativo":     {"emoji": "📚", "color": "#85c1e9"},
+    "Comunitario":   {"emoji": "🤝", "color": "#82e0aa"},
+    "Inauguración":  {"emoji": "🎉", "color": "#f39c12"},
+    "Promoción":     {"emoji": "🎁", "color": "#f5cba7"},
+    "Charla":        {"emoji": "💬", "color": "#aed6f1"},
+    "Taller":        {"emoji": "🔧", "color": "#aeb6bf"},
+    "Mercado":       {"emoji": "🛒", "color": "#ffe27a"},
+    "Fiesta":        {"emoji": "🎊", "color": "#f8b4d9"},
+    "Beneficencia":  {"emoji": "❤️", "color": "#ec7063"},
+    "Religioso":     {"emoji": "⛪", "color": "#d7bde2"},
+    "Otros":         {"emoji": "📅", "color": "#e4e1d8"},
+}
+
+# Categorías de PROFESIONALES
+CATEGORIAS_PROFESIONALES = [
+    "Electricista", "Plomero", "Carpintero", "Albañil", "Pintor",
+    "Mecánico", "Técnico electrónica", "Técnico celulares", "Técnico PC",
+    "Jardinero", "Paisajista", "Fumigador", "Limpieza", "Mudanzas",
+    "Cerrajero", "Soldador", "Herrero", "Vidriero", "Instalador gas",
+    "Instalador aire", "Instalador alarmas", "Instalador antenas",
+    "Tapicero", "Techista", "Impermeabilizador", "Constructor piscinas",
+    "Reparación electrodomésticos", "Profesor particular", "Entrenador personal",
+    "Fotógrafo", "Videógrafo", "DJ", "Animador", "Otros"
+]
+
+CAT_PROFESIONALES = {
+    "Electricista":                  {"emoji": "💡", "color": "#f39c12"},
+    "Plomero":                       {"emoji": "🔧", "color": "#5dade2"},
+    "Carpintero":                    {"emoji": "🪚", "color": "#d4a574"},
+    "Albañil":                       {"emoji": "🧱", "color": "#95a5a6"},
+    "Pintor":                        {"emoji": "🎨", "color": "#af7ac5"},
+    "Mecánico":                      {"emoji": "🔩", "color": "#7f8c8d"},
+    "Técnico electrónica":           {"emoji": "📡", "color": "#5dade2"},
+    "Técnico celulares":             {"emoji": "📱", "color": "#85c1e9"},
+    "Técnico PC":                    {"emoji": "💻", "color": "#7fb3d5"},
+    "Jardinero":                     {"emoji": "🌿", "color": "#76d7c4"},
+    "Paisajista":                    {"emoji": "🌳", "color": "#82e0aa"},
+    "Fumigador":                     {"emoji": "🦟", "color": "#aeb6bf"},
+    "Limpieza":                      {"emoji": "🧹", "color": "#85c1e9"},
+    "Mudanzas":                      {"emoji": "📦", "color": "#f39c12"},
+    "Cerrajero":                     {"emoji": "🔑", "color": "#f1c40f"},
+    "Soldador":                      {"emoji": "🔥", "color": "#e74c3c"},
+    "Herrero":                       {"emoji": "⚒️", "color": "#7f8c8d"},
+    "Vidriero":                      {"emoji": "🪟", "color": "#aed6f1"},
+    "Instalador gas":                {"emoji": "🔥", "color": "#e67e22"},
+    "Instalador aire":               {"emoji": "❄️", "color": "#5dade2"},
+    "Instalador alarmas":            {"emoji": "🔔", "color": "#e74c3c"},
+    "Instalador antenas":            {"emoji": "📡", "color": "#85c1e9"},
+    "Tapicero":                      {"emoji": "🛋️", "color": "#d7bde2"},
+    "Techista":                      {"emoji": "🏠", "color": "#95a5a6"},
+    "Impermeabilizador":             {"emoji": "💧", "color": "#5dade2"},
+    "Constructor piscinas":          {"emoji": "🏊", "color": "#aed6f1"},
+    "Reparación electrodomésticos":  {"emoji": "🔌", "color": "#95a5a6"},
+    "Profesor particular":           {"emoji": "📚", "color": "#85c1e9"},
+    "Entrenador personal":           {"emoji": "💪", "color": "#ec7063"},
+    "Fotógrafo":                     {"emoji": "📷", "color": "#85c1e9"},
+    "Videógrafo":                    {"emoji": "🎥", "color": "#7fb3d5"},
+    "DJ":                            {"emoji": "🎧", "color": "#af7ac5"},
+    "Animador":                      {"emoji": "🎭", "color": "#f8b4d9"},
+    "Otros":                         {"emoji": "🛠️", "color": "#bcc7d9"},
+}
+
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS comercios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -252,6 +332,71 @@ CREATE TABLE IF NOT EXISTS cupones (
     estado TEXT NOT NULL DEFAULT 'activo',
     creado TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     canjeado_en TEXT
+);
+
+CREATE TABLE IF NOT EXISTS eventos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    comercio_id INTEGER REFERENCES comercios(id),
+    titulo TEXT NOT NULL,
+    descripcion TEXT,
+    categoria TEXT NOT NULL,
+    ciudad TEXT NOT NULL,
+    direccion TEXT,
+    coordenadas TEXT,
+    fecha_inicio TEXT NOT NULL,
+    fecha_fin TEXT,
+    hora_inicio TEXT,
+    hora_fin TEXT,
+    foto TEXT,
+    link_externo TEXT,
+    contacto TEXT,
+    precio INTEGER,
+    precio_texto TEXT,
+    activo INTEGER NOT NULL DEFAULT 1,
+    destacado INTEGER NOT NULL DEFAULT 0,
+    creado TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS profesionales (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    email TEXT,
+    telefono TEXT NOT NULL,
+    whatsapp TEXT,
+    categoria TEXT NOT NULL,
+    especialidades TEXT,
+    ciudad TEXT NOT NULL,
+    zona_cobertura TEXT,
+    direccion TEXT,
+    coordenadas TEXT,
+    descripcion TEXT,
+    experiencia_anos INTEGER,
+    foto TEXT,
+    galeria TEXT,
+    precio_desde INTEGER,
+    precio_hasta INTEGER,
+    disponibilidad TEXT,
+    calificacion REAL DEFAULT 0,
+    trabajos_completados INTEGER DEFAULT 0,
+    verificado INTEGER NOT NULL DEFAULT 0,
+    activo INTEGER NOT NULL DEFAULT 1,
+    creado TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS solicitudes_presupuesto (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    profesional_id INTEGER NOT NULL REFERENCES profesionales(id),
+    nombre_cliente TEXT NOT NULL,
+    telefono_cliente TEXT NOT NULL,
+    email_cliente TEXT,
+    descripcion TEXT NOT NULL,
+    ciudad TEXT NOT NULL,
+    direccion TEXT,
+    urgencia TEXT,
+    presupuesto_estimado TEXT,
+    estado TEXT NOT NULL DEFAULT 'pendiente',
+    creado TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    respondido_en TEXT
 );
 """
 
@@ -485,6 +630,16 @@ def meta_categoria(nombre):
     return CAT.get(nombre, CAT["Otros"])
 
 
+@app.template_filter("cat_eventos")
+def meta_categoria_eventos(nombre):
+    return CAT_EVENTOS.get(nombre, CAT_EVENTOS["Otros"])
+
+
+@app.template_filter("cat_profesionales")
+def meta_categoria_profesionales(nombre):
+    return CAT_PROFESIONALES.get(nombre, CAT_PROFESIONALES["Otros"])
+
+
 @app.template_filter("cuando")
 def cuando(dias):
     if dias <= 0:
@@ -530,8 +685,16 @@ def login_requerido(vista):
 
 @app.context_processor
 def globales():
-    return {"CIUDADES": CIUDADES, "CATEGORIAS": CATEGORIAS, "CAT": CAT,
-            "ciudad_actual": g.get("ciudad_actual", request.cookies.get("ciudad", ""))}
+    return {
+        "CIUDADES": CIUDADES, 
+        "CATEGORIAS": CATEGORIAS, 
+        "CAT": CAT,
+        "CATEGORIAS_EVENTOS": CATEGORIAS_EVENTOS,
+        "CAT_EVENTOS": CAT_EVENTOS,
+        "CATEGORIAS_PROFESIONALES": CATEGORIAS_PROFESIONALES,
+        "CAT_PROFESIONALES": CAT_PROFESIONALES,
+        "ciudad_actual": g.get("ciudad_actual", request.cookies.get("ciudad", ""))
+    }
 
 
 # ---------- Público: ver ofertas y reclamar ----------
@@ -801,6 +964,127 @@ def mapa():
                 })
     
     return render_template("mapa.html", markers_json=markers_json, ciudad=ciudad, categoria=categoria)
+
+
+@app.route("/eventos")
+def eventos():
+    """Lista de eventos locales."""
+    db = get_db()
+    ciudad = request.args.get("ciudad", "")
+    categoria = request.args.get("categoria", "")
+    
+    sql = """
+        SELECT e.*, c.nombre AS organizador, c.slug AS organizador_slug
+        FROM eventos e
+        LEFT JOIN comercios c ON c.id = e.comercio_id
+        WHERE e.activo = 1 AND e.fecha_inicio >= ?
+    """
+    params = [hoy()]
+    
+    if ciudad and ciudad in CIUDADES:
+        sql += " AND e.ciudad = ?"
+        params.append(ciudad)
+    
+    if categoria and categoria in CATEGORIAS_EVENTOS:
+        sql += " AND e.categoria = ?"
+        params.append(categoria)
+    
+    sql += " ORDER BY e.destacado DESC, e.fecha_inicio ASC LIMIT 100"
+    
+    lista_eventos = db.execute(sql, params).fetchall()
+    
+    return render_template("eventos.html", eventos=lista_eventos, ciudad=ciudad, categoria=categoria)
+
+
+@app.route("/evento/<int:evento_id>")
+def evento(evento_id):
+    """Detalle de un evento."""
+    db = get_db()
+    evento = db.execute("""
+        SELECT e.*, c.nombre AS organizador, c.slug AS organizador_slug, c.telefono AS organizador_telefono
+        FROM eventos e
+        LEFT JOIN comercios c ON c.id = e.comercio_id
+        WHERE e.id = ?
+    """, (evento_id,)).fetchone()
+    
+    if not evento:
+        abort(404)
+    
+    return render_template("evento.html", evento=evento)
+
+
+@app.route("/profesionales")
+def profesionales():
+    """Directorio de profesionales y servicios."""
+    db = get_db()
+    ciudad = request.args.get("ciudad", "")
+    categoria = request.args.get("categoria", "")
+    
+    sql = """
+        SELECT p.*
+        FROM profesionales p
+        WHERE p.activo = 1
+    """
+    params = []
+    
+    if ciudad and ciudad in CIUDADES:
+        sql += " AND (p.ciudad = ? OR p.zona_cobertura LIKE ?)"
+        params.extend([ciudad, f"%{ciudad}%"])
+    
+    if categoria and categoria in CATEGORIAS_PROFESIONALES:
+        sql += " AND p.categoria = ?"
+        params.append(categoria)
+    
+    sql += " ORDER BY p.verificado DESC, p.calificacion DESC, p.trabajos_completados DESC LIMIT 100"
+    
+    lista_profesionales = db.execute(sql, params).fetchall()
+    
+    return render_template("profesionales.html", profesionales=lista_profesionales, ciudad=ciudad, categoria=categoria)
+
+
+@app.route("/profesional/<int:profesional_id>")
+def profesional(profesional_id):
+    """Perfil de un profesional."""
+    db = get_db()
+    profesional = db.execute("SELECT * FROM profesionales WHERE id = ?", (profesional_id,)).fetchone()
+    
+    if not profesional:
+        abort(404)
+    
+    return render_template("profesional.html", profesional=profesional)
+
+
+@app.route("/profesional/<int:profesional_id>/solicitar", methods=["POST"])
+def solicitar_presupuesto(profesional_id):
+    """Solicitar presupuesto a un profesional."""
+    db = get_db()
+    profesional = db.execute("SELECT * FROM profesionales WHERE id = ?", (profesional_id,)).fetchone()
+    
+    if not profesional:
+        abort(404)
+    
+    f = request.form
+    nombre = f.get("nombre", "").strip()
+    telefono = solo_digitos(f.get("telefono"))
+    email = f.get("email", "").strip()
+    descripcion = f.get("descripcion", "").strip()
+    ciudad = f.get("ciudad", "").strip()
+    direccion = f.get("direccion", "").strip()
+    urgencia = f.get("urgencia", "normal")
+    
+    if not nombre or not telefono or not descripcion or not ciudad:
+        flash("Completá todos los campos obligatorios.", "error")
+        return redirect(url_for("profesional", profesional_id=profesional_id))
+    
+    db.execute("""
+        INSERT INTO solicitudes_presupuesto 
+        (profesional_id, nombre_cliente, telefono_cliente, email_cliente, descripcion, ciudad, direccion, urgencia)
+        VALUES (?,?,?,?,?,?,?,?)
+    """, (profesional_id, nombre, telefono, email, descripcion, ciudad, direccion, urgencia))
+    db.commit()
+    
+    flash(f"¡Solicitud enviada! {profesional['nombre']} te contactará pronto.", "exito")
+    return redirect(url_for("profesional", profesional_id=profesional_id))
 
 
 @app.route("/api/qr/<codigo>")

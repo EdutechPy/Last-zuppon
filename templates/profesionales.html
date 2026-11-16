@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% block title %}Profesionales y Servicios en {{ ciudad or 'Paraguay' }} · ZupponPy{% endblock %}
+{% block content %}
+
+<section class="hero">
+  <h1>🛠️ Profesionales y <span>Servicios</span></h1>
+  <p class="sub">Encontrá electricistas, plomeros, mecánicos y más. Pedí presupuesto gratis.</p>
+</section>
+
+<div class="chips">
+  <a class="chip {{ 'on' if not categoria }}" href="{{ url_for('profesionales', ciudad=ciudad) }}">
+    🛠️ Todos
+  </a>
+  {% for cat in CATEGORIAS_PROFESIONALES %}
+    <a class="chip {{ 'on' if categoria == cat }}" 
+       href="{{ url_for('profesionales', ciudad=ciudad, categoria=cat) }}"
+       style="--c:{{ (cat|cat_profesionales).color if cat in CAT_PROFESIONALES else '#bcc7d9' }}">
+      {{ (cat|cat_profesionales).emoji if cat in CAT_PROFESIONALES }} {{ cat }}
+    </a>
+  {% endfor %}
+</div>
+
+{% if profesionales %}
+<section class="seccion">
+  <h2>{{ profesionales|length }} {{ 'profesional' if profesionales|length == 1 else 'profesionales' }}{% if ciudad %} en {{ ciudad }}{% endif %}</h2>
+  
+  <div class="profesionales-grid">
+    {% for p in profesionales %}
+    <article class="profesional-card">
+      <div class="profesional-header">
+        {% if p.foto %}
+        <img src="{{ url_for('static', filename='uploads/' + p.foto + '.jpg') }}" alt="{{ p.nombre }}" class="profesional-avatar">
+        {% else %}
+        <div class="profesional-avatar-placeholder">
+          {{ (p.categoria|cat_profesionales).emoji if p.categoria in CAT_PROFESIONALES else '👤' }}
+        </div>
+        {% endif %}
+        
+        <div class="profesional-titular">
+          <h3>{{ p.nombre }}</h3>
+          <p class="profesional-categoria">
+            {{ (p.categoria|cat_profesionales).emoji if p.categoria in CAT_PROFESIONALES }} {{ p.categoria }}
+          </p>
+        </div>
+        
+        {% if p.verificado %}
+        <span class="badge-verificado" title="Profesional verificado">✓</span>
+        {% endif %}
+      </div>
+      
+      {% if p.descripcion %}
+      <p class="profesional-desc">{{ p.descripcion[:120] }}{% if p.descripcion|length > 120 %}...{% endif %}</p>
+      {% endif %}
+      
+      <div class="profesional-stats">
+        {% if p.calificacion > 0 %}
+        <span class="stat">⭐ {{ "%.1f"|format(p.calificacion) }}</span>
+        {% endif %}
+        
+        {% if p.trabajos_completados > 0 %}
+        <span class="stat">✅ {{ p.trabajos_completados }} trabajos</span>
+        {% endif %}
+        
+        {% if p.experiencia_anos %}
+        <span class="stat">📅 {{ p.experiencia_anos }} años</span>
+        {% endif %}
+      </div>
+      
+      <div class="profesional-ubicacion">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+        <span>{{ p.ciudad }}</span>
+        {% if p.zona_cobertura %}
+        <span class="cobertura">· Cubre: {{ p.zona_cobertura }}</span>
+        {% endif %}
+      </div>
+      
+      {% if p.precio_desde or p.precio_hasta %}
+      <div class="profesional-precio">
+        💰 Desde {{ '{:,}'.format(p.precio_desde).replace(',', '.') if p.precio_desde else '...' }} Gs.
+      </div>
+      {% endif %}
+      
+      <div class="profesional-acciones">
+        <a href="{{ url_for('profesional', profesional_id=p.id) }}" class="btn-ver">Ver perfil</a>
+        <a href="https://wa.me/595{{ p.whatsapp or p.telefono }}" target="_blank" class="btn-contacto">
+          📱 WhatsApp
+        </a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% else %}
+<section class="vacio">
+  <p>🛠️ No encontramos profesionales{% if categoria %} de {{ categoria }}{% endif %}{% if ciudad %} en {{ ciudad }}{% endif %}.</p>
+  <a href="{{ url_for('profesionales') }}" class="boton">Ver todos los profesionales</a>
+</section>
+{% endif %}
+
+<style>
+.profesionales-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));
+  gap:1.5rem;
+  margin-top:1.5rem;
+}
+.profesional-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:1.5rem;
+  transition:all .2s;
+}
+.profesional-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 32px rgba(0,0,0,.1);
+}
+.profesional-header{
+  display:flex;
+  align-items:start;
+  gap:1rem;
+  margin-bottom:1rem;
+  position:relative;
+}
+.profesional-avatar{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid var(--border);
+}
+.profesional-avatar-placeholder{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:var(--background);
+  display:grid;
+  place-items:center;
+  font-size:2rem;
+  border:3px solid var(--border);
+}
+.profesional-titular{
+  flex:1;
+}
+.profesional-titular h3{
+  font-size:1.25rem;
+  margin-bottom:.25rem;
+  line-height:1.2;
+}
+.profesional-categoria{
+  color:var(--muted);
+  font-size:.9rem;
+  font-weight:600;
+  margin:0;
+}
+.badge-verificado{
+  position:absolute;
+  top:0;
+  right:0;
+  background:var(--green);
+  color:#fff;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  font-weight:800;
+  font-size:1.1rem;
+  box-shadow:0 2px 8px rgba(85,214,160,.4);
+}
+.profesional-desc{
+  color:var(--tinta);
+  font-size:.95rem;
+  line-height:1.5;
+  margin-bottom:1rem;
+}
+.profesional-stats{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
+  margin-bottom:1rem;
+}
+.stat{
+  display:inline-flex;
+  align-items:center;
+  gap:.3rem;
+  padding:.4rem .75rem;
+  background:var(--background);
+  border-radius:8px;
+  font-size:.85rem;
+  font-weight:600;
+  color:var(--tinta);
+}
+.profesional-ubicacion{
+  display:flex;
+  align-items:center;
+  gap:.4rem;
+  font-size:.9rem;
+  color:var(--muted);
+  margin-bottom:.75rem;
+  flex-wrap:wrap;
+}
+.profesional-ubicacion svg{
+  color:var(--green-dark);
+  flex-shrink:0;
+}
+.cobertura{
+  font-size:.85rem;
+}
+.profesional-precio{
+  padding:.75rem;
+  background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius:8px;
+  font-weight:700;
+  color:var(--navy);
+  margin-bottom:1rem;
+  font-size:.95rem;
+}
+.profesional-acciones{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:.75rem;
+}
+.btn-ver{
+  padding:.75rem 1rem;
+  background:var(--navy);
+  color:#fff;
+  border-radius:8px;
+  font-weight:700;
+  text-align:center;
+  text-decoration:none;
+  transition:all .2s;
+  font-size:.9rem;
+}
+.btn-ver:hover{
+  background:var(--navy-light);
+}
+.btn-contacto{
+  padding:.75rem 1rem;
+  background:var(--green);
+  color:#10291e;
+  border-radius:8px;
+  font-weight:700;
+  text-align:center;
+  text-decoration:none;
+  transition:all .2s;
+  font-size:.9rem;
+}
+.btn-contacto:hover{
+  background:#39c88b;
+}
+</style>
+
+{% endblock %}
