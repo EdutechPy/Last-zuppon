@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Mapa de Ofertas · ZupponPy{% endblock %}
-{% block description %}Descubrí ofertas cerca tuyo en el mapa. {{ ofertas_json|length }} ofertas disponibles{% if ciudad %} en {{ ciudad }}{% endif %}.{% endblock %}
+{% block title %}Mapa de Ofertas y Negocios · ZupponPy{% endblock %}
+{% block description %}Descubrí ofertas y negocios cerca tuyo en el mapa. {{ markers_json|length }} puntos disponibles{% if ciudad %} en {{ ciudad }}{% endif %}.{% endblock %}
 {% block content %}
 
 <div class="mapa-container">
   <div class="mapa-header">
-    <h1>🗺️ Mapa de Ofertas</h1>
+    <h1>🗺️ Mapa de Ofertas y Negocios</h1>
     <div class="mapa-controles">
       <form method="get" action="{{ url_for('mapa') }}" class="mapa-filtro">
         <select name="ciudad" aria-label="Filtrar por ciudad" onchange="this.form.submit()">
@@ -37,11 +37,15 @@
     </div>
   </div>
   
-  {% if ofertas_json %}
+  {% if markers_json %}
     <div class="mapa-info">
-      <p>📍 Mostrando <strong>{{ ofertas_json|length }}</strong> {{ 'oferta' if ofertas_json|length == 1 else 'ofertas' }} con ubicación
+      <p>📍 Mostrando <strong>{{ markers_json|length }}</strong> {{ 'punto' if markers_json|length == 1 else 'puntos' }} en el mapa
       {% if ciudad %} en <strong>{{ ciudad }}</strong>{% endif %}
       {% if categoria %} · Categoría: <strong>{{ (categoria|cat).emoji }} {{ categoria }}</strong>{% endif %}
+      </p>
+      <p class="mapa-info-tipos">
+        🎯 <strong>Marcadores rojos</strong> = Ofertas con descuento · 
+        🏪 <strong>Marcadores azules</strong> = Negocios disponibles
       </p>
     </div>
     
@@ -50,10 +54,11 @@
     <div class="mapa-leyenda">
       <h3>🎯 Cómo usar el mapa</h3>
       <ul>
-        <li>🏠 <strong>Marcadores con logo</strong> = Ofertas disponibles</li>
-        <li>👆 <strong>Haz clic</strong> en un marcador para ver detalles</li>
-        <li>🖱️ <strong>Pasa el mouse</strong> sobre un marcador para ver el nombre del negocio</li>
-        <li>📱 <strong>Toca</strong> "Ver oferta" para reclamar tu cupón</li>
+        <li>🎁 <strong>Marcadores rojos</strong> = Ofertas con descuento activo</li>
+        <li>🏪 <strong>Marcadores azules</strong> = Negocios registrados (sin ofertas actualmente)</li>
+        <li>👆 <strong>Haz clic</strong> en un marcador para ver detalles y contacto</li>
+        <li>🖱️ <strong>Pasa el mouse</strong> sobre un marcador para ver el nombre</li>
+        <li>📱 <strong>Contactá</strong> directamente por teléfono o WhatsApp</li>
       </ul>
     </div>
   {% else %}
@@ -64,16 +69,16 @@
         <line x1="12" y1="2" x2="12" y2="6"/>
         <line x1="12" y1="14" x2="12" y2="18"/>
       </svg>
-      <h2>No hay ofertas con ubicación</h2>
+      <h2>No hay puntos con ubicación</h2>
       <p>
         {% if ciudad and categoria %}
-          No se encontraron ofertas de <strong>{{ categoria }}</strong> en <strong>{{ ciudad }}</strong> con coordenadas.
+          No se encontraron negocios u ofertas de <strong>{{ categoria }}</strong> en <strong>{{ ciudad }}</strong> con coordenadas.
         {% elif ciudad %}
-          No se encontraron ofertas en <strong>{{ ciudad }}</strong> con coordenadas.
+          No se encontraron negocios u ofertas en <strong>{{ ciudad }}</strong> con coordenadas.
         {% elif categoria %}
-          No se encontraron ofertas de <strong>{{ categoria }}</strong> con coordenadas.
+          No se encontraron negocios u ofertas de <strong>{{ categoria }}</strong> con coordenadas.
         {% else %}
-          Las ofertas con coordenadas aparecerán aquí en el mapa.
+          Los negocios y ofertas con coordenadas aparecerán aquí en el mapa.
         {% endif %}
       </p>
       <a href="{{ url_for('index') }}" class="boton">Ver todas las ofertas</a>
@@ -81,10 +86,10 @@
   {% endif %}
 </div>
 
-{% if ofertas_json %}
+{% if markers_json %}
 <script>
-// Datos de ofertas desde el servidor
-const ofertas = {{ ofertas_json|tojson }};
+// Datos de ofertas y negocios desde el servidor
+const markers = {{ markers_json|tojson }};
 
 // Inicializar mapa
 function initMap() {
@@ -121,27 +126,53 @@ function initMap() {
   const bounds = new google.maps.LatLngBounds();
   
   // Crear marcadores con logo personalizado
-  ofertas.forEach(oferta => {
+  markers.forEach(item => {
+    // Debug: ver qué datos llegan
+    console.log('Marcador:', {
+      nombre: item.comercio,
+      tipo: item.tipo,
+      logo: item.comercio_logo
+    });
+    
     // Parsear coordenadas (formato: "-25.2637,-57.5759")
-    const [lat, lng] = oferta.coordenadas.split(',').map(c => parseFloat(c.trim()));
+    const [lat, lng] = item.coordenadas.split(',').map(c => parseFloat(c.trim()));
     
     if (isNaN(lat) || isNaN(lng)) {
-      console.warn('Coordenadas inválidas:', oferta.coordenadas);
+      console.warn('Coordenadas inválidas:', item.coordenadas);
       return;
     }
     
     const position = { lat, lng };
     
     // Determinar qué logo usar: del negocio o el genérico de ZupponPy
-    const logoUrl = oferta.comercio_logo 
-      ? `/static/uploads/${oferta.comercio_logo}.jpg`
-      : '/static/logo.jpg';
+    // Usar rutas absolutas para que funcionen en Custom Overlays
+    const baseUrl = window.location.origin;
+    let logoUrl = `${baseUrl}/static/logo.jpg`; // Por defecto el de ZupponPy
     
-    // Crear HTML para marcador personalizado estilo Google Maps
+    if (item.comercio_logo && item.comercio_logo.trim() !== '') {
+      // Verificar si ya tiene extensión
+      if (item.comercio_logo.includes('.')) {
+        logoUrl = `${baseUrl}/static/uploads/${item.comercio_logo}`;
+      } else {
+        logoUrl = `${baseUrl}/static/uploads/${item.comercio_logo}.jpg`;
+      }
+    }
+    
+    console.log('Logo URL construida:', logoUrl);
+    
+    // Determinar si es oferta o negocio
+    const esOferta = item.tipo === 'oferta';
+    const markerColor = esOferta ? '#ef4444' : '#3b82f6';
+    const markerIcon = esOferta ? '🎁' : '🏪';
+    
+    // Crear HTML para marcador personalizado
     const markerHTML = `
-      <div class="custom-marker" title="${oferta.comercio}">
-        <img src="${logoUrl}" alt="${oferta.comercio}">
-        <div class="marker-badge">-${oferta.descuento}%</div>
+      <div class="custom-marker ${esOferta ? 'marker-oferta' : 'marker-negocio'}" title="${item.comercio}">
+        <img src="${logoUrl}" 
+             alt="${item.comercio}"
+             onerror="this.src='${baseUrl}/static/logo.jpg'"
+             crossorigin="anonymous">
+        ${esOferta ? `<div class="marker-badge">-${item.descuento}%</div>` : '<div class="marker-badge-negocio">🏪</div>'}
       </div>
     `;
     
@@ -195,37 +226,81 @@ function initMap() {
     
     const marker = new CustomMarker(position, map);
     
-    // Contenido del InfoWindow simplificado
-    const infoContent = `
-      <div class="info-ventana">
-        <div class="info-header">
-          <span class="info-descuento">-${oferta.descuento}%</span>
-          <span class="info-categoria">${oferta.categoria}</span>
+    // Contenido del InfoWindow según el tipo
+    let infoContent;
+    
+    if (esOferta) {
+      // InfoWindow para ofertas
+      infoContent = `
+        <div class="info-ventana">
+          <div class="info-header">
+            <span class="info-descuento">-${item.descuento}%</span>
+            <span class="info-categoria">${item.categoria}</span>
+          </div>
+          <h3 class="info-titulo">${item.titulo}</h3>
+          <p class="info-comercio">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            ${item.comercio}
+          </p>
+          <p class="info-direccion">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            ${item.direccion}, ${item.ciudad}
+          </p>
+          ${item.comercio_telefono ? `
+          <p class="info-telefono">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            <a href="tel:${item.comercio_telefono}">${item.comercio_telefono}</a>
+          </p>
+          ` : ''}
+          <div class="info-meta">
+            <span class="info-disponibles">📱 ${item.restantes} disponibles</span>
+            <span class="info-tiempo">⏱️ ${item.dias <= 0 ? 'Termina hoy' : item.dias === 1 ? 'Termina mañana' : 'Quedan ' + item.dias + ' días'}</span>
+          </div>
+          <div class="info-acciones">
+            <a href="${item.url}" class="btn-ver-oferta">Ver oferta →</a>
+            ${item.comercio_slug ? `<a href="/negocio/${item.comercio_slug}" class="btn-ver-negocio">Ver negocio</a>` : ''}
+          </div>
         </div>
-        <h3 class="info-titulo">${oferta.titulo}</h3>
-        <p class="info-comercio">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          </svg>
-          ${oferta.comercio}
-        </p>
-        <p class="info-direccion">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          ${oferta.direccion}, ${oferta.ciudad}
-        </p>
-        <div class="info-meta">
-          <span class="info-disponibles">📱 ${oferta.restantes} disponibles</span>
-          <span class="info-tiempo">⏱️ ${oferta.dias <= 0 ? 'Termina hoy' : oferta.dias === 1 ? 'Termina mañana' : 'Quedan ' + oferta.dias + ' días'}</span>
+      `;
+    } else {
+      // InfoWindow para negocios sin ofertas
+      infoContent = `
+        <div class="info-ventana info-negocio">
+          <div class="info-header-negocio">
+            <span class="info-negocio-badge">🏪 Negocio</span>
+            ${item.categoria ? `<span class="info-categoria-negocio">${item.categoria}</span>` : ''}
+          </div>
+          <h3 class="info-titulo">${item.titulo}</h3>
+          ${item.descripcion ? `<p class="info-descripcion">${item.descripcion}</p>` : ''}
+          <p class="info-direccion">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            ${item.direccion}, ${item.ciudad}
+          </p>
+          ${item.comercio_telefono ? `
+          <p class="info-telefono">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            <a href="tel:${item.comercio_telefono}" class="link-tel">${item.comercio_telefono}</a> · 
+            <a href="https://wa.me/595${item.comercio_telefono.replace(/\D/g,'')}" target="_blank" class="link-wsp">WhatsApp</a>
+          </p>
+          ` : ''}
+          <div class="info-acciones">
+            ${item.url ? `<a href="${item.url}" class="btn-ver-negocio-full">Ver perfil completo</a>` : '<p class="info-sin-ofertas">Sin ofertas actualmente</p>'}
+          </div>
         </div>
-        <div class="info-acciones">
-          <a href="${oferta.url}" class="btn-ver-oferta">Ver oferta →</a>
-          ${oferta.comercio_slug ? `<a href="/negocio/${oferta.comercio_slug}" class="btn-ver-negocio">Ver negocio</a>` : ''}
-        </div>
-      </div>
-    `;
+      `;
+    }
     
     const infoWindow = new google.maps.InfoWindow({
       content: infoContent,
@@ -250,7 +325,7 @@ function initMap() {
   });
   
   // Ajustar zoom para mostrar todos los marcadores
-  if (ofertas.length > 0) {
+  if (markers.length > 0) {
     map.fitBounds(bounds);
     
     // Evitar zoom excesivo si solo hay un marcador
@@ -381,9 +456,17 @@ window.initMap = initMap;
   to{ opacity:1; transform:translateY(0); }
 }
 .mapa-info p{
-  margin:0;
+  margin:0 0 0.5rem;
   font-size:1.15rem;
   color:var(--tinta);
+}
+.mapa-info p:last-child{
+  margin:0;
+}
+.mapa-info-tipos{
+  font-size:1rem !important;
+  color:#64748b !important;
+  margin-top:0.5rem !important;
 }
 .google-map{
   width:100%;
@@ -609,6 +692,111 @@ window.initMap = initMap;
 @keyframes pulse{
   0%, 100%{ transform:scale(1); }
   50%{ transform:scale(1.1); }
+}
+
+/* Marcadores de negocios (sin ofertas) */
+.marker-negocio img{
+  box-shadow:0 0 0 2px rgba(59,130,246,0.4);
+}
+.marker-negocio:hover img{
+  border-color:#3b82f6;
+  box-shadow:0 0 0 3px rgba(59,130,246,0.6), 0 0 20px rgba(59,130,246,0.3);
+}
+.marker-badge-negocio{
+  position:absolute;
+  bottom:-8px;
+  right:-8px;
+  background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color:#fff;
+  font-size:0.8rem;
+  padding:0.25rem 0.4rem;
+  border-radius:8px;
+  border:2px solid #fff;
+  box-shadow:0 2px 8px rgba(59,130,246,0.5);
+  line-height:1;
+}
+
+/* InfoWindow para negocios */
+.info-negocio{
+  background:linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+.info-header-negocio{
+  margin-bottom:0.75rem;
+  display:flex;
+  gap:0.5rem;
+  flex-wrap:wrap;
+}
+.info-negocio-badge{
+  display:inline-block;
+  background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color:#fff;
+  padding:0.4rem 0.85rem;
+  border-radius:10px;
+  font-weight:700;
+  font-size:0.9rem;
+  box-shadow:0 2px 8px rgba(59,130,246,0.3);
+}
+.info-categoria-negocio{
+  display:inline-block;
+  background:#64748b;
+  color:#fff;
+  padding:0.35rem 0.75rem;
+  border-radius:8px;
+  font-weight:600;
+  font-size:0.85rem;
+}
+.info-descripcion{
+  font-size:0.95rem;
+  color:#475569;
+  margin:0.75rem 0;
+  line-height:1.5;
+}
+.info-telefono{
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+  margin:0.75rem 0;
+  font-size:0.95rem;
+  color:#475569;
+}
+.info-telefono a{
+  color:var(--azul);
+  text-decoration:none;
+  font-weight:600;
+}
+.info-telefono a:hover{
+  text-decoration:underline;
+}
+.link-tel{
+  color:#059669 !important;
+}
+.link-wsp{
+  color:#25D366 !important;
+  font-weight:700 !important;
+}
+.btn-ver-negocio-full{
+  display:block;
+  width:100%;
+  padding:0.75rem 1rem;
+  background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color:#fff;
+  text-decoration:none;
+  border-radius:10px;
+  font-weight:700;
+  text-align:center;
+  transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:0 2px 8px rgba(59,130,246,0.3);
+}
+.btn-ver-negocio-full:hover{
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(59,130,246,0.4);
+}
+.info-sin-ofertas{
+  text-align:center;
+  color:#94a3b8;
+  font-style:italic;
+  margin:0.5rem 0;
+  font-size:0.95rem;
 }
 
 /* Responsive */

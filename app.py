@@ -42,21 +42,170 @@ CIUDADES = [
     "Villa Elisa", "Ñemby",
 ]
 CATEGORIAS = [
-    "Carnicería", "Supermercado", "Restaurante", "Panadería", "Farmacia",
-    "Ferretería", "Ropa y calzado", "Belleza", "Café y helados", "Servicios", "Otros",
+    "Restaurante", "Supermercado", "Farmacia", "Panadería", "Carnicería",
+    "Peluquería", "Barbería", "Salón de belleza", "Spa", "Centro de estética",
+    "Lavadero de autos", "Lubricentro", "Taller mecánico", "Gomería",
+    "Ferretería", "Materiales de construcción", "Cerrajería",
+    "Ropa y calzado", "Boutique", "Zapatería", "Deportes",
+    "Electrónica", "Celulares", "Computación", "Electrodomésticos",
+    "Mueblería", "Decoración", "Bazar", "Librería", "Papelería",
+    "Café", "Bar", "Heladería", "Pizzería", "Hamburguesas", "Lomitería",
+    "Empanadas", "Rotisería", "Comida rápida", "Delivery",
+    "Gimnasio", "Centro deportivo", "Yoga", "Pilates", "Danza",
+    "Educación", "Academia", "Instituto", "Cursos", "Idiomas",
+    "Clínica", "Consultorio", "Laboratorio", "Óptica", "Odontología",
+    "Veterinaria", "Pet shop", "Agropecuaria",
+    "Fotografía", "Imprenta", "Publicidad", "Diseño",
+    "Automotriz", "Concesionaria", "Repuestos",
+    "Inmobiliaria", "Arquitectura", "Construcción",
+    "Floristería", "Vivero", "Jardinería",
+    "Hotel", "Hostel", "Apart hotel", "Turismo",
+    "Eventos", "Catering", "Salón de fiestas",
+    "Juguetería", "Cotillón", "Regalos",
+    "Cerrajería", "Plomería", "Electricidad", "Pinturería",
+    "Lavandería", "Tintorería", "Sastrería",
+    "Óptica", "Relojería", "Joyería", "Bijouterie",
+    "Instrumentos musicales", "Disquería",
+    "Cine", "Teatro", "Entretenimiento",
+    "Otros",
 ]
 CAT = {
-    "Carnicería":     {"emoji": "🥩", "color": "#ff9aa2"},
-    "Supermercado":   {"emoji": "🛒", "color": "#ffe27a"},
-    "Restaurante":    {"emoji": "🍔", "color": "#ffb366"},
-    "Panadería":      {"emoji": "🥐", "color": "#d4b8ff"},
-    "Farmacia":       {"emoji": "💊", "color": "#8fe3c0"},
-    "Ferretería":     {"emoji": "🔧", "color": "#9cc9ff"},
-    "Ropa y calzado": {"emoji": "👕", "color": "#b8f0a5"},
-    "Belleza":        {"emoji": "💇", "color": "#ffb8e1"},
-    "Café y helados": {"emoji": "🍦", "color": "#a8ecee"},
-    "Servicios":      {"emoji": "🛠️", "color": "#bcc7d9"},
-    "Otros":          {"emoji": "🎁", "color": "#e4e1d8"},
+    # Alimentos y Bebidas
+    "Restaurante":              {"emoji": "🍽️", "color": "#ffb366"},
+    "Supermercado":             {"emoji": "🛒", "color": "#ffe27a"},
+    "Farmacia":                 {"emoji": "💊", "color": "#8fe3c0"},
+    "Panadería":                {"emoji": "🥐", "color": "#d4b8ff"},
+    "Carnicería":               {"emoji": "🥩", "color": "#ff9aa2"},
+    "Café":                     {"emoji": "☕", "color": "#c9a77c"},
+    "Bar":                      {"emoji": "🍺", "color": "#ffcd82"},
+    "Heladería":                {"emoji": "🍦", "color": "#a8ecee"},
+    "Pizzería":                 {"emoji": "🍕", "color": "#ffb8a5"},
+    "Hamburguesas":             {"emoji": "🍔", "color": "#ffa97a"},
+    "Lomitería":                {"emoji": "🥖", "color": "#ffbb8f"},
+    "Empanadas":                {"emoji": "🥟", "color": "#ffd699"},
+    "Rotisería":                {"emoji": "🍗", "color": "#ffb870"},
+    "Comida rápida":            {"emoji": "🌮", "color": "#ffaa7a"},
+    "Delivery":                 {"emoji": "🛵", "color": "#7ec8ff"},
+    
+    # Belleza y Cuidado Personal
+    "Peluquería":               {"emoji": "💇", "color": "#ffb8e1"},
+    "Barbería":                 {"emoji": "💈", "color": "#a8d8ff"},
+    "Salón de belleza":         {"emoji": "💅", "color": "#ffc4e8"},
+    "Spa":                      {"emoji": "🧖", "color": "#d4b8ff"},
+    "Centro de estética":       {"emoji": "✨", "color": "#ffd4f4"},
+    
+    # Automotriz
+    "Lavadero de autos":        {"emoji": "🚗", "color": "#82d3ff"},
+    "Lubricentro":              {"emoji": "🛢️", "color": "#95a5a6"},
+    "Taller mecánico":          {"emoji": "🔧", "color": "#7f8c8d"},
+    "Gomería":                  {"emoji": "🛞", "color": "#34495e"},
+    "Automotriz":               {"emoji": "🚙", "color": "#5dade2"},
+    "Concesionaria":            {"emoji": "🏎️", "color": "#e74c3c"},
+    "Repuestos":                {"emoji": "⚙️", "color": "#95a5a6"},
+    
+    # Construcción y Hogar
+    "Ferretería":               {"emoji": "🔨", "color": "#9cc9ff"},
+    "Materiales de construcción": {"emoji": "🧱", "color": "#d4a574"},
+    "Cerrajería":               {"emoji": "🔐", "color": "#f4d03f"},
+    "Pinturería":               {"emoji": "🎨", "color": "#85c1e9"},
+    "Plomería":                 {"emoji": "🚰", "color": "#5dade2"},
+    "Electricidad":             {"emoji": "⚡", "color": "#f39c12"},
+    
+    # Moda y Accesorios
+    "Ropa y calzado":           {"emoji": "👕", "color": "#b8f0a5"},
+    "Boutique":                 {"emoji": "👗", "color": "#f8b4d9"},
+    "Zapatería":                {"emoji": "👞", "color": "#a5b8f0"},
+    "Deportes":                 {"emoji": "⚽", "color": "#82e0aa"},
+    "Joyería":                  {"emoji": "💍", "color": "#f8e5a0"},
+    "Bijouterie":               {"emoji": "📿", "color": "#f5cba7"},
+    "Relojería":                {"emoji": "⌚", "color": "#aed6f1"},
+    
+    # Tecnología
+    "Electrónica":              {"emoji": "📱", "color": "#85c1e9"},
+    "Celulares":                {"emoji": "📱", "color": "#5dade2"},
+    "Computación":              {"emoji": "💻", "color": "#7fb3d5"},
+    "Electrodomésticos":        {"emoji": "🔌", "color": "#a9cce3"},
+    
+    # Hogar y Decoración
+    "Mueblería":                {"emoji": "🛋️", "color": "#d7bde2"},
+    "Decoración":               {"emoji": "🖼️", "color": "#f5b7b1"},
+    "Bazar":                    {"emoji": "🎁", "color": "#aed6f1"},
+    
+    # Papelería y Educación
+    "Librería":                 {"emoji": "📚", "color": "#85c1e9"},
+    "Papelería":                {"emoji": "✏️", "color": "#f9e79f"},
+    "Educación":                {"emoji": "🎓", "color": "#a9dfbf"},
+    "Academia":                 {"emoji": "📖", "color": "#82e0aa"},
+    "Instituto":                {"emoji": "🏫", "color": "#7dcea0"},
+    "Cursos":                   {"emoji": "👨‍🏫", "color": "#76d7c4"},
+    "Idiomas":                  {"emoji": "🌍", "color": "#73c6b6"},
+    
+    # Salud
+    "Clínica":                  {"emoji": "🏥", "color": "#85c1e9"},
+    "Consultorio":              {"emoji": "👨‍⚕️", "color": "#7fb3d5"},
+    "Laboratorio":              {"emoji": "🧪", "color": "#aed6f1"},
+    "Óptica":                   {"emoji": "👓", "color": "#5dade2"},
+    "Odontología":              {"emoji": "🦷", "color": "#85c1e9"},
+    
+    # Mascotas y Agro
+    "Veterinaria":              {"emoji": "🐾", "color": "#82e0aa"},
+    "Pet shop":                 {"emoji": "🐶", "color": "#f5b7b1"},
+    "Agropecuaria":             {"emoji": "🌾", "color": "#aed6f1"},
+    
+    # Fitness y Deporte
+    "Gimnasio":                 {"emoji": "💪", "color": "#ec7063"},
+    "Centro deportivo":         {"emoji": "🏃", "color": "#f1948a"},
+    "Yoga":                     {"emoji": "🧘", "color": "#d7bde2"},
+    "Pilates":                  {"emoji": "🤸", "color": "#c39bd3"},
+    "Danza":                    {"emoji": "💃", "color": "#f8b4d9"},
+    
+    # Servicios Creativos
+    "Fotografía":               {"emoji": "📷", "color": "#85c1e9"},
+    "Imprenta":                 {"emoji": "🖨️", "color": "#aeb6bf"},
+    "Publicidad":               {"emoji": "📢", "color": "#f39c12"},
+    "Diseño":                   {"emoji": "🎨", "color": "#af7ac5"},
+    
+    # Inmobiliaria y Construcción
+    "Inmobiliaria":             {"emoji": "🏠", "color": "#5dade2"},
+    "Arquitectura":             {"emoji": "📐", "color": "#85c1e9"},
+    "Construcción":             {"emoji": "👷", "color": "#f39c12"},
+    
+    # Naturaleza y Plantas
+    "Floristería":              {"emoji": "💐", "color": "#f5b7b1"},
+    "Vivero":                   {"emoji": "🌱", "color": "#82e0aa"},
+    "Jardinería":               {"emoji": "🌿", "color": "#76d7c4"},
+    
+    # Turismo y Hospedaje
+    "Hotel":                    {"emoji": "🏨", "color": "#5dade2"},
+    "Hostel":                   {"emoji": "🛏️", "color": "#85c1e9"},
+    "Apart hotel":              {"emoji": "🏢", "color": "#aed6f1"},
+    "Turismo":                  {"emoji": "✈️", "color": "#7fb3d5"},
+    
+    # Eventos
+    "Eventos":                  {"emoji": "🎉", "color": "#f8b4d9"},
+    "Catering":                 {"emoji": "🍽️", "color": "#f5b7b1"},
+    "Salón de fiestas":         {"emoji": "🎊", "color": "#d7bde2"},
+    
+    # Juguetes y Regalos
+    "Juguetería":               {"emoji": "🧸", "color": "#f8b4d9"},
+    "Cotillón":                 {"emoji": "🎈", "color": "#aed6f1"},
+    "Regalos":                  {"emoji": "🎁", "color": "#f5cba7"},
+    
+    # Textiles y Confección
+    "Lavandería":               {"emoji": "🧺", "color": "#85c1e9"},
+    "Tintorería":               {"emoji": "👔", "color": "#7fb3d5"},
+    "Sastrería":                {"emoji": "🪡", "color": "#aeb6bf"},
+    
+    # Entretenimiento
+    "Instrumentos musicales":   {"emoji": "🎸", "color": "#f39c12"},
+    "Disquería":                {"emoji": "💿", "color": "#af7ac5"},
+    "Cine":                     {"emoji": "🎬", "color": "#5d6d7e"},
+    "Teatro":                   {"emoji": "🎭", "color": "#af7ac5"},
+    "Entretenimiento":          {"emoji": "🎪", "color": "#f8b4d9"},
+    
+    # General
+    "Servicios":                {"emoji": "🛠️", "color": "#bcc7d9"},
+    "Otros":                    {"emoji": "📦", "color": "#e4e1d8"},
 }
 
 SCHEMA = """
@@ -72,7 +221,8 @@ CREATE TABLE IF NOT EXISTS comercios (
     descripcion TEXT,
     logo TEXT,
     fondo TEXT,
-    color_marca TEXT
+    color_marca TEXT,
+    categoria TEXT
 );
 CREATE TABLE IF NOT EXISTS ofertas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -165,6 +315,11 @@ def init_db():
         db.execute("ALTER TABLE ofertas ADD COLUMN whatsapp TEXT")
     if "principal" not in columnas:
         db.execute("ALTER TABLE ofertas ADD COLUMN principal INTEGER NOT NULL DEFAULT 0")
+    
+    # Migración: agregar categoria a comercios
+    columnas_comercios = [fila[1] for fila in db.execute("PRAGMA table_info(comercios)")]
+    if "categoria" not in columnas_comercios:
+        db.execute("ALTER TABLE comercios ADD COLUMN categoria TEXT")
     
     # Agregar campos para página de negocio
     columnas_comercios = [fila[1] for fila in db.execute("PRAGMA table_info(comercios)")]
@@ -533,14 +688,15 @@ def mis_cupones():
 
 @app.route("/mapa")
 def mapa():
-    """Muestra el mapa de Google Maps con todas las ofertas que tienen coordenadas."""
+    """Muestra el mapa con ofertas activas Y negocios registrados (aunque no tengan ofertas)."""
     db = get_db()
     ciudad = request.args.get("ciudad", "")
     categoria = request.args.get("categoria", "")
     
-    # Obtener ofertas activas con coordenadas
-    sql = """
+    # 1. Obtener ofertas activas con coordenadas
+    sql_ofertas = """
         SELECT o.*, c.nombre AS comercio, c.slug AS comercio_slug, c.logo AS comercio_logo,
+               c.telefono AS comercio_telefono,
                (SELECT COUNT(*) FROM cupones WHERE oferta_id = o.id) AS reclamados
         FROM ofertas o 
         JOIN comercios c ON c.id = o.comercio_id
@@ -549,30 +705,36 @@ def mapa():
           AND o.coordenadas IS NOT NULL 
           AND o.coordenadas != ''
     """
-    params = [hoy()]
+    params_ofertas = [hoy()]
     
     if ciudad and ciudad in CIUDADES:
-        sql += " AND o.ciudad = ?"
-        params.append(ciudad)
+        sql_ofertas += " AND o.ciudad = ?"
+        params_ofertas.append(ciudad)
     
     if categoria and categoria in CATEGORIAS:
-        sql += " AND o.categoria = ?"
-        params.append(categoria)
+        sql_ofertas += " AND o.categoria = ?"
+        params_ofertas.append(categoria)
     
-    sql += " ORDER BY o.id DESC LIMIT 100"
+    sql_ofertas += " ORDER BY o.id DESC LIMIT 100"
     
-    ofertas = enriquecer(db.execute(sql, params).fetchall())
+    ofertas = enriquecer(db.execute(sql_ofertas, params_ofertas).fetchall())
     
-    # Convertir a JSON para JavaScript
-    ofertas_json = []
+    # Convertir ofertas a JSON para JavaScript
+    markers_json = []
+    comercios_con_ofertas = set()
+    
     for o in ofertas:
         if o["restantes"] > 0:  # Solo ofertas disponibles
-            ofertas_json.append({
+            comercios_con_ofertas.add(o["comercio_id"])
+            markers_json.append({
+                "tipo": "oferta",
                 "id": o["id"],
+                "comercio_id": o["comercio_id"],
                 "titulo": o["titulo"],
                 "comercio": o["comercio"],
                 "comercio_slug": o["comercio_slug"],
                 "comercio_logo": o["comercio_logo"],
+                "comercio_telefono": o["comercio_telefono"] if o["comercio_telefono"] else "",
                 "descuento": o["descuento"],
                 "categoria": o["categoria"],
                 "ciudad": o["ciudad"],
@@ -584,7 +746,61 @@ def mapa():
                 "url": url_for("oferta", oferta_id=o["id"])
             })
     
-    return render_template("mapa.html", ofertas_json=ofertas_json, ciudad=ciudad, categoria=categoria)
+    # 2. Obtener negocios SIN ofertas activas pero que tienen dirección
+    # (pueden tener coordenadas en la dirección o simplemente mostrar su ubicación)
+    sql_comercios = """
+        SELECT c.id, c.nombre, c.slug, c.logo, c.telefono, c.ciudad, c.direccion, c.descripcion, c.categoria
+        FROM comercios c
+        WHERE c.direccion IS NOT NULL 
+          AND c.direccion != ''
+    """
+    params_comercios = []
+    
+    if ciudad and ciudad in CIUDADES:
+        sql_comercios += " AND c.ciudad = ?"
+        params_comercios.append(ciudad)
+    
+    if categoria and categoria in CATEGORIAS:
+        sql_comercios += " AND c.categoria = ?"
+        params_comercios.append(categoria)
+    
+    sql_comercios += " ORDER BY c.id DESC LIMIT 200"
+    
+    comercios = db.execute(sql_comercios, params_comercios).fetchall()
+    
+    # Agregar negocios que NO tienen ofertas activas
+    for c in comercios:
+        if c["id"] not in comercios_con_ofertas:
+            # Intentar extraer coordenadas de la dirección si tiene formato "lat,lng"
+            coordenadas = None
+            direccion = c["direccion"]
+            
+            # Buscar patrón de coordenadas en la dirección
+            coord_match = re.search(r'(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)', direccion)
+            if coord_match:
+                coordenadas = f"{coord_match.group(1)},{coord_match.group(2)}"
+            
+            # Solo agregar si tiene coordenadas válidas
+            if coordenadas:
+                markers_json.append({
+                    "tipo": "negocio",
+                    "id": None,
+                    "comercio_id": c["id"],
+                    "titulo": c["nombre"],
+                    "comercio": c["nombre"],
+                    "comercio_slug": c["slug"] if c["slug"] else "",
+                    "comercio_logo": c["logo"] if c["logo"] else "",
+                    "comercio_telefono": c["telefono"] if c["telefono"] else "",
+                    "descuento": None,
+                    "categoria": c["categoria"] if c["categoria"] else None,
+                    "ciudad": c["ciudad"],
+                    "direccion": direccion,
+                    "coordenadas": coordenadas,
+                    "descripcion": c["descripcion"] if c["descripcion"] else "",
+                    "url": url_for("pagina_negocio", slug=c["slug"]) if c["slug"] else None
+                })
+    
+    return render_template("mapa.html", markers_json=markers_json, ciudad=ciudad, categoria=categoria)
 
 
 @app.route("/api/qr/<codigo>")
@@ -1195,12 +1411,15 @@ def nuevo_negocio():
         telefono = solo_digitos(f.get("telefono"))
         ciudad = f.get("ciudad", "")
         direccion = f.get("direccion", "").strip()
+        categoria = f.get("categoria", "").strip()
         
         errores = []
         if not nombre or not email or not direccion:
             errores.append("Completá todos los campos obligatorios.")
         if ciudad not in CIUDADES:
             errores.append("Elegí una ciudad válida.")
+        if categoria and categoria not in CATEGORIAS:
+            categoria = None  # Si la categoría no es válida, ignorarla
         if len(password) < 6:
             errores.append("La contraseña debe tener al menos 6 caracteres.")
         
@@ -1218,8 +1437,8 @@ def nuevo_negocio():
                     contador += 1
                 
                 db.execute(
-                    "INSERT INTO comercios (nombre, email, password_hash, telefono, ciudad, direccion, slug) VALUES (?,?,?,?,?,?,?)",
-                    (nombre, email, generate_password_hash(password), telefono, ciudad, direccion, slug))
+                    "INSERT INTO comercios (nombre, email, password_hash, telefono, ciudad, direccion, slug, categoria) VALUES (?,?,?,?,?,?,?,?)",
+                    (nombre, email, generate_password_hash(password), telefono, ciudad, direccion, slug, categoria))
                 db.commit()
                 flash(f"Negocio '{nombre}' creado exitosamente. Página: /negocio/{slug}", "exito")
                 return redirect(url_for("panel", vista="negocios"))
@@ -1253,12 +1472,15 @@ def editar_negocio(negocio_id):
         direccion = f.get("direccion", "").strip()
         descripcion = f.get("descripcion", "").strip()
         color_marca = f.get("color_marca", "").strip()
+        categoria = f.get("categoria", "").strip()
         
         errores = []
         if not nombre or not email or not direccion:
             errores.append("Completá todos los campos obligatorios.")
         if ciudad not in CIUDADES:
             errores.append("Elegí una ciudad válida.")
+        if categoria and categoria not in CATEGORIAS:
+            categoria = None  # Si la categoría no es válida, ignorarla
         
         # Procesar logo si se subió
         archivo_logo = request.files.get("logo")
@@ -1294,14 +1516,14 @@ def editar_negocio(negocio_id):
                 # Si hay nueva contraseña, actualizarla
                 if password and len(password) >= 6:
                     sql = """UPDATE comercios SET nombre=?, email=?, password_hash=?, telefono=?, ciudad=?, 
-                            direccion=?, slug=?, descripcion=?, color_marca=?"""
+                            direccion=?, slug=?, descripcion=?, color_marca=?, categoria=?"""
                     params = [nombre, email, generate_password_hash(password), telefono, ciudad, direccion, 
-                             slug, descripcion, color_marca]
+                             slug, descripcion, color_marca, categoria]
                 else:
                     # Mantener la contraseña actual
                     sql = """UPDATE comercios SET nombre=?, email=?, telefono=?, ciudad=?, direccion=?, 
-                            slug=?, descripcion=?, color_marca=?"""
-                    params = [nombre, email, telefono, ciudad, direccion, slug, descripcion, color_marca]
+                            slug=?, descripcion=?, color_marca=?, categoria=?"""
+                    params = [nombre, email, telefono, ciudad, direccion, slug, descripcion, color_marca, categoria]
                 
                 # Si hay nuevo logo, actualizarlo
                 if nuevo_logo:

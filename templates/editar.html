@@ -69,17 +69,62 @@
       <small>Número de contacto para consultas. Se mostrará con enlace directo a WhatsApp.</small>
     </label>
 
-    <div class="fila dos">
-      <label>
-        <span>Precio normal (opcional)</span>
-        <input type="text" inputmode="numeric" name="precio_normal" placeholder="45.000"
-               value="{{ '{:,}'.format(oferta.precio_normal).replace(',', '.') if oferta.precio_normal else '' }}">
-        <small>Ejemplo: 45000 o 45.000 Gs.</small>
-      </label>
-      <label>
-        <span>% de descuento</span>
-        <input type="number" name="descuento" min="1" max="99" value="{{ oferta.descuento }}" required>
-      </label>
+    <div class="precio-seccion">
+      <h3>💰 Precio y Descuento</h3>
+      <p class="ayuda">Podés cambiar los precios o el descuento directamente</p>
+      
+      <div class="opcion-precios">
+        <label>
+          <input type="radio" name="modo_precio" value="precios" id="modo-precios" {{ 'checked' if oferta.precio_normal else '' }}>
+          <strong>Ingresar precio antes y después</strong>
+        </label>
+        <div class="campos-precios" id="campos-precios" style="{{ 'display:block' if oferta.precio_normal else 'display:none' }}">
+          <div class="dos">
+            <label>
+              Precio ANTES (Gs.)
+              <input name="precio_antes" id="precio-antes" type="number" min="1" step="1" 
+                     value="{{ oferta.precio_normal if oferta.precio_normal else '' }}" 
+                     placeholder="10000" inputmode="numeric">
+            </label>
+            <label>
+              Precio AHORA (Gs.)
+              <input name="precio_ahora" id="precio-ahora" type="number" min="1" step="1" 
+                     value="{{ (oferta.precio_normal * (100 - oferta.descuento) / 100)|int if oferta.precio_normal else '' }}" 
+                     placeholder="7000" inputmode="numeric">
+            </label>
+          </div>
+          <div class="resultado-calculo" id="resultado-calculo" style="{{ 'display:flex' if oferta.precio_normal else 'display:none' }}">
+            <span class="badge-descuento">Descuento: <strong id="descuento-calculado">{{ oferta.descuento }}%</strong></span>
+            <span class="badge-ahorro">Ahorrás: <strong id="ahorro-calculado">{{ (oferta.precio_normal * oferta.descuento / 100)|int if oferta.precio_normal else 0 }} Gs.</strong></span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="opcion-descuento">
+        <label>
+          <input type="radio" name="modo_precio" value="descuento" id="modo-descuento" {{ '' if oferta.precio_normal else 'checked' }}>
+          <strong>Ingresar solo el porcentaje de descuento</strong>
+        </label>
+        <div class="campos-descuento" id="campos-descuento" style="{{ 'display:none' if oferta.precio_normal else 'display:block' }}">
+          <div class="dos">
+            <label>
+              Descuento (%)
+              <input name="descuento_manual" id="descuento-manual" type="number" min="1" max="99" 
+                     value="{{ oferta.descuento }}" placeholder="30">
+            </label>
+            <label>
+              Precio normal (opcional)
+              <input name="precio_normal_manual" id="precio-normal-manual" type="number" min="1" step="1" 
+                     value="{{ oferta.precio_normal if oferta.precio_normal else '' }}" 
+                     placeholder="10000" inputmode="numeric">
+            </label>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Campos ocultos para enviar al servidor -->
+      <input type="hidden" name="descuento" id="descuento-final" value="{{ oferta.descuento }}">
+      <input type="hidden" name="precio_normal" id="precio-normal-final" value="{{ oferta.precio_normal if oferta.precio_normal else '' }}">
     </div>
 
     <div class="fila dos">
@@ -118,8 +163,188 @@
   </form>
 </section>
 
-{% if es_admin and todos_comercios %}
+<style>
+.precio-seccion{
+  background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border:2px solid var(--azul);
+  border-radius:16px;
+  padding:1.5rem;
+  margin:1.5rem 0;
+}
+.precio-seccion h3{
+  margin:0 0 0.5rem;
+  color:var(--tinta);
+  font-size:1.3rem;
+}
+.precio-seccion .ayuda{
+  margin:0 0 1rem;
+  color:#64748b;
+  font-size:0.95rem;
+}
+.opcion-precios,
+.opcion-descuento{
+  background:#fff;
+  border-radius:12px;
+  padding:1rem;
+  margin:0.75rem 0;
+}
+.opcion-precios label:first-child,
+.opcion-descuento label:first-child{
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+  margin-bottom:1rem;
+  cursor:pointer;
+}
+.opcion-precios input[type="radio"],
+.opcion-descuento input[type="radio"]{
+  width:auto;
+  margin:0;
+  cursor:pointer;
+}
+.campos-precios,
+.campos-descuento{
+  margin-top:1rem;
+  padding-top:1rem;
+  border-top:2px dashed #e2e8f0;
+}
+.resultado-calculo{
+  display:flex;
+  gap:1rem;
+  margin-top:1rem;
+  padding:1rem;
+  background:linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-radius:12px;
+  border-left:4px solid #10b981;
+  flex-wrap:wrap;
+}
+.badge-descuento,
+.badge-ahorro{
+  display:inline-flex;
+  align-items:center;
+  gap:0.5rem;
+  font-size:1rem;
+  color:#065f46;
+}
+.badge-descuento strong,
+.badge-ahorro strong{
+  font-size:1.3rem;
+  color:#047857;
+}
+</style>
+
 <script>
+  // Sistema de precios con cálculo automático de descuento
+  const modoPrecios = document.getElementById("modo-precios");
+  const modoDescuento = document.getElementById("modo-descuento");
+  const camposPrecios = document.getElementById("campos-precios");
+  const camposDescuento = document.getElementById("campos-descuento");
+  
+  const precioAntes = document.getElementById("precio-antes");
+  const precioAhora = document.getElementById("precio-ahora");
+  const descuentoManual = document.getElementById("descuento-manual");
+  const precioNormalManual = document.getElementById("precio-normal-manual");
+  
+  const resultadoCalculo = document.getElementById("resultado-calculo");
+  const descuentoCalculado = document.getElementById("descuento-calculado");
+  const ahorroCalculado = document.getElementById("ahorro-calculado");
+  
+  const descuentoFinal = document.getElementById("descuento-final");
+  const precioNormalFinal = document.getElementById("precio-normal-final");
+  
+  // Cambiar entre modos
+  modoPrecios.addEventListener("change", function() {
+    if(this.checked) {
+      camposPrecios.style.display = "block";
+      camposDescuento.style.display = "none";
+      descuentoManual.removeAttribute("required");
+      precioAntes.setAttribute("required", "required");
+      precioAhora.setAttribute("required", "required");
+    }
+  });
+  
+  modoDescuento.addEventListener("change", function() {
+    if(this.checked) {
+      camposPrecios.style.display = "none";
+      camposDescuento.style.display = "block";
+      precioAntes.removeAttribute("required");
+      precioAhora.removeAttribute("required");
+      descuentoManual.setAttribute("required", "required");
+      resultadoCalculo.style.display = "none";
+    }
+  });
+  
+  // Calcular descuento automáticamente
+  function calcularDescuento() {
+    const antes = parseFloat(precioAntes.value) || 0;
+    const ahora = parseFloat(precioAhora.value) || 0;
+    
+    if(antes > 0 && ahora > 0 && ahora < antes) {
+      const descuento = Math.round(((antes - ahora) / antes) * 100);
+      const ahorro = antes - ahora;
+      
+      descuentoCalculado.textContent = descuento + "%";
+      ahorroCalculado.textContent = ahorro.toLocaleString("es-PY") + " Gs.";
+      resultadoCalculo.style.display = "flex";
+      
+      // Actualizar campos ocultos
+      descuentoFinal.value = descuento;
+      precioNormalFinal.value = antes;
+    } else {
+      resultadoCalculo.style.display = "none";
+      descuentoFinal.value = "";
+      precioNormalFinal.value = "";
+    }
+  }
+  
+  precioAntes.addEventListener("input", calcularDescuento);
+  precioAhora.addEventListener("input", calcularDescuento);
+  
+  // Actualizar campos ocultos en modo manual
+  descuentoManual.addEventListener("input", function() {
+    descuentoFinal.value = this.value;
+  });
+  
+  precioNormalManual.addEventListener("input", function() {
+    precioNormalFinal.value = this.value;
+  });
+  
+  // Validar antes de enviar
+  document.querySelector("form").addEventListener("submit", function(e) {
+    if(modoPrecios.checked) {
+      // Modo precios: calcular y validar
+      const antes = parseFloat(precioAntes.value) || 0;
+      const ahora = parseFloat(precioAhora.value) || 0;
+      
+      if(antes <= 0 || ahora <= 0) {
+        e.preventDefault();
+        alert("⚠️ Ingresá el precio antes y el precio ahora");
+        return false;
+      }
+      
+      if(ahora >= antes) {
+        e.preventDefault();
+        alert("⚠️ El precio AHORA debe ser menor que el precio ANTES");
+        return false;
+      }
+      
+      calcularDescuento();
+    } else {
+      // Modo manual: validar descuento
+      const desc = parseFloat(descuentoManual.value) || 0;
+      
+      if(desc < 1 || desc > 99) {
+        e.preventDefault();
+        alert("⚠️ El descuento debe estar entre 1% y 99%");
+        return false;
+      }
+      
+      descuentoFinal.value = desc;
+      precioNormalFinal.value = precioNormalManual.value || "";
+    }
+  });
+
+  {% if es_admin and todos_comercios %}
   // Filtrar negocios por ciudad seleccionada
   const ciudadSelect = document.getElementById("ciudad-select");
   const comercioSelect = document.getElementById("comercio-select");
@@ -151,6 +376,6 @@
   
   // Filtrar al cargar la página
   filtrarNegocios();
+  {% endif %}
 </script>
-{% endif %}
 {% endblock %}

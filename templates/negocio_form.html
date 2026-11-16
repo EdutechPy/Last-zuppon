@@ -40,6 +40,17 @@
     </label>
     
     <label>
+      Categoría (opcional)
+      <select name="categoria">
+        <option value="">Sin categoría específica</option>
+        {% for cat in CATEGORIAS %}
+          <option value="{{ cat }}" {{ 'selected' if negocio and negocio.categoria == cat }}>{{ (cat|cat).emoji }} {{ cat }}</option>
+        {% endfor %}
+      </select>
+      <span class="chico">Ayuda a los clientes a encontrar tu negocio por rubro.</span>
+    </label>
+    
+    <label>
       Dirección
       <input type="text" name="direccion" value="{{ negocio.direccion if negocio }}" required>
     </label>
