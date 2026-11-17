@@ -42,77 +42,27 @@
     </div>
   </div>
 
-  <div class="stats-section">
-    <h2>📅 Visitas por Día (últimos 30 días)</h2>
-    <div class="chart-container">
-      <table class="stats-table">
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Visitas Únicas</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for v in visitas_por_dia[:15] %}
-          <tr>
-            <td>{{ v.fecha }}</td>
-            <td><strong>{{ v.visitas }}</strong></td>
-          </tr>
-          {% else %}
-          <tr><td colspan="2">Sin datos aún</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <div class="charts-row">
+    <div class="chart-box">
+      <h2>📅 Tendencia de Visitas (últimos 30 días)</h2>
+      <canvas id="visitasChart"></canvas>
+    </div>
+    
+    <div class="chart-box">
+      <h2>📊 Tipos de Visitas</h2>
+      <canvas id="tiposChart"></canvas>
     </div>
   </div>
 
-  <div class="stats-section">
-    <h2>📍 Ciudades Más Activas</h2>
-    <div class="chart-container">
-      <table class="stats-table">
-        <thead>
-          <tr>
-            <th>Ciudad</th>
-            <th>Visitas</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in ciudades_activas %}
-          <tr>
-            <td>{{ c.ciudad }}</td>
-            <td><strong>{{ c.visitas }}</strong></td>
-          </tr>
-          {% else %}
-          <tr><td colspan="2">Sin datos aún</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <div class="charts-row">
+    <div class="chart-box">
+      <h2>📍 Ciudades Más Activas</h2>
+      <canvas id="ciudadesChart"></canvas>
     </div>
-  </div>
-
-  <div class="stats-section">
-    <h2>🔥 Ofertas Más Vistas</h2>
-    <div class="chart-container">
-      <table class="stats-table">
-        <thead>
-          <tr>
-            <th>Oferta</th>
-            <th>Negocio</th>
-            <th>Vistas</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for o in ofertas_mas_vistas %}
-          <tr>
-            <td><a href="{{ url_for('oferta', oferta_id=o.id) }}">{{ o.titulo }}</a></td>
-            <td>{{ o.comercio }}</td>
-            <td><strong>{{ o.vistas }}</strong></td>
-          </tr>
-          {% else %}
-          <tr><td colspan="3">Sin datos aún</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    
+    <div class="chart-box">
+      <h2>🔥 Top 10 Ofertas Más Vistas</h2>
+      <canvas id="ofertasChart"></canvas>
     </div>
   </div>
 
@@ -146,36 +96,161 @@
     </div>
   </div>
 
-  <div class="stats-section">
-    <h2>📊 Tipos de Visitas</h2>
-    <div class="chart-container">
-      <table class="stats-table">
-        <thead>
-          <tr>
-            <th>Tipo</th>
-            <th>Visitas</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for v in visitas_por_tipo %}
-          <tr>
-            <td>{{ v.tipo }}</td>
-            <td><strong>{{ v.visitas }}</strong></td>
-          </tr>
-          {% else %}
-          <tr><td colspan="2">Sin datos aún</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-
 </section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Configuración de colores
+const colors = {
+  primary: '#667eea',
+  secondary: '#764ba2',
+  success: '#55d6a0',
+  danger: '#ef4444',
+  warning: '#f39c12',
+  info: '#5dade2'
+};
+
+// Gráfico de visitas por día
+const visitasData = {
+  labels: [{% for v in visitas_por_dia|reverse %}{{ v.fecha|tojson }},{% endfor %}],
+  datasets: [{
+    label: 'Visitas únicas',
+    data: [{% for v in visitas_por_dia|reverse %}{{ v.visitas }},{% endfor %}],
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '20',
+    borderWidth: 3,
+    fill: true,
+    tension: 0.4
+  }]
+};
+
+new Chart(document.getElementById('visitasChart'), {
+  type: 'line',
+  data: visitasData,
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#fff',
+        titleColor: '#172333',
+        bodyColor: '#64748b',
+        borderColor: '#e8edf2',
+        borderWidth: 1,
+        padding: 12,
+        displayColors: false
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { precision: 0 },
+        grid: { color: '#e8edf2' }
+      },
+      x: {
+        grid: { display: false }
+      }
+    }
+  }
+});
+
+// Gráfico de tipos de visitas (Donut)
+const tiposData = {
+  labels: [{% for v in visitas_por_tipo %}{{ v.tipo|tojson }},{% endfor %}],
+  datasets: [{
+    data: [{% for v in visitas_por_tipo %}{{ v.visitas }},{% endfor %}],
+    backgroundColor: [
+      colors.primary,
+      colors.success,
+      colors.warning,
+      colors.info,
+      colors.danger,
+      colors.secondary
+    ]
+  }]
+};
+
+new Chart(document.getElementById('tiposChart'), {
+  type: 'doughnut',
+  data: tiposData,
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: { padding: 15, font: { size: 12 } }
+      }
+    }
+  }
+});
+
+// Gráfico de ciudades (Barras horizontales)
+const ciudadesData = {
+  labels: [{% for c in ciudades_activas[:10] %}{{ c.ciudad|tojson }},{% endfor %}],
+  datasets: [{
+    label: 'Visitas',
+    data: [{% for c in ciudades_activas[:10] %}{{ c.visitas }},{% endfor %}],
+    backgroundColor: colors.success,
+    borderRadius: 8
+  }]
+};
+
+new Chart(document.getElementById('ciudadesChart'), {
+  type: 'bar',
+  data: ciudadesData,
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        ticks: { precision: 0 }
+      }
+    }
+  }
+});
+
+// Gráfico de ofertas más vistas
+const ofertasData = {
+  labels: [{% for o in ofertas_mas_vistas[:10] %}{{ o.titulo[:30]|tojson }},{% endfor %}],
+  datasets: [{
+    label: 'Vistas',
+    data: [{% for o in ofertas_mas_vistas[:10] %}{{ o.vistas }},{% endfor %}],
+    backgroundColor: colors.warning,
+    borderRadius: 8
+  }]
+};
+
+new Chart(document.getElementById('ofertasChart'), {
+  type: 'bar',
+  data: ofertasData,
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { precision: 0 }
+      }
+    }
+  }
+});
+</script>
 
 <style>
 .panel-container{
-  max-width:1200px;
+  max-width:1400px;
   margin:0 auto;
+  padding:2rem 1.5rem;
 }
 .panel-header{
   display:flex;
@@ -184,6 +259,10 @@
   margin-bottom:2rem;
   flex-wrap:wrap;
   gap:1rem;
+}
+.panel-header h1{
+  font-size:2.2rem;
+  margin:0;
 }
 .stats-grid{
   display:grid;
@@ -213,12 +292,38 @@
   font-size:2.5rem;
   margin:0;
   color:var(--navy);
+  font-weight:800;
 }
 .stat-content p{
   margin:0;
   color:var(--muted);
   font-size:.95rem;
 }
+
+/* Gráficos */
+.charts-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(500px, 1fr));
+  gap:2rem;
+  margin-bottom:2rem;
+}
+.chart-box{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2rem;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.chart-box h2{
+  margin:0 0 1.5rem;
+  font-size:1.3rem;
+  color:var(--navy);
+}
+.chart-box canvas{
+  max-height:300px;
+}
+
+/* Tablas */
 .stats-section{
   background:#fff;
   border:1px solid var(--border);
@@ -247,10 +352,12 @@
   font-weight:700;
   color:var(--tinta);
   border-bottom:2px solid var(--border);
+  font-size:.9rem;
 }
 .stats-table td{
   padding:1rem;
   border-bottom:1px solid var(--border);
+  font-size:.95rem;
 }
 .stats-table tbody tr:hover{
   background:var(--background);
@@ -262,6 +369,22 @@
 }
 .stats-table a:hover{
   text-decoration:underline;
+}
+
+/* Responsive */
+@media (max-width: 768px){
+  .charts-row{
+    grid-template-columns:1fr;
+  }
+  .chart-box canvas{
+    max-height:250px;
+  }
+  .stat-icon{
+    font-size:2.5rem;
+  }
+  .stat-content h3{
+    font-size:2rem;
+  }
 }
 </style>
 

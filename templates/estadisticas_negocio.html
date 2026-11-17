@@ -58,102 +58,47 @@
     </p>
   </div>
 
-  <div class="stats-section">
-    <h2>📅 Vistas por Día (últimos 30 días)</h2>
-    <div class="chart-container">
-      <table class="stats-table">
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Vistas</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for v in vistas_por_dia[:15] %}
-          <tr>
-            <td>{{ v.fecha }}</td>
-            <td><strong>{{ v.vistas }}</strong></td>
-          </tr>
-          {% else %}
-          <tr><td colspan="2">Sin datos aún. Tus vistas aparecerán aquí.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <div class="charts-row">
+    <div class="chart-box">
+      <h2>📅 Tendencia de Vistas (últimos 30 días)</h2>
+      <canvas id="vistasChart"></canvas>
+    </div>
+    
+    <div class="chart-box">
+      <h2>🎫 Cupones Reclamados</h2>
+      <canvas id="cuponesChart"></canvas>
     </div>
   </div>
 
-  <div class="stats-section">
-    <h2>🎫 Cupones Reclamados por Día</h2>
-    <div class="chart-container">
-      <table class="stats-table">
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Cupones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in cupones_por_dia[:15] %}
-          <tr>
-            <td>{{ c.fecha }}</td>
-            <td><strong>{{ c.cupones }}</strong></td>
-          </tr>
-          {% else %}
-          <tr><td colspan="2">Sin cupones reclamados aún</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <div class="charts-row-single">
+    <div class="chart-box">
+      <h2>🔥 Rendimiento por Oferta</h2>
+      <canvas id="ofertasChart"></canvas>
     </div>
   </div>
 
-  <div class="stats-section">
-    <h2>🔥 Tus Ofertas Más Populares</h2>
-    <div class="chart-container">
-      <table class="stats-table">
-        <thead>
-          <tr>
-            <th>Oferta</th>
-            <th>Vistas</th>
-            <th>Cupones</th>
-            <th>Conversión</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for o in ofertas_populares %}
-          <tr>
-            <td><a href="{{ url_for('oferta', oferta_id=o.id) }}">{{ o.titulo }}</a></td>
-            <td>{{ o.vistas }}</td>
-            <td><strong>{{ o.cupones }}</strong></td>
-            <td>{{ "%.1f"|format((o.cupones / o.vistas * 100) if o.vistas > 0 else 0) }}%</td>
-          </tr>
-          {% else %}
-          <tr><td colspan="4">Creá ofertas para ver estadísticas</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <div class="charts-row">
+    <div class="chart-box">
+      <h2>📍 Ciudades de Tus Visitantes</h2>
+      <canvas id="ciudadesChart"></canvas>
     </div>
-  </div>
-
-  <div class="stats-section">
-    <h2>📍 Ciudades de Tus Visitantes</h2>
-    <div class="chart-container">
-      <table class="stats-table">
-        <thead>
-          <tr>
-            <th>Ciudad</th>
-            <th>Visitas</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in ciudades_visitas %}
-          <tr>
-            <td>{{ c.ciudad }}</td>
-            <td><strong>{{ c.visitas }}</strong></td>
-          </tr>
-          {% else %}
-          <tr><td colspan="2">Sin datos de ciudades aún</td></tr>
-          {% endfor %}
-        </tbody>
+    
+    <div class="chart-box chart-box-table">
+      <h2>📊 Resumen de Conversión</h2>
+      <table class="mini-stats-table">
+        {% for o in ofertas_populares[:5] %}
+        <tr>
+          <td><strong>{{ o.titulo[:25] }}...</strong></td>
+          <td>{{ o.vistas }} vistas</td>
+          <td class="conversion-cell">
+            <span class="conversion-badge {{ 'good' if (o.cupones / o.vistas * 100) > 10 else 'normal' if o.vistas > 0 }}">
+              {{ "%.0f"|format((o.cupones / o.vistas * 100) if o.vistas > 0 else 0) }}%
+            </span>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3">Creá ofertas para ver datos</td></tr>
+        {% endfor %}
       </table>
     </div>
   </div>
@@ -171,10 +116,152 @@
 
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const colors = {
+  primary: '#667eea',
+  success: '#55d6a0',
+  warning: '#f39c12',
+  danger: '#ef4444'
+};
+
+// Gráfico de vistas por día
+const vistasData = {
+  labels: [{% for v in vistas_por_dia|reverse %}{{ v.fecha|tojson }},{% endfor %}],
+  datasets: [{
+    label: 'Vistas',
+    data: [{% for v in vistas_por_dia|reverse %}{{ v.vistas }},{% endfor %}],
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '20',
+    borderWidth: 3,
+    fill: true,
+    tension: 0.4
+  }]
+};
+
+new Chart(document.getElementById('vistasChart'), {
+  type: 'line',
+  data: vistasData,
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#fff',
+        titleColor: '#172333',
+        bodyColor: '#64748b',
+        borderColor: '#e8edf2',
+        borderWidth: 1,
+        padding: 12
+      }
+    },
+    scales: {
+      y: { beginAtZero: true, ticks: { precision: 0 } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// Gráfico de cupones por día
+const cuponesData = {
+  labels: [{% for c in cupones_por_dia|reverse %}{{ c.fecha|tojson }},{% endfor %}],
+  datasets: [{
+    label: 'Cupones',
+    data: [{% for c in cupones_por_dia|reverse %}{{ c.cupones }},{% endfor %}],
+    borderColor: colors.success,
+    backgroundColor: colors.success + '20',
+    borderWidth: 3,
+    fill: true,
+    tension: 0.4
+  }]
+};
+
+new Chart(document.getElementById('cuponesChart'), {
+  type: 'line',
+  data: cuponesData,
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#fff',
+        titleColor: '#172333',
+        bodyColor: '#64748b',
+        borderColor: '#e8edf2',
+        borderWidth: 1,
+        padding: 12
+      }
+    },
+    scales: {
+      y: { beginAtZero: true, ticks: { precision: 0 } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// Gráfico de ofertas (barras agrupadas)
+const ofertasData = {
+  labels: [{% for o in ofertas_populares[:10] %}{{ o.titulo[:20]|tojson }},{% endfor %}],
+  datasets: [
+    {
+      label: 'Vistas',
+      data: [{% for o in ofertas_populares[:10] %}{{ o.vistas }},{% endfor %}],
+      backgroundColor: colors.primary,
+      borderRadius: 6
+    },
+    {
+      label: 'Cupones',
+      data: [{% for o in ofertas_populares[:10] %}{{ o.cupones }},{% endfor %}],
+      backgroundColor: colors.success,
+      borderRadius: 6
+    }
+  ]
+};
+
+new Chart(document.getElementById('ofertasChart'), {
+  type: 'bar',
+  data: ofertasData,
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { position: 'top', labels: { padding: 15 } }
+    },
+    scales: {
+      y: { beginAtZero: true, ticks: { precision: 0 } }
+    }
+  }
+});
+
+// Gráfico de ciudades (donut)
+const ciudadesData = {
+  labels: [{% for c in ciudades_visitas %}{{ c.ciudad|tojson }},{% endfor %}],
+  datasets: [{
+    data: [{% for c in ciudades_visitas %}{{ c.visitas }},{% endfor %}],
+    backgroundColor: [colors.primary, colors.success, colors.warning, colors.danger, '#5dade2', '#af7ac5']
+  }]
+};
+
+new Chart(document.getElementById('ciudadesChart'), {
+  type: 'doughnut',
+  data: ciudadesData,
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 12 } }
+    }
+  }
+});
+</script>
+
 <style>
 .panel-container{
-  max-width:1200px;
+  max-width:1400px;
   margin:0 auto;
+  padding:2rem 1.5rem;
 }
 .panel-header{
   display:flex;
@@ -184,11 +271,15 @@
   flex-wrap:wrap;
   gap:1rem;
 }
+.panel-header h1{
+  font-size:2.2rem;
+  margin:0;
+}
 .stats-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
   gap:1.5rem;
-  margin-bottom:2rem;
+  margin-bottom:3rem;
 }
 .stat-card{
   background:#fff;
@@ -205,36 +296,100 @@
   box-shadow:0 12px 32px rgba(0,0,0,.1);
 }
 .stat-icon{
-  font-size:2.5rem;
+  font-size:3rem;
   line-height:1;
 }
 .stat-content h3{
-  font-size:2.2rem;
+  font-size:2.5rem;
   margin:0;
   color:var(--navy);
+  font-weight:800;
 }
 .stat-content p{
   margin:0;
   color:var(--muted);
-  font-size:.9rem;
+  font-size:.95rem;
 }
 .insight-box{
-  background:linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color:#fff;
   border-radius:16px;
-  padding:1.5rem;
-  margin-bottom:2rem;
-  border-left:4px solid var(--green);
+  padding:2rem;
+  margin-bottom:3rem;
+  box-shadow:0 8px 24px rgba(102, 126, 234, .3);
 }
 .insight-box h3{
-  margin:0 0 .5rem;
-  color:var(--navy);
-  font-size:1.3rem;
+  margin:0 0 1rem;
+  font-size:1.5rem;
 }
 .insight-box p{
   margin:0;
-  color:var(--tinta);
-  font-size:1rem;
   line-height:1.6;
+  font-size:1.05rem;
+}
+
+/* Gráficos */
+.charts-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(500px, 1fr));
+  gap:2rem;
+  margin-bottom:2rem;
+}
+.charts-row-single{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:2rem;
+  margin-bottom:2rem;
+}
+.chart-box{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2rem;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.chart-box h2{
+  margin:0 0 1.5rem;
+  font-size:1.3rem;
+  color:var(--navy);
+}
+.chart-box canvas{
+  max-height:300px;
+}
+.chart-box-table{
+  display:flex;
+  flex-direction:column;
+}
+.mini-stats-table{
+  width:100%;
+  border-collapse:collapse;
+}
+.mini-stats-table tr{
+  border-bottom:1px solid var(--border);
+}
+.mini-stats-table td{
+  padding:.75rem .5rem;
+  font-size:.9rem;
+}
+.conversion-cell{
+  text-align:right;
+}
+.conversion-badge{
+  display:inline-block;
+  padding:.25rem .75rem;
+  border-radius:20px;
+  font-weight:700;
+  font-size:.85rem;
+  background:var(--background);
+  color:var(--muted);
+}
+.conversion-badge.good{
+  background:#d1fae5;
+  color:#059669;
+}
+.conversion-badge.normal{
+  background:#fef3c7;
+  color:#d97706;
 }
 .stats-section{
   background:#fff;
@@ -281,15 +436,15 @@
   text-decoration:underline;
 }
 .tips-section{
-  background:linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+  background:#fff;
+  border:1px solid var(--border);
   border-radius:16px;
   padding:2rem;
-  border-left:4px solid #f39c12;
 }
 .tips-section h3{
-  margin:0 0 1rem;
+  margin:0 0 1.5rem;
+  font-size:1.5rem;
   color:var(--navy);
-  font-size:1.3rem;
 }
 .tips-section ul{
   list-style:none;
@@ -297,9 +452,27 @@
   margin:0;
 }
 .tips-section li{
-  padding:.75rem 0;
-  color:var(--tinta);
+  padding:1rem;
+  margin-bottom:.5rem;
+  background:var(--background);
+  border-radius:12px;
   line-height:1.6;
+}
+
+/* Responsive */
+@media (max-width: 768px){
+  .charts-row{
+    grid-template-columns:1fr;
+  }
+  .chart-box canvas{
+    max-height:250px;
+  }
+  .stat-icon{
+    font-size:2.5rem;
+  }
+  .stat-content h3{
+    font-size:2rem;
+  }
 }
 </style>
 
