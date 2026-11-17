@@ -398,6 +398,30 @@ CREATE TABLE IF NOT EXISTS solicitudes_presupuesto (
     creado TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     respondido_en TEXT
 );
+
+CREATE TABLE IF NOT EXISTS visitas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT NOT NULL,
+    tipo TEXT NOT NULL,
+    recurso_id INTEGER,
+    ciudad TEXT,
+    user_agent TEXT,
+    ip TEXT,
+    referrer TEXT,
+    fecha TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS analiticas_negocio (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    comercio_id INTEGER NOT NULL REFERENCES comercios(id),
+    tipo_evento TEXT NOT NULL,
+    oferta_id INTEGER REFERENCES ofertas(id),
+    session_id TEXT,
+    ciudad TEXT,
+    fecha TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 """
 
 OFERTA_SELECT = """
@@ -427,6 +451,62 @@ def close_db(_exc=None):
 # ---------- Utilidades ----------
 def hoy():
     return date.today().isoformat()
+
+
+def obtener_session_id():
+    """Genera o recupera un ID de sesión único del usuario (cookie persistente)."""
+    session_id = request.cookies.get('session_id')
+    if not session_id:
+        session_id = secrets.token_urlsafe(16)
+    return session_id
+
+
+def registrar_visita(tipo, recurso_id=None, ciudad=None):
+    """Registra una visita al sitio con deduplicación por sesión."""
+    try:
+        db = get_db()
+        session_id = obtener_session_id()
+        fecha_hoy = hoy()
+        
+        # Verificar si ya existe una visita de este tipo hoy con esta sesión
+        existe = db.execute("""
+            SELECT 1 FROM visitas 
+            WHERE session_id = ? AND tipo = ? AND fecha = ? 
+            AND (? IS NULL OR recurso_id = ?)
+            LIMIT 1
+        """, (session_id, tipo, fecha_hoy, recurso_id, recurso_id)).fetchone()
+        
+        if not existe:
+            user_agent = request.headers.get('User-Agent', '')[:200]
+            ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+            referrer = request.headers.get('Referer', '')[:200]
+            
+            db.execute("""
+                INSERT INTO visitas (session_id, tipo, recurso_id, ciudad, user_agent, ip, referrer, fecha)
+                VALUES (?,?,?,?,?,?,?,?)
+            """, (session_id, tipo, recurso_id, ciudad, user_agent, ip, referrer, fecha_hoy))
+            db.commit()
+        
+        return session_id
+    except Exception as e:
+        print(f"Error registrando visita: {e}")
+        return obtener_session_id()
+
+
+def registrar_analitica_negocio(comercio_id, tipo_evento, oferta_id=None, ciudad=None):
+    """Registra eventos de analítica para un negocio específico."""
+    try:
+        db = get_db()
+        session_id = obtener_session_id()
+        fecha_hoy = hoy()
+        
+        db.execute("""
+            INSERT INTO analiticas_negocio (comercio_id, tipo_evento, oferta_id, session_id, ciudad, fecha)
+            VALUES (?,?,?,?,?,?)
+        """, (comercio_id, tipo_evento, oferta_id, session_id, ciudad, fecha_hoy))
+        db.commit()
+    except Exception as e:
+        print(f"Error registrando analítica: {e}")
 
 
 def solo_digitos(texto):
@@ -700,6 +780,9 @@ def globales():
 # ---------- Público: ver ofertas y reclamar ----------
 @app.route("/")
 def index():
+    # Registrar visita al sitio
+    session_id = registrar_visita('index')
+    
     param = request.args.get("ciudad")
     elegido = param if param is not None else request.cookies.get("ciudad")
     if elegido is None:                     # primera visita: la ciudad con más ofertas
@@ -768,6 +851,7 @@ def index():
         otras=otras, ciudad=ciudad, categoria=categoria, q=q, total=len(vivas)))
     if param is not None:
         respuesta.set_cookie("ciudad", ciudad, max_age=60 * 60 * 24 * 365, samesite="Lax")
+    respuesta.set_cookie("session_id", session_id, max_age=60 * 60 * 24 * 365, samesite="Lax")
     return respuesta
 
 
@@ -786,6 +870,10 @@ def oferta(oferta_id):
     vigente = o["activa"] and o["valido_hasta"] >= hoy()
     restantes = o["cupos"] - o["reclamados"]
     dias = (date.fromisoformat(o["valido_hasta"]) - date.today()).days
+    
+    # Registrar visita a la oferta y analítica del negocio
+    registrar_visita('oferta', recurso_id=oferta_id, ciudad=o['ciudad'])
+    registrar_analitica_negocio(o['comercio_id'], 'vista_oferta', oferta_id=oferta_id, ciudad=o['ciudad'])
     
     # Obtener el slug del comercio
     comercio = db.execute("SELECT slug FROM comercios WHERE id = ?", (o["comercio_id"],)).fetchone()
@@ -1369,6 +1457,154 @@ def panel():
     
     return render_template("panel.html", comercio=comercio, ofertas=ofertas, negocios=negocios, 
                           hoy=hoy(), es_admin=es_admin, vista=vista)
+
+
+@app.route("/panel/estadisticas")
+@login_requerido
+def estadisticas():
+    """Estadísticas de visitas y analíticas."""
+    db = get_db()
+    comercio = db.execute("SELECT * FROM comercios WHERE id = ?",
+                          (session["comercio_id"],)).fetchone()
+    es_admin = comercio["email"] == "admin@gmail.com"
+    
+    if es_admin:
+        # ESTADÍSTICAS GLOBALES DEL SITIO
+        # Visitas totales únicas por día (últimos 30 días)
+        visitas_por_dia = db.execute("""
+            SELECT fecha, COUNT(DISTINCT session_id) as visitas
+            FROM visitas
+            WHERE fecha >= date('now', '-30 days')
+            GROUP BY fecha
+            ORDER BY fecha DESC
+        """).fetchall()
+        
+        # Visitas por tipo
+        visitas_por_tipo = db.execute("""
+            SELECT tipo, COUNT(DISTINCT session_id) as visitas
+            FROM visitas
+            WHERE fecha >= date('now', '-30 days')
+            GROUP BY tipo
+            ORDER BY visitas DESC
+        """).fetchall()
+        
+        # Ciudades más activas
+        ciudades_activas = db.execute("""
+            SELECT ciudad, COUNT(DISTINCT session_id) as visitas
+            FROM visitas
+            WHERE ciudad IS NOT NULL AND fecha >= date('now', '-30 days')
+            GROUP BY ciudad
+            ORDER BY visitas DESC
+            LIMIT 10
+        """).fetchall()
+        
+        # Ofertas más vistas
+        ofertas_mas_vistas = db.execute("""
+            SELECT o.id, o.titulo, c.nombre as comercio, COUNT(DISTINCT v.session_id) as vistas
+            FROM visitas v
+            JOIN ofertas o ON o.id = v.recurso_id
+            JOIN comercios c ON c.id = o.comercio_id
+            WHERE v.tipo = 'oferta' AND v.fecha >= date('now', '-30 days')
+            GROUP BY o.id
+            ORDER BY vistas DESC
+            LIMIT 10
+        """).fetchall()
+        
+        # Total de usuarios únicos
+        total_usuarios = db.execute("""
+            SELECT COUNT(DISTINCT session_id) as total
+            FROM visitas
+            WHERE fecha >= date('now', '-30 days')
+        """).fetchone()
+        
+        # Negocios más activos (más vistas en sus ofertas)
+        negocios_activos = db.execute("""
+            SELECT c.id, c.nombre, c.ciudad,
+                   COUNT(DISTINCT a.session_id) as interacciones,
+                   SUM(CASE WHEN a.tipo_evento = 'vista_oferta' THEN 1 ELSE 0 END) as vistas_ofertas,
+                   SUM(CASE WHEN a.tipo_evento = 'cupon_reclamado' THEN 1 ELSE 0 END) as cupones_reclamados
+            FROM analiticas_negocio a
+            JOIN comercios c ON c.id = a.comercio_id
+            WHERE a.fecha >= date('now', '-30 days')
+            GROUP BY c.id
+            ORDER BY interacciones DESC
+            LIMIT 10
+        """).fetchall()
+        
+        return render_template("estadisticas_admin.html", 
+                             comercio=comercio,
+                             visitas_por_dia=visitas_por_dia,
+                             visitas_por_tipo=visitas_por_tipo,
+                             ciudades_activas=ciudades_activas,
+                             ofertas_mas_vistas=ofertas_mas_vistas,
+                             total_usuarios=total_usuarios,
+                             negocios_activos=negocios_activos)
+    else:
+        # ESTADÍSTICAS DEL NEGOCIO
+        comercio_id = session["comercio_id"]
+        
+        # Vistas de ofertas por día (últimos 30 días)
+        vistas_por_dia = db.execute("""
+            SELECT fecha, COUNT(DISTINCT session_id) as vistas
+            FROM analiticas_negocio
+            WHERE comercio_id = ? AND tipo_evento = 'vista_oferta' AND fecha >= date('now', '-30 days')
+            GROUP BY fecha
+            ORDER BY fecha DESC
+        """, (comercio_id,)).fetchall()
+        
+        # Cupones reclamados por día
+        cupones_por_dia = db.execute("""
+            SELECT fecha, COUNT(*) as cupones
+            FROM analiticas_negocio
+            WHERE comercio_id = ? AND tipo_evento = 'cupon_reclamado' AND fecha >= date('now', '-30 days')
+            GROUP BY fecha
+            ORDER BY fecha DESC
+        """, (comercio_id,)).fetchall()
+        
+        # Ofertas más populares
+        ofertas_populares = db.execute("""
+            SELECT o.id, o.titulo, 
+                   COUNT(DISTINCT CASE WHEN a.tipo_evento = 'vista_oferta' THEN a.session_id END) as vistas,
+                   COUNT(CASE WHEN a.tipo_evento = 'cupon_reclamado' THEN 1 END) as cupones
+            FROM ofertas o
+            LEFT JOIN analiticas_negocio a ON a.oferta_id = o.id AND a.fecha >= date('now', '-30 days')
+            WHERE o.comercio_id = ?
+            GROUP BY o.id
+            ORDER BY vistas DESC
+            LIMIT 10
+        """, (comercio_id,)).fetchall()
+        
+        # Ciudades de donde vienen más visitas
+        ciudades_visitas = db.execute("""
+            SELECT ciudad, COUNT(DISTINCT session_id) as visitas
+            FROM analiticas_negocio
+            WHERE comercio_id = ? AND ciudad IS NOT NULL AND fecha >= date('now', '-30 days')
+            GROUP BY ciudad
+            ORDER BY visitas DESC
+        """, (comercio_id,)).fetchall()
+        
+        # Totales
+        totales = db.execute("""
+            SELECT 
+                COUNT(DISTINCT CASE WHEN tipo_evento = 'vista_oferta' THEN session_id END) as visitantes_unicos,
+                COUNT(CASE WHEN tipo_evento = 'vista_oferta' THEN 1 END) as total_vistas,
+                COUNT(CASE WHEN tipo_evento = 'cupon_reclamado' THEN 1 END) as total_cupones
+            FROM analiticas_negocio
+            WHERE comercio_id = ? AND fecha >= date('now', '-30 days')
+        """, (comercio_id,)).fetchone()
+        
+        # Tasa de conversión (cupones / vistas)
+        tasa_conversion = (totales['total_cupones'] / totales['total_vistas'] * 100) if totales['total_vistas'] > 0 else 0
+        
+        return render_template("estadisticas_negocio.html",
+                             comercio=comercio,
+                             vistas_por_dia=vistas_por_dia,
+                             cupones_por_dia=cupones_por_dia,
+                             ofertas_populares=ofertas_populares,
+                             ciudades_visitas=ciudades_visitas,
+                             totales=totales,
+                             tasa_conversion=tasa_conversion)
+
 
 
 @app.route("/panel/nueva", methods=["GET", "POST"])

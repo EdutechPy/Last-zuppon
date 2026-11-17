@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% block title %}📊 Mis Estadísticas · ZupponPy{% endblock %}
+{% block content %}
+
+<section class="panel-container">
+  <div class="panel-header">
+    <h1>📊 Estadísticas de {{ comercio.nombre }}</h1>
+    <a href="{{ url_for('panel') }}" class="boton sec">← Volver al panel</a>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">👁️</div>
+      <div class="stat-content">
+        <h3>{{ totales.visitantes_unicos }}</h3>
+        <p>Visitantes únicos</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">📈</div>
+      <div class="stat-content">
+        <h3>{{ totales.total_vistas }}</h3>
+        <p>Vistas totales</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">🎫</div>
+      <div class="stat-content">
+        <h3>{{ totales.total_cupones }}</h3>
+        <p>Cupones reclamados</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-content">
+        <h3>{{ "%.1f"|format(tasa_conversion) }}%</h3>
+        <p>Tasa de conversión</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <h3>💡 Insights</h3>
+    <p>
+      {% if tasa_conversion > 10 %}
+        ¡Excelente! Tu tasa de conversión de <strong>{{ "%.1f"|format(tasa_conversion) }}%</strong> está muy bien. 
+        Tus ofertas generan interés y acción.
+      {% elif tasa_conversion > 5 %}
+        Tu tasa de conversión de <strong>{{ "%.1f"|format(tasa_conversion) }}%</strong> es buena. 
+        Considerá hacer tus ofertas más atractivas para mejorarla.
+      {% else %}
+        Tu tasa de conversión es de <strong>{{ "%.1f"|format(tasa_conversion) }}%</strong>. 
+        Probá con ofertas más atractivas o aumentá el descuento para captar más clientes.
+      {% endif %}
+    </p>
+  </div>
+
+  <div class="stats-section">
+    <h2>📅 Vistas por Día (últimos 30 días)</h2>
+    <div class="chart-container">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Vistas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in vistas_por_dia[:15] %}
+          <tr>
+            <td>{{ v.fecha }}</td>
+            <td><strong>{{ v.vistas }}</strong></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="2">Sin datos aún. Tus vistas aparecerán aquí.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="stats-section">
+    <h2>🎫 Cupones Reclamados por Día</h2>
+    <div class="chart-container">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Cupones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in cupones_por_dia[:15] %}
+          <tr>
+            <td>{{ c.fecha }}</td>
+            <td><strong>{{ c.cupones }}</strong></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="2">Sin cupones reclamados aún</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="stats-section">
+    <h2>🔥 Tus Ofertas Más Populares</h2>
+    <div class="chart-container">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>Oferta</th>
+            <th>Vistas</th>
+            <th>Cupones</th>
+            <th>Conversión</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in ofertas_populares %}
+          <tr>
+            <td><a href="{{ url_for('oferta', oferta_id=o.id) }}">{{ o.titulo }}</a></td>
+            <td>{{ o.vistas }}</td>
+            <td><strong>{{ o.cupones }}</strong></td>
+            <td>{{ "%.1f"|format((o.cupones / o.vistas * 100) if o.vistas > 0 else 0) }}%</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4">Creá ofertas para ver estadísticas</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="stats-section">
+    <h2>📍 Ciudades de Tus Visitantes</h2>
+    <div class="chart-container">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>Ciudad</th>
+            <th>Visitas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in ciudades_visitas %}
+          <tr>
+            <td>{{ c.ciudad }}</td>
+            <td><strong>{{ c.visitas }}</strong></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="2">Sin datos de ciudades aún</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tips-section">
+    <h3>💡 Tips para mejorar tus estadísticas</h3>
+    <ul>
+      <li>📸 <strong>Usá fotos atractivas:</strong> Las ofertas con fotos reciben 3x más vistas</li>
+      <li>💰 <strong>Descuentos claros:</strong> Entre 20% y 40% son los más efectivos</li>
+      <li>⏰ <strong>Creá urgencia:</strong> Ofertas que terminan pronto generan más conversiones</li>
+      <li>📅 <strong>Publicá regularmente:</strong> Mantené tu negocio activo con ofertas nuevas</li>
+      <li>📍 <strong>Agregá ubicación:</strong> Negocios con coordenadas aparecen en el mapa</li>
+    </ul>
+  </div>
+
+</section>
+
+<style>
+.panel-container{
+  max-width:1200px;
+  margin:0 auto;
+}
+.panel-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:2rem;
+  flex-wrap:wrap;
+  gap:1rem;
+}
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  gap:1.5rem;
+  margin-bottom:2rem;
+}
+.stat-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:1.5rem;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  transition:all .2s;
+}
+.stat-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 32px rgba(0,0,0,.1);
+}
+.stat-icon{
+  font-size:2.5rem;
+  line-height:1;
+}
+.stat-content h3{
+  font-size:2.2rem;
+  margin:0;
+  color:var(--navy);
+}
+.stat-content p{
+  margin:0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+.insight-box{
+  background:linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-radius:16px;
+  padding:1.5rem;
+  margin-bottom:2rem;
+  border-left:4px solid var(--green);
+}
+.insight-box h3{
+  margin:0 0 .5rem;
+  color:var(--navy);
+  font-size:1.3rem;
+}
+.insight-box p{
+  margin:0;
+  color:var(--tinta);
+  font-size:1rem;
+  line-height:1.6;
+}
+.stats-section{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2rem;
+  margin-bottom:2rem;
+}
+.stats-section h2{
+  margin:0 0 1.5rem;
+  font-size:1.5rem;
+  color:var(--navy);
+}
+.chart-container{
+  overflow-x:auto;
+}
+.stats-table{
+  width:100%;
+  border-collapse:collapse;
+}
+.stats-table thead{
+  background:var(--background);
+}
+.stats-table th{
+  padding:1rem;
+  text-align:left;
+  font-weight:700;
+  color:var(--tinta);
+  border-bottom:2px solid var(--border);
+}
+.stats-table td{
+  padding:1rem;
+  border-bottom:1px solid var(--border);
+}
+.stats-table tbody tr:hover{
+  background:var(--background);
+}
+.stats-table a{
+  color:var(--navy);
+  text-decoration:none;
+  font-weight:600;
+}
+.stats-table a:hover{
+  text-decoration:underline;
+}
+.tips-section{
+  background:linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+  border-radius:16px;
+  padding:2rem;
+  border-left:4px solid #f39c12;
+}
+.tips-section h3{
+  margin:0 0 1rem;
+  color:var(--navy);
+  font-size:1.3rem;
+}
+.tips-section ul{
+  list-style:none;
+  padding:0;
+  margin:0;
+}
+.tips-section li{
+  padding:.75rem 0;
+  color:var(--tinta);
+  line-height:1.6;
+}
+</style>
+
+{% endblock %}

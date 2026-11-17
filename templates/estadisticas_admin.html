@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+{% block title %}📊 Estadísticas del Sitio · ZupponPy{% endblock %}
+{% block content %}
+
+<section class="panel-container">
+  <div class="panel-header">
+    <h1>📊 Estadísticas del Sitio</h1>
+    <a href="{{ url_for('panel') }}" class="boton sec">← Volver al panel</a>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-content">
+        <h3>{{ total_usuarios['total'] or 0 }}</h3>
+        <p>Usuarios únicos (30 días)</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">📈</div>
+      <div class="stat-content">
+        <h3>{{ visitas_por_dia|length }}</h3>
+        <p>Días con actividad</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">🏪</div>
+      <div class="stat-content">
+        <h3>{{ negocios_activos|length }}</h3>
+        <p>Negocios activos</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-content">
+        <h3>{{ ofertas_mas_vistas|length }}</h3>
+        <p>Ofertas con vistas</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-section">
+    <h2>📅 Visitas por Día (últimos 30 días)</h2>
+    <div class="chart-container">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Visitas Únicas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in visitas_por_dia[:15] %}
+          <tr>
+            <td>{{ v.fecha }}</td>
+            <td><strong>{{ v.visitas }}</strong></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="2">Sin datos aún</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="stats-section">
+    <h2>📍 Ciudades Más Activas</h2>
+    <div class="chart-container">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>Ciudad</th>
+            <th>Visitas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in ciudades_activas %}
+          <tr>
+            <td>{{ c.ciudad }}</td>
+            <td><strong>{{ c.visitas }}</strong></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="2">Sin datos aún</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="stats-section">
+    <h2>🔥 Ofertas Más Vistas</h2>
+    <div class="chart-container">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>Oferta</th>
+            <th>Negocio</th>
+            <th>Vistas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in ofertas_mas_vistas %}
+          <tr>
+            <td><a href="{{ url_for('oferta', oferta_id=o.id) }}">{{ o.titulo }}</a></td>
+            <td>{{ o.comercio }}</td>
+            <td><strong>{{ o.vistas }}</strong></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3">Sin datos aún</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="stats-section">
+    <h2>🏆 Negocios Más Activos</h2>
+    <div class="chart-container">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>Negocio</th>
+            <th>Ciudad</th>
+            <th>Vistas</th>
+            <th>Cupones</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for n in negocios_activos %}
+          <tr>
+            <td><strong>{{ n.nombre }}</strong></td>
+            <td>{{ n.ciudad }}</td>
+            <td>{{ n.vistas_ofertas }}</td>
+            <td>{{ n.cupones_reclamados }}</td>
+            <td><strong>{{ n.interacciones }}</strong></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5">Sin datos aún</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="stats-section">
+    <h2>📊 Tipos de Visitas</h2>
+    <div class="chart-container">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Visitas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in visitas_por_tipo %}
+          <tr>
+            <td>{{ v.tipo }}</td>
+            <td><strong>{{ v.visitas }}</strong></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="2">Sin datos aún</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
+<style>
+.panel-container{
+  max-width:1200px;
+  margin:0 auto;
+}
+.panel-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:2rem;
+  flex-wrap:wrap;
+  gap:1rem;
+}
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+  gap:1.5rem;
+  margin-bottom:3rem;
+}
+.stat-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:1.5rem;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  transition:all .2s;
+}
+.stat-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 12px 32px rgba(0,0,0,.1);
+}
+.stat-icon{
+  font-size:3rem;
+  line-height:1;
+}
+.stat-content h3{
+  font-size:2.5rem;
+  margin:0;
+  color:var(--navy);
+}
+.stat-content p{
+  margin:0;
+  color:var(--muted);
+  font-size:.95rem;
+}
+.stats-section{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2rem;
+  margin-bottom:2rem;
+}
+.stats-section h2{
+  margin:0 0 1.5rem;
+  font-size:1.5rem;
+  color:var(--navy);
+}
+.chart-container{
+  overflow-x:auto;
+}
+.stats-table{
+  width:100%;
+  border-collapse:collapse;
+}
+.stats-table thead{
+  background:var(--background);
+}
+.stats-table th{
+  padding:1rem;
+  text-align:left;
+  font-weight:700;
+  color:var(--tinta);
+  border-bottom:2px solid var(--border);
+}
+.stats-table td{
+  padding:1rem;
+  border-bottom:1px solid var(--border);
+}
+.stats-table tbody tr:hover{
+  background:var(--background);
+}
+.stats-table a{
+  color:var(--navy);
+  text-decoration:none;
+  font-weight:600;
+}
+.stats-table a:hover{
+  text-decoration:underline;
+}
+</style>
+
+{% endblock %}
