@@ -104,6 +104,33 @@ h1,h2,h3{
   position:relative;
 }
 
+/* Navegación principal visible en desktop */
+.top .nav-main{
+  display:flex;
+  gap:.5rem;
+  align-items:center;
+  margin-left:auto;
+}
+
+.top .nav-main a{
+  text-decoration:none;
+  font-weight:600;
+  color:#fff;
+  padding:.6rem 1.2rem;
+  border-radius:30px;
+  transition:all .2s;
+  font-size:.95rem;
+}
+
+.top .nav-main a:hover{
+  background:rgba(255,255,255,.1);
+}
+
+/* Menú drawer (oculto en desktop) */
+.top .nav-drawer{
+  display:none;
+}
+
 /* Botón hamburguesa (oculto en desktop) */
 .menu-toggle{
   display:none;
@@ -2286,7 +2313,7 @@ label small,.chico{
     overflow:visible;
     display:grid;
     grid-template-columns:auto 1fr auto auto;
-    grid-template-rows:auto auto;
+    grid-template-rows:auto auto auto;
     align-items:center;
   }
   
@@ -2338,14 +2365,44 @@ label small,.chico{
     padding:.4rem;
   }
   
-  /* ===== MENÚ DRAWER LATERAL ===== */
-  .top nav{
+  /* ===== NAV PRINCIPAL EN TERCERA FILA ===== */
+  .top .nav-main{
+    grid-column:1 / -1;
+    grid-row:3;
+    display:flex;
+    gap:.5rem;
+    justify-content:space-around;
+    width:100%;
+    margin:0;
+    padding-top:.5rem;
+  }
+  
+  .top .nav-main a{
+    flex:1;
+    text-align:center;
+    padding:.7rem .5rem;
+    font-size:.85rem;
+    border-radius:10px;
+    white-space:nowrap;
+    min-height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  
+  .top .nav-main a:active{
+    background:rgba(255,255,255,.2);
+    transform:scale(0.95);
+  }
+  
+  /* ===== MENÚ DRAWER LATERAL (Solo Admin/Login) ===== */
+  .top .nav-drawer{
     display:flex;
     flex-direction:column;
     position:fixed;
     top:0;
     right:-100%;
-    width:min(300px, 85vw);
+    width:min(280px, 85vw);
     height:100vh;
     height:100dvh;
     background:var(--navy);
@@ -2357,11 +2414,11 @@ label small,.chico{
     box-shadow:-8px 0 24px rgba(0,0,0,.4);
   }
   
-  .top nav.active{
+  .top .nav-drawer.active{
     right:0;
   }
   
-  .top nav a{
+  .top .nav-drawer a{
     padding:1.1rem 1.25rem;
     font-size:1.05rem;
     border-radius:12px;
@@ -2372,13 +2429,16 @@ label small,.chico{
     transition:all .2s;
     border-bottom:1px solid rgba(255,255,255,.08);
     white-space:nowrap;
+    color:#fff;
+    text-decoration:none;
+    font-weight:600;
   }
   
-  .top nav a:last-child{
+  .top .nav-drawer a:last-child{
     border-bottom:none;
   }
   
-  .top nav a:active{
+  .top .nav-drawer a:active{
     background:rgba(255,255,255,.2);
     transform:translateX(4px);
   }

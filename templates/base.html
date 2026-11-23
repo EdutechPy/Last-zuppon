@@ -134,16 +134,20 @@
     <span>Mapa</span>
   </a>
   
-  <!-- Menú principal - se oculta en móvil -->
-  <nav id="mainNav">
+  <!-- Navegación principal - enlaces visibles en móvil -->
+  <nav class="nav-main" id="navMain">
     <a href="{{ url_for('eventos') }}">📅 Eventos</a>
     <a href="{{ url_for('profesionales') }}">🛠️ Profesionales</a>
     <a href="{{ url_for('mis_cupones') }}">📱 Mis cupones</a>
-    <a href="{{ url_for('panel') }}">Admin</a>
+  </nav>
+  
+  <!-- Menú hamburguesa - solo Admin y Login -->
+  <nav class="nav-drawer" id="navDrawer">
+    <a href="{{ url_for('panel') }}">🔐 Admin</a>
     {% if session.comercio_id %}
-      <a href="{{ url_for('salir') }}">Salir</a>
+      <a href="{{ url_for('salir') }}">👋 Salir</a>
     {% else %}
-      <a href="{{ url_for('login') }}">Soy comercio</a>
+      <a href="{{ url_for('login') }}">🏪 Soy comercio</a>
     {% endif %}
   </nav>
 </header>
@@ -170,29 +174,29 @@
 // Menú hamburguesa para móviles
 (function() {
   const menuToggle = document.getElementById('menuToggle');
-  const mainNav = document.getElementById('mainNav');
+  const navDrawer = document.getElementById('navDrawer');
   const menuOverlay = document.getElementById('menuOverlay');
   
-  if (menuToggle && mainNav) {
+  if (menuToggle && navDrawer) {
     menuToggle.addEventListener('click', function() {
-      mainNav.classList.toggle('active');
+      navDrawer.classList.toggle('active');
       menuToggle.classList.toggle('active');
       menuOverlay.classList.toggle('active');
-      document.body.style.overflow = mainNav.classList.contains('active') ? 'hidden' : '';
+      document.body.style.overflow = navDrawer.classList.contains('active') ? 'hidden' : '';
     });
     
     // Cerrar al hacer click en el overlay
     menuOverlay.addEventListener('click', function() {
-      mainNav.classList.remove('active');
+      navDrawer.classList.remove('active');
       menuToggle.classList.remove('active');
       menuOverlay.classList.remove('active');
       document.body.style.overflow = '';
     });
     
     // Cerrar al hacer click en un enlace
-    mainNav.querySelectorAll('a').forEach(link => {
+    navDrawer.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', function() {
-        mainNav.classList.remove('active');
+        navDrawer.classList.remove('active');
         menuToggle.classList.remove('active');
         menuOverlay.classList.remove('active');
         document.body.style.overflow = '';
