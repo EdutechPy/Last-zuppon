@@ -22,7 +22,14 @@
   --gris:var(--muted);
   --papel:var(--background);
   
-  --gutter:clamp(1.25rem,2.5vw,2.5rem);
+  --gutter:clamp(1rem,2.5vw,2.5rem);
+}
+
+/* Ajustar gutter en móviles para evitar overflow */
+@media (max-width:768px){
+  :root{
+    --gutter:1rem;
+  }
 }
 
 *{
@@ -176,8 +183,10 @@ h1,h2,h3{
 /* FLASHES MODERNOS */
 .flashes{
   width:100%;
+  max-width:100%;
   padding:0 var(--gutter);
   margin-top:1rem;
+  box-sizing:border-box;
 }
 
 .flash{
@@ -358,11 +367,13 @@ label small,.chico{
   gap:.7rem;
   overflow-x:auto;
   overflow-y:hidden;
-  padding:1rem var(--gutter) 1.5rem;
-  margin:0 calc(-1 * var(--gutter));
+  padding:1rem 0 1.5rem;
+  margin:0;
   scrollbar-width:thin;
   scrollbar-color:var(--green-dark) var(--border);
   scroll-behavior:smooth;
+  width:100%;
+  box-sizing:border-box;
 }
 
 .chips::-webkit-scrollbar{
@@ -495,11 +506,13 @@ label small,.chico{
   gap:1.2rem;
   overflow-x:auto;
   scroll-snap-type:x proximity;
-  padding:.5rem var(--gutter) 1.5rem;
-  margin:0 calc(-1 * var(--gutter));
-  scroll-padding-left:var(--gutter);
+  padding:.5rem 0 1.5rem;
+  margin:0;
+  scroll-padding-left:0;
   /* Prevenir que se salga de la pantalla */
   max-width:100vw;
+  width:100%;
+  box-sizing:border-box;
 }
 .fila-scroll .card{flex:0 0 clamp(260px,24vw,340px);scroll-snap-align:start}
 .grid{
@@ -2209,55 +2222,150 @@ a, button, .boton, .chip, .card, .card-cupon, input, select, textarea{
 
 /* Área táctil mínima de 44x44px (recomendación de Google) */
 @media (max-width:768px){
-  /* Forzar que nada se salga de la pantalla */
-  html, body{
-    overflow-x:hidden !important;
-    max-width:100vw !important;
-    position:relative;
-  }
-  
+  /* SUPER IMPORTANTE: Forzar que NADA se salga */
   *{
     max-width:100% !important;
   }
   
-  /* Contenedores principales */
-  .top, main, .hero, .seccion, .panel-container, .negocio-pagina{
-    width:100% !important;
+  html{
+    overflow-x:hidden !important;
+    width:100vw !important;
     max-width:100vw !important;
+  }
+  
+  body{
+    overflow-x:hidden !important;
+    width:100vw !important;
+    max-width:100vw !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+  
+  /* Contenedores principales sin margin negativo */
+  main{
+    width:100vw !important;
+    max-width:100vw !important;
+    padding:0 1rem 3rem !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+    overflow-x:hidden !important;
+  }
+  
+  /* Header sin overflow */
+  .top{
+    width:100vw !important;
+    max-width:100vw !important;
+    margin:0 !important;
+    padding:1rem !important;
+    box-sizing:border-box !important;
+    overflow-x:hidden !important;
+  }
+  
+  /* Eliminar márgenes negativos que causan overflow */
+  .chips, .fila-scroll{
+    margin-left:0 !important;
+    margin-right:0 !important;
+    padding-left:1rem !important;
+    padding-right:1rem !important;
+    width:100vw !important;
+    max-width:100vw !important;
+    box-sizing:border-box !important;
+  }
+  
+  /* Flashes sin overflow */
+  .flashes{
+    width:100vw !important;
+    max-width:100vw !important;
+    padding:0 1rem !important;
+    margin:1rem 0 !important;
+    box-sizing:border-box !important;
+  }
+  
+  /* Hero contenido */
+  .hero{
+    width:100% !important;
+    max-width:100% !important;
+    margin:0 !important;
+    padding:2rem 0 1.5rem !important;
+    box-sizing:border-box !important;
+  }
+  
+  /* Buscador sin overflow */
+  .busca{
+    width:100% !important;
+    max-width:100% !important;
+    margin:0 auto !important;
+    box-sizing:border-box !important;
+  }
+  
+  /* Secciones sin overflow */
+  .seccion{
+    width:100% !important;
+    max-width:100% !important;
+    margin:2rem 0 !important;
+    box-sizing:border-box !important;
+  }
+  
+  /* Grids responsivos */
+  .grid, .grid-pro, .grid-cupones{
+    width:100% !important;
+    max-width:100% !important;
+    grid-template-columns:1fr !important;
+    padding:0 !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+  }
+  
+  /* Cards sin salirse */
+  .card, .card-cupon, .card-pro{
+    width:100% !important;
+    max-width:100% !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+  }
+  
+  /* Destacada sin overflow */
+  .destacada{
+    width:100% !important;
+    max-width:100% !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+  }
+  
+  /* Stats sin overflow */
+  .stats-grid{
+    width:100% !important;
+    max-width:100% !important;
+    margin:0 !important;
+    padding:0 !important;
+    box-sizing:border-box !important;
+  }
+  
+  /* Página de negocio sin overflow */
+  .negocio-pagina, .negocio-hero-pro, .negocio-ofertas-pro{
+    width:100vw !important;
+    max-width:100vw !important;
+    margin:0 !important;
     overflow-x:hidden !important;
     box-sizing:border-box !important;
   }
   
-  /* Grids y flex que pueden causar overflow */
-  .grid, .grid-pro, .grid-cupones, .stats-grid, .charts-row{
+  /* Panel sin overflow */
+  .panel, .panel-container{
     width:100% !important;
     max-width:100% !important;
-  }
-  
-  /* Cards y elementos que se salen */
-  .card, .card-cupon, .card-pro, .destacada{
-    max-width:100% !important;
-    width:100% !important;
-  }
-  
-  /* Fila scroll debe contener sus elementos */
-  .fila-scroll{
-    width:100vw !important;
-    max-width:100vw !important;
+    margin:0 !important;
+    padding:1rem !important;
     box-sizing:border-box !important;
   }
   
-  /* Chips scroll debe contener */
-  .chips{
-    width:100vw !important;
-    max-width:100vw !important;
-    box-sizing:border-box !important;
-  }
-  
-  /* Imágenes y media */
-  img, video, iframe, canvas{
+  /* Formularios sin overflow */
+  .formulario{
+    width:100% !important;
     max-width:100% !important;
-    height:auto !important;
+    padding:0 1rem !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
   }
   
   .boton, button, .chip, .pestana, .top nav a{
