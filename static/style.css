@@ -583,10 +583,35 @@ label small,.chico{
 .card .cuerpo{padding:1.2rem 1.3rem 1.35rem}
 .card h3{font-size:1.15rem;letter-spacing:-.01em;margin-bottom:.4rem}
 .card.agotada{opacity:.55}
-.sticker{position:absolute;top:.75rem;right:.75rem;background:var(--sol);border:2px solid var(--tinta);
-  border-radius:999px;padding:.1rem .7rem;font-weight:800;transform:rotate(6deg)}
-.sticker.grande{font-size:1.5rem;padding:.2rem .9rem;top:1rem;right:1rem}
-.sticker.flat{position:static;display:inline-block;transform:rotate(-3deg)}
+.sticker{
+  position:absolute;
+  top:.75rem;
+  right:.75rem;
+  background:var(--sol);
+  border:2px solid var(--tinta);
+  border-radius:999px;
+  padding:.25rem .75rem;
+  font-weight:800;
+  transform:rotate(6deg);
+  font-size:.95rem;
+  line-height:1.2;
+  white-space:nowrap;
+  max-width:calc(100% - 1.5rem);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  z-index:2;
+}
+.sticker.grande{
+  font-size:1.2rem;
+  padding:.3rem .9rem;
+  top:1rem;
+  right:1rem;
+}
+.sticker.flat{
+  position:static;
+  display:inline-block;
+  transform:rotate(-3deg);
+}
 .quien{color:var(--gris);margin:0 0 .4rem}
 .precio s{color:var(--gris);margin-right:.4rem;font-size:.9rem}
 .precio strong{color:var(--rojo);font-size:1.1rem}
@@ -1489,6 +1514,20 @@ label small,.chico{
   left:12px;
   background:linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
   color:#fff;
+  font-size:.75rem;
+  font-weight:700;
+  padding:.35rem .8rem;
+  border-radius:12px;
+  z-index:2;
+  box-shadow:0 4px 12px rgba(245,158,11,0.4);
+  white-space:nowrap;
+  max-width:calc(100% - 24px);
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+  left:12px;
+  background:linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color:#fff;
   font-size:0.8rem;
   font-weight:700;
   padding:0.4rem 0.9rem;
@@ -1541,6 +1580,20 @@ label small,.chico{
 .badge-urgente{
   position:absolute;
   bottom:12px;
+  left:12px;
+  background:#f97316;
+  color:#fff;
+  font-size:.75rem;
+  font-weight:700;
+  padding:.35rem .75rem;
+  border-radius:12px;
+  z-index:2;
+  box-shadow:0 4px 12px rgba(249,115,22,0.4);
+  white-space:nowrap;
+  max-width:calc(100% - 24px);
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
   left:12px;
   background:#f97316;
   color:#fff;
@@ -2662,10 +2715,29 @@ label small,.chico{
   
   /* Stickers proporcionados */
   .card .sticker{
-    font-size:1.1rem;
-    padding:.2rem .7rem;
+    font-size:1rem;
+    padding:.25rem .7rem;
     top:.75rem;
     right:.75rem;
+    border-width:2px;
+    white-space:nowrap;
+    max-width:calc(100% - 1.5rem);
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  
+  .card .sticker.grande{
+    font-size:1.2rem;
+    padding:.3rem .8rem;
+  }
+  
+  /* Badge urgente más compacto */
+  .badge-urgente{
+    font-size:.75rem;
+    padding:.3rem .7rem;
+    bottom:.75rem;
+    left:.75rem;
+    white-space:nowrap;
   }
   
   /* ===== CARDS DESTACADA ===== */
@@ -2838,10 +2910,31 @@ label small,.chico{
   }
   
   .sticker-pro{
-    font-size:1.1rem;
-    padding:.5rem .9rem;
+    font-size:1rem;
+    padding:.4rem .8rem;
     top:.75rem;
     right:.75rem;
+    border-width:2px;
+    white-space:nowrap;
+    max-width:calc(100% - 1.5rem);
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  
+  /* Badge principal compacto */
+  .badge-principal{
+    font-size:.7rem;
+    padding:.3rem .7rem;
+    top:.75rem;
+    left:.75rem;
+  }
+  
+  /* Badge urgente en cards pro */
+  .card-pro .badge-urgente{
+    font-size:.75rem;
+    padding:.3rem .7rem;
+    bottom:.75rem;
+    left:.75rem;
   }
   
   /* ===== FILA SCROLL HORIZONTAL ===== */
