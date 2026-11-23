@@ -101,6 +101,60 @@ h1,h2,h3{
   width:100%;
   max-width:100vw;
   overflow:hidden;
+  position:relative;
+}
+
+/* Botón hamburguesa (oculto en desktop) */
+.menu-toggle{
+  display:none;
+  flex-direction:column;
+  gap:5px;
+  background:transparent;
+  border:none;
+  padding:8px;
+  cursor:pointer;
+  z-index:1001;
+  margin-left:auto;
+}
+
+.menu-toggle span{
+  display:block;
+  width:25px;
+  height:3px;
+  background:#fff;
+  border-radius:3px;
+  transition:all .3s;
+}
+
+.menu-toggle.active span:nth-child(1){
+  transform:rotate(45deg) translate(7px, 7px);
+}
+
+.menu-toggle.active span:nth-child(2){
+  opacity:0;
+}
+
+.menu-toggle.active span:nth-child(3){
+  transform:rotate(-45deg) translate(7px, -7px);
+}
+
+/* Overlay para cerrar menú */
+.menu-overlay{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,.5);
+  z-index:999;
+  opacity:0;
+  transition:opacity .3s;
+}
+
+.menu-overlay.active{
+  display:block;
+  opacity:1;
 }
 
 .brand{
@@ -2225,62 +2279,87 @@ label small,.chico{
     width:100%;
     padding:1rem;
     gap:.5rem;
-    overflow:hidden;
+    overflow:visible;
+  }
+  
+  /* Mostrar botón hamburguesa */
+  .menu-toggle{
+    display:flex;
+    order:2;
   }
   
   .brand{
     font-size:1.4rem;
+    order:1;
   }
   
   .brand .logo{
     height:2.5rem;
   }
   
-  /* Selector de ciudad en nueva línea */
+  /* Selector de ciudad compacto */
   .lugar{
     order:3;
-    flex:1 1 100%;
-    margin:0;
-    padding:.7rem 1rem;
+    padding:.6rem .9rem;
+    margin-left:0;
   }
   
   .lugar select{
-    width:100%;
-    max-width:none;
-    font-size:.95rem;
-  }
-  
-  /* Navegación scrollable horizontal */
-  .top nav{
-    order:2;
-    display:flex;
-    gap:.4rem;
-    overflow-x:auto;
-    overflow-y:hidden;
-    width:100%;
-    padding-bottom:.25rem;
-    scrollbar-width:none;
-    -webkit-overflow-scrolling:touch;
-  }
-  
-  .top nav::-webkit-scrollbar{
-    display:none;
-  }
-  
-  .top nav a{
-    flex-shrink:0;
-    padding:.65rem 1rem;
+    width:auto;
+    max-width:140px;
     font-size:.85rem;
-    white-space:nowrap;
+    padding:.3rem .4rem;
   }
   
-  /* Botón mapa */
+  /* Botón mapa compacto */
   .btn-mapa{
-    padding:.7rem 1rem;
+    order:4;
+    padding:.6rem .9rem;
   }
   
   .btn-mapa span{
     display:none;
+  }
+  
+  /* Navegación tipo drawer lateral */
+  .top nav{
+    display:flex;
+    flex-direction:column;
+    position:fixed;
+    top:0;
+    right:-100%;
+    width:280px;
+    max-width:85vw;
+    height:100vh;
+    background:var(--navy);
+    padding:5rem 1.5rem 2rem;
+    gap:0;
+    z-index:1000;
+    overflow-y:auto;
+    transition:right .3s cubic-bezier(.4,0,.2,1);
+    box-shadow:-4px 0 20px rgba(0,0,0,.3);
+  }
+  
+  .top nav.active{
+    right:0;
+  }
+  
+  .top nav a{
+    padding:1rem 1.25rem;
+    font-size:1.05rem;
+    border-radius:12px;
+    margin-bottom:.5rem;
+    display:flex;
+    align-items:center;
+    gap:.75rem;
+    transition:all .2s;
+    border-bottom:1px solid rgba(255,255,255,.1);
+  }
+  
+  .top nav a:hover,
+  .top nav a:active{
+    background:rgba(255,255,255,.15);
+    transform:translateX(4px);
   }
   
   /* Flashes sin overflow */

@@ -108,6 +108,14 @@
     <img src="{{ url_for('static', filename='logo.jpg') }}" alt="ZupponPy" class="logo">
     Zuppon<span>Py</span>
   </a>
+  
+  <!-- Botón hamburguesa para móvil -->
+  <button class="menu-toggle" id="menuToggle" aria-label="Menú">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  
   <form class="lugar" method="get" action="{{ url_for('index') }}">
     <span aria-hidden="true">📍</span>
     <select name="ciudad" aria-label="Tu ciudad" onchange="this.form.submit()">
@@ -117,6 +125,7 @@
       {% endfor %}
     </select>
   </form>
+  
   <a href="{{ url_for('mapa') }}" class="btn-mapa" title="Ver ofertas en el mapa">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
@@ -124,7 +133,9 @@
     </svg>
     <span>Mapa</span>
   </a>
-  <nav>
+  
+  <!-- Menú principal - se oculta en móvil -->
+  <nav id="mainNav">
     <a href="{{ url_for('eventos') }}">📅 Eventos</a>
     <a href="{{ url_for('profesionales') }}">🛠️ Profesionales</a>
     <a href="{{ url_for('mis_cupones') }}">📱 Mis cupones</a>
@@ -136,6 +147,9 @@
     {% endif %}
   </nav>
 </header>
+
+<!-- Overlay para cerrar menú -->
+<div class="menu-overlay" id="menuOverlay"></div>
 
 {% with mensajes = get_flashed_messages(with_categories=true) %}
   {% if mensajes %}
@@ -153,6 +167,40 @@
 </footer>
 
 <script>
+// Menú hamburguesa para móviles
+(function() {
+  const menuToggle = document.getElementById('menuToggle');
+  const mainNav = document.getElementById('mainNav');
+  const menuOverlay = document.getElementById('menuOverlay');
+  
+  if (menuToggle && mainNav) {
+    menuToggle.addEventListener('click', function() {
+      mainNav.classList.toggle('active');
+      menuToggle.classList.toggle('active');
+      menuOverlay.classList.toggle('active');
+      document.body.style.overflow = mainNav.classList.contains('active') ? 'hidden' : '';
+    });
+    
+    // Cerrar al hacer click en el overlay
+    menuOverlay.addEventListener('click', function() {
+      mainNav.classList.remove('active');
+      menuToggle.classList.remove('active');
+      menuOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+    
+    // Cerrar al hacer click en un enlace
+    mainNav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', function() {
+        mainNav.classList.remove('active');
+        menuToggle.classList.remove('active');
+        menuOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      });
+    });
+  }
+})();
+
 // Reproducir sonido cuando hay mensaje de éxito en el canje
 document.addEventListener('DOMContentLoaded', function() {
   const flashExito = document.querySelector('.flash.exito');
