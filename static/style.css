@@ -2584,36 +2584,324 @@ label small,.chico{
     flex:0 0 min(280px, 85vw);
   }
   
-  /* Destacada en columna */
-  .destacada{
-    width:100%;
-    max-width:100%;
-    grid-template-columns:1fr;
-    margin:0;
-  }
+  /* ===== CARDS MEJORADAS PARA ANDROID ===== */
   
-  .d-arte{
-    min-height:200px;
-  }
-  
-  .d-texto{
-    padding:1.5rem;
-  }
-  
-  /* Grid 1 columna */
+  /* Grid de cards en 1 columna con mejor espaciado */
   .grid{
     width:100%;
     max-width:100%;
     grid-template-columns:1fr;
-    gap:1.25rem;
+    gap:1.5rem;
     padding:0;
     margin:0;
   }
   
-  /* Cards sin overflow */
+  /* Cards más grandes y destacadas */
   .card{
     width:100%;
     max-width:100%;
+    border-width:3px;
+    border-radius:20px;
+    box-shadow:0 4px 16px rgba(0,0,0,.12);
+    transition:transform .2s, box-shadow .2s;
+  }
+  
+  .card:active{
+    transform:translateY(-2px) scale(0.98);
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+  }
+  
+  /* Área de arte más grande */
+  .card .arte{
+    height:180px;
+  }
+  
+  .card .emoji{
+    font-size:5.5rem;
+    filter:drop-shadow(0 6px 0 rgba(18,24,58,.2));
+  }
+  
+  /* Cuerpo de la card con mejor padding */
+  .card .cuerpo{
+    padding:1.5rem 1.4rem 1.6rem;
+  }
+  
+  .card h3{
+    font-size:1.3rem;
+    letter-spacing:-.015em;
+    margin-bottom:.6rem;
+    line-height:1.3;
+  }
+  
+  /* Precios más grandes y legibles */
+  .card .quien{
+    font-size:1rem;
+    margin-bottom:.6rem;
+    color:var(--gris);
+  }
+  
+  .card .precio{
+    margin:.75rem 0;
+  }
+  
+  .card .precio s{
+    font-size:1rem;
+    margin-right:.6rem;
+  }
+  
+  .card .precio strong{
+    font-size:1.4rem;
+    font-weight:800;
+  }
+  
+  /* Meta info más legible */
+  .card .meta{
+    font-size:.95rem;
+    margin-top:.5rem;
+  }
+  
+  /* Stickers más grandes */
+  .card .sticker{
+    font-size:1.4rem;
+    padding:.3rem .9rem;
+    top:1rem;
+    right:1rem;
+  }
+  
+  /* ===== CARDS DESTACADA ===== */
+  .destacada{
+    width:100%;
+    max-width:100%;
+    grid-template-columns:1fr;
+    margin:0 0 1.5rem;
+    border-radius:20px;
+    border-width:3px;
+    box-shadow:0 6px 20px rgba(0,0,0,.14);
+  }
+  
+  .d-arte{
+    min-height:240px;
+  }
+  
+  .d-arte .emoji{
+    font-size:7rem;
+  }
+  
+  .d-texto{
+    padding:1.75rem 1.5rem;
+  }
+  
+  .d-texto h3{
+    font-size:clamp(1.8rem, 5vw, 2.2rem);
+    margin-bottom:.6rem;
+  }
+  
+  .d-texto .boton{
+    margin-top:1rem;
+    padding:1rem 1.75rem;
+    font-size:1.1rem;
+  }
+  
+  /* ===== CARDS DE CUPONES ===== */
+  .grid-cupones{
+    width:100%;
+    max-width:100%;
+    grid-template-columns:1fr;
+    gap:1.5rem;
+    padding:0;
+  }
+  
+  .card-cupon{
+    width:100%;
+    max-width:100%;
+    border-width:3px;
+    border-radius:20px;
+    box-shadow:0 4px 16px rgba(0,0,0,.12);
+  }
+  
+  .card-cupon:active{
+    transform:translateY(-2px) scale(0.98);
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+  }
+  
+  .card-cupon-imagen{
+    height:200px;
+  }
+  
+  .emoji-grande{
+    font-size:5.5rem;
+  }
+  
+  .card-cupon-descuento{
+    font-size:1.4rem;
+    padding:.5rem 1rem;
+    top:1rem;
+    right:1rem;
+  }
+  
+  .card-cupon-body{
+    padding:1.5rem 1.4rem;
+    min-height:auto;
+  }
+  
+  .card-cupon-body h3{
+    font-size:1.3rem;
+    margin-bottom:.6rem;
+    line-height:1.3;
+  }
+  
+  .card-comercio{
+    font-size:1rem;
+    margin:.4rem 0;
+  }
+  
+  .card-ciudad{
+    font-size:.95rem;
+  }
+  
+  .card-cupon-footer{
+    padding:1.2rem 1.4rem;
+    gap:1rem;
+  }
+  
+  .codigo-mini{
+    font-size:1.2rem;
+    letter-spacing:.12em;
+  }
+  
+  .fecha-mini{
+    font-size:.9rem;
+  }
+  
+  /* ===== CARDS PROFESIONALES (grid-pro) ===== */
+  .grid-pro{
+    grid-template-columns:1fr;
+    gap:1.5rem;
+  }
+  
+  .card-pro{
+    border-width:3px;
+    border-radius:20px;
+    box-shadow:0 4px 16px rgba(0,0,0,.12);
+  }
+  
+  .card-pro:active{
+    transform:translateY(-2px) scale(0.98);
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+  }
+  
+  .arte-pro{
+    aspect-ratio:16/10;
+    min-height:200px;
+  }
+  
+  .emoji-large{
+    font-size:5.5rem;
+  }
+  
+  .cuerpo-pro{
+    padding:1.5rem 1.4rem;
+    gap:.85rem;
+  }
+  
+  .titulo-oferta-pro{
+    font-size:1.4rem;
+    line-height:1.3;
+  }
+  
+  .precio-pro{
+    gap:.85rem;
+    margin:.6rem 0;
+  }
+  
+  .precio-anterior{
+    font-size:1.05rem;
+  }
+  
+  .precio-actual{
+    font-size:2rem;
+    font-weight:900;
+  }
+  
+  .descuento-solo{
+    font-size:1.4rem;
+    margin:.6rem 0;
+  }
+  
+  .meta-pro{
+    gap:1.2rem;
+    padding-top:.85rem;
+  }
+  
+  .meta-item-card{
+    font-size:.95rem;
+  }
+  
+  .sticker-pro{
+    font-size:1.3rem;
+    padding:.7rem 1.1rem;
+    top:1rem;
+    right:1rem;
+  }
+  
+  /* ===== FILA SCROLL HORIZONTAL ===== */
+  .fila-scroll{
+    width:100%;
+    max-width:100%;
+    padding:1rem;
+    margin:0;
+    gap:1.2rem;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x mandatory;
+    scroll-padding-left:1rem;
+  }
+  
+  .fila-scroll .card{
+    flex:0 0 min(300px, 88vw);
+    scroll-snap-align:start;
+  }
+  
+  /* Indicador de scroll más visible */
+  .fila-scroll::after{
+    content:'→';
+    position:sticky;
+    right:0;
+    padding:0 1.25rem;
+    background:linear-gradient(to left, var(--background) 70%, transparent);
+    pointer-events:none;
+    font-size:1.75rem;
+    color:var(--navy);
+    display:flex;
+    align-items:center;
+    font-weight:800;
+  }
+  
+  /* ===== SECCIONES CON MEJOR ESPACIADO ===== */
+  .seccion{
+    width:100%;
+    max-width:100%;
+    margin:2.5rem 0;
+    padding:0;
+  }
+  
+  .seccion>h2{
+    font-size:1.6rem;
+    padding:0 1rem;
+    margin-bottom:1.2rem;
+    font-weight:800;
+  }
+  
+  .seccion.urgente{
+    margin:1.5rem 1rem;
+    padding:1.75rem 1.5rem;
+    border-radius:20px;
+  }
+  
+  .seccion.urgente>h2{
+    font-size:1.8rem;
+    padding:0;
   }
   
   /* Detalle responsive */
