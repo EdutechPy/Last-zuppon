@@ -2130,3 +2130,479 @@ label small,.chico{
     justify-content:center
   }
 }
+
+
+/* ========================================
+   OPTIMIZACIONES PARA ANDROID/MÓVILES
+   ======================================== */
+
+/* Aceleración de hardware para animaciones suaves */
+.card, .card-pro, .card-cupon, .boton, .chip, .destacada, .stat-card{
+  -webkit-transform:translateZ(0);
+  transform:translateZ(0);
+  -webkit-backface-visibility:hidden;
+  backface-visibility:hidden;
+  will-change:transform;
+}
+
+/* Mejora de rendimiento para scrolling */
+.chips, .fila-scroll, .grid-cupones, .grid-pro{
+  -webkit-overflow-scrolling:touch;
+  scroll-behavior:smooth;
+}
+
+/* Eliminar delays de tap en Android */
+a, button, .boton, .chip, .card, .card-cupon, input, select, textarea{
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+
+/* Área táctil mínima de 44x44px (recomendación de Google) */
+@media (max-width:768px){
+  .boton, button, .chip, .pestana, .top nav a{
+    min-height:44px;
+    min-width:44px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+  
+  /* Botones más grandes en móvil */
+  .boton, button{
+    padding:1rem 1.75rem;
+    font-size:1.05rem;
+  }
+  
+  /* Inputs más grandes y espaciados */
+  input, select, textarea{
+    padding:1rem 1.25rem;
+    font-size:1rem;
+    min-height:48px;
+  }
+  
+  /* Chips más grandes y espaciados */
+  .chips{
+    gap:1rem;
+    padding:1.25rem var(--gutter) 1.75rem;
+  }
+  
+  .chip{
+    padding:.8rem 1.3rem;
+    font-size:1rem;
+    min-height:44px;
+  }
+  
+  /* Cards con mejor padding táctil */
+  .card, .card-cupon, .card-pro{
+    border-width:3px;
+  }
+  
+  /* Hero más compacto en móvil */
+  .hero{
+    padding:2rem 0 1.5rem;
+  }
+  
+  .hero h1{
+    font-size:clamp(2rem, 10vw, 2.8rem);
+    margin-bottom:1rem;
+  }
+  
+  /* Buscador optimizado para móvil */
+  .busca{
+    flex-direction:column;
+    padding:.75rem;
+    gap:.75rem;
+  }
+  
+  .busca input{
+    padding:1rem;
+  }
+  
+  .busca button{
+    width:100%;
+    padding:1rem;
+    font-size:1.1rem;
+  }
+  
+  /* Grid adaptativo */
+  .grid{
+    grid-template-columns:1fr;
+    gap:1.25rem;
+  }
+  
+  /* Tarjetas más prominentes */
+  .card:active, .card-cupon:active, .card-pro:active{
+    transform:scale(0.98);
+  }
+  
+  /* Modales full-screen en móvil */
+  .modal-cupon-content{
+    max-height:100vh;
+    max-width:100%;
+    border-radius:0;
+    border-width:0;
+  }
+  
+  /* QR más pequeño pero legible */
+  .codigo-qr{
+    width:min(300px, 85vw);
+    height:min(300px, 85vw);
+  }
+  
+  /* Código más legible */
+  .codigo{
+    font-size:clamp(2rem, 10vw, 3rem);
+  }
+  
+  /* Navegación del header optimizada */
+  .top{
+    padding:1rem var(--gutter);
+    gap:.75rem;
+  }
+  
+  .brand{
+    font-size:1.5rem;
+  }
+  
+  .brand .logo{
+    height:2.5rem;
+  }
+  
+  .top nav{
+    gap:.4rem;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    width:100%;
+  }
+  
+  .top nav::-webkit-scrollbar{
+    display:none;
+  }
+  
+  .top nav a{
+    padding:.7rem 1rem;
+    font-size:.9rem;
+    white-space:nowrap;
+  }
+  
+  /* Selector de ciudad más grande */
+  .lugar{
+    padding:.75rem 1.25rem;
+  }
+  
+  .lugar select{
+    font-size:1rem;
+    padding:.5rem;
+  }
+  
+  /* Stats cards en columna */
+  .stats-grid{
+    grid-template-columns:1fr;
+    gap:1rem;
+  }
+  
+  .stat-card{
+    padding:1.25rem;
+  }
+  
+  .stat-icon{
+    font-size:2.75rem;
+  }
+  
+  .stat-content h3{
+    font-size:2.25rem;
+  }
+  
+  /* Panel de comercio optimizado */
+  .fila-oferta{
+    flex-direction:column;
+    gap:.75rem;
+    padding:1.25rem;
+  }
+  
+  .fila-oferta .acciones{
+    width:100%;
+    justify-content:stretch;
+  }
+  
+  .fila-oferta .acciones .boton, 
+  .fila-oferta .acciones .boton-sec{
+    flex:1;
+    min-width:0;
+  }
+  
+  /* Formularios más amigables */
+  .dos{
+    grid-template-columns:1fr;
+    gap:1rem;
+  }
+  
+  /* Flashes más prominentes */
+  .flash{
+    padding:1rem 1.25rem;
+    font-size:1rem;
+    border-width:2px;
+  }
+  
+  /* Footer más compacto */
+  .foot{
+    padding:2rem var(--gutter) 2rem;
+  }
+  
+  /* Mapa responsive */
+  .mapa-iframe{
+    height:350px;
+  }
+  
+  /* WhatsApp flotante más pequeño */
+  .whatsapp-flotante{
+    bottom:1.25rem;
+    right:1.25rem;
+    padding:.9rem;
+  }
+  
+  .whatsapp-flotante svg{
+    width:28px;
+    height:28px;
+  }
+  
+  /* Página de negocio optimizada */
+  .negocio-hero-pro{
+    padding:1.75rem var(--gutter) 2rem;
+  }
+  
+  .negocio-logo-pro, .negocio-logo-placeholder-pro{
+    width:120px;
+    height:120px;
+  }
+  
+  .negocio-nombre-pro{
+    font-size:1.75rem;
+    line-height:1.2;
+  }
+  
+  .negocio-descripcion-pro{
+    font-size:1rem;
+    padding:1rem 1.25rem;
+  }
+  
+  .meta-item{
+    font-size:1rem;
+  }
+  
+  /* Ofertas del negocio */
+  .grid-pro{
+    grid-template-columns:1fr;
+    gap:1.5rem;
+  }
+  
+  /* Detalle de oferta optimizado */
+  .detalle-arte{
+    height:280px;
+    border-radius:16px;
+  }
+  
+  .detalle h1{
+    font-size:1.75rem;
+  }
+  
+  /* Cupón optimizado */
+  .ticket{
+    border-width:3px;
+    box-shadow:4px 4px 0 var(--tinta);
+  }
+  
+  .ticket-top{
+    padding:1.25rem;
+  }
+  
+  .ticket-bottom{
+    padding:1rem 1.25rem;
+  }
+  
+  /* Mejorar legibilidad de precios */
+  .precio strong{
+    font-size:1.3rem;
+  }
+  
+  .precio-actual{
+    font-size:1.9rem;
+  }
+  
+  /* Secciones más compactas */
+  .seccion{
+    margin-top:2rem;
+  }
+  
+  .seccion>h2{
+    font-size:1.4rem;
+  }
+  
+  /* Cards en scroll horizontal más grandes */
+  .fila-scroll .card{
+    flex:0 0 clamp(280px, 85vw, 340px);
+  }
+  
+  /* Destacada en columna */
+  .destacada{
+    grid-template-columns:1fr;
+  }
+  
+  .d-arte{
+    min-height:220px;
+  }
+  
+  .d-texto{
+    padding:1.5rem;
+  }
+  
+  /* Mejorar contraste para legibilidad solar */
+  .chip, .card, .boton, .flash, input, select, textarea{
+    box-shadow:0 2px 8px rgba(0,0,0,.12);
+  }
+  
+  /* Evitar zoom en inputs en iOS/Android */
+  input, select, textarea{
+    font-size:16px !important;
+  }
+  
+  /* Gráficos más pequeños pero legibles */
+  .chart-box canvas{
+    max-height:280px;
+  }
+  
+  .charts-row{
+    grid-template-columns:1fr;
+    gap:1.5rem;
+  }
+  
+  /* Tablas responsive */
+  .stats-table{
+    font-size:.9rem;
+  }
+  
+  .stats-table th, .stats-table td{
+    padding:.75rem .5rem;
+  }
+}
+
+/* Optimizaciones específicas para Android */
+@media (max-width:768px) and (-webkit-min-device-pixel-ratio:2){
+  /* Mejora de renderizado de fuentes en pantallas de alta densidad */
+  body{
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    text-rendering:optimizeLegibility;
+  }
+  
+  /* Mejorar bordes en pantallas AMOLED */
+  .card, .card-cupon, .card-pro, .boton, .chip{
+    border-width:2.5px;
+  }
+  
+  /* Sombras más sutiles en pantallas brillantes */
+  .card:hover, .card-cupon:hover{
+    box-shadow:0 8px 20px rgba(0,0,0,.18);
+  }
+}
+
+/* Optimización de performance para animaciones */
+@media (max-width:768px){
+  /* Reducir animaciones complejas en móvil */
+  @media (prefers-reduced-motion: no-preference){
+    .card, .card-cupon, .chip, .boton{
+      transition:transform .2s ease-out, box-shadow .2s ease-out;
+    }
+  }
+  
+  /* Desactivar animaciones si el usuario lo prefiere */
+  @media (prefers-reduced-motion: reduce){
+    *{
+      animation:none !important;
+      transition:none !important;
+    }
+  }
+}
+
+/* Safe area para notch/punch-hole en Android */
+@supports (padding:max(0px)){
+  @media (max-width:768px){
+    .top{
+      padding-top:max(1rem, env(safe-area-inset-top));
+      padding-left:max(var(--gutter), env(safe-area-inset-left));
+      padding-right:max(var(--gutter), env(safe-area-inset-right));
+    }
+    
+    main{
+      padding-left:max(var(--gutter), env(safe-area-inset-left));
+      padding-right:max(var(--gutter), env(safe-area-inset-right));
+      padding-bottom:max(3rem, env(safe-area-inset-bottom));
+    }
+    
+    .whatsapp-flotante{
+      bottom:max(1.25rem, calc(env(safe-area-inset-bottom) + .5rem));
+      right:max(1.25rem, calc(env(safe-area-inset-right) + .5rem));
+    }
+  }
+}
+
+/* Mejora de scroll en listas horizontales */
+.chips, .fila-scroll{
+  scroll-snap-type:x mandatory;
+  scroll-padding:var(--gutter);
+}
+
+.chip, .fila-scroll .card{
+  scroll-snap-align:start;
+}
+
+/* Indicador visual de scroll horizontal en móvil */
+@media (max-width:768px){
+  .chips::after, .fila-scroll::after{
+    content:'→';
+    position:sticky;
+    right:0;
+    padding:0 1rem;
+    background:linear-gradient(to left, var(--background) 60%, transparent);
+    pointer-events:none;
+    font-size:1.5rem;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+  }
+}
+
+/* Mejoras táctiles adicionales para Android */
+@media (hover: none) and (pointer: coarse){
+  /* Feedback táctil mejorado */
+  .boton:active, button:active{
+    transform:scale(0.96);
+    box-shadow:0 2px 8px rgba(0,0,0,.2);
+  }
+  
+  .chip:active{
+    transform:scale(0.95);
+  }
+  
+  .card:active, .card-cupon:active, .card-pro:active{
+    transform:translateY(-2px) scale(0.98);
+  }
+  
+  /* Mejorar áreas de toque */
+  .top nav a{
+    padding:.8rem 1.2rem;
+  }
+  
+  /* Botones flotantes más accesibles */
+  .whatsapp-flotante{
+    padding:1rem;
+  }
+  
+  /* Modal close más grande */
+  .modal-close{
+    width:48px;
+    height:48px;
+    font-size:1.75rem;
+  }
+}
