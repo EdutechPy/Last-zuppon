@@ -2291,96 +2291,69 @@ label small,.chico{
 
 
 /* ========================================
-   RESPONSIVE COMPLETO PARA ANDROID/MÓVILES
+   RESPONSIVE OPTIMIZADO PARA ANDROID
    ======================================== */
 
-/* RESET COMPLETO PARA MÓVILES */
 @media (max-width:768px){
-  /* Contenedor raíz sin overflow */
-  html{
+  /* Reset básico */
+  html, body{
     width:100%;
     max-width:100%;
     overflow-x:hidden;
-    position:relative;
-  }
-  
-  body{
-    width:100%;
-    max-width:100%;
-    overflow-x:hidden;
-    position:relative;
     margin:0;
     padding:0;
   }
   
-  /* TODOS los elementos limitados */
   *{
     max-width:100%;
     box-sizing:border-box;
   }
   
-  /* Contenedor principal sin overflow */
   main{
     width:100%;
-    max-width:100%;
-    padding:0 1rem 3rem;
-    margin:0;
+    padding:0 1rem calc(70px + env(safe-area-inset-bottom));
     overflow-x:hidden;
   }
   
-  /* ===== HEADER SIMPLE EN MÓVIL ===== */
+  /* ===== HEADER ===== */
   .top{
-    width:100%;
-    max-width:100%;
-    padding:.9rem 1rem;
-    gap:.7rem;
-    overflow:hidden;
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
+    padding:.8rem 1rem;
+    gap:.6rem;
   }
   
-  /* Logo */
   .brand{
-    font-size:1.3rem;
-    white-space:nowrap;
+    font-size:1.2rem;
   }
   
   .brand .logo{
-    height:2.3rem;
+    height:2rem;
   }
   
-  /* Botón mapa */
   .btn-mapa{
-    padding:.65rem .85rem;
-    font-size:.9rem;
+    padding:.6rem .8rem;
+    font-size:.85rem;
+    margin-left:auto;
   }
   
   .btn-mapa span{
     display:none;
   }
   
-  /* Selector de ciudad */
   .lugar{
     flex:1 1 100%;
-    width:100%;
-    padding:.6rem .9rem;
-    margin:0;
+    padding:.55rem .8rem;
   }
   
   .lugar select{
-    width:100%;
-    max-width:100%;
-    font-size:.9rem;
-    padding:.4rem;
+    font-size:.85rem;
+    padding:.35rem;
   }
   
-  /* Ocultar navegación desktop en móvil */
   .top .nav-desktop{
     display:none;
   }
   
-  /* ===== BARRA DE NAVEGACIÓN INFERIOR ===== */
+  /* ===== BOTTOM NAV ===== */
   .bottom-nav{
     display:flex;
     position:fixed;
@@ -2390,7 +2363,6 @@ label small,.chico{
     background:var(--navy);
     box-shadow:0 -4px 12px rgba(0,0,0,.2);
     z-index:900;
-    padding:0;
     padding-bottom:env(safe-area-inset-bottom);
   }
   
@@ -2399,35 +2371,28 @@ label small,.chico{
     display:flex;
     flex-direction:column;
     align-items:center;
-    justify-content:center;
-    padding:.75rem .5rem;
-    text-decoration:none;
+    padding:.6rem .4rem;
+    min-height:56px;
+    gap:.2rem;
     color:#fff;
-    background:transparent;
     border:none;
-    cursor:pointer;
-    transition:all .2s;
-    min-height:60px;
-    gap:.25rem;
+    background:transparent;
   }
   
   .bottom-nav-item:active{
     background:rgba(255,255,255,.15);
-    transform:scale(0.95);
   }
   
   .bottom-nav-icon{
-    font-size:1.5rem;
-    line-height:1;
+    font-size:1.4rem;
   }
   
   .bottom-nav-label{
-    font-size:.7rem;
+    font-size:.65rem;
     font-weight:600;
-    color:rgba(255,255,255,.9);
   }
   
-  /* ===== MENÚ EMERGENTE DESDE ABAJO ===== */
+  /* ===== BOTTOM MENU ===== */
   .bottom-menu{
     display:block;
     position:fixed;
@@ -2436,7 +2401,7 @@ label small,.chico{
     right:0;
     z-index:1000;
     transform:translateY(100%);
-    transition:transform .3s cubic-bezier(.4,0,.2,1);
+    transition:transform .3s;
   }
   
   .bottom-menu.active{
@@ -2444,865 +2409,495 @@ label small,.chico{
   }
   
   .bottom-menu-content{
-    background:var(--white);
-    border-radius:24px 24px 0 0;
-    padding:1.5rem;
-    padding-bottom:calc(1.5rem + env(safe-area-inset-bottom));
-    box-shadow:0 -8px 24px rgba(0,0,0,.2);
-    max-height:50vh;
-    overflow-y:auto;
-  }
-  
-  .bottom-menu-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:1.5rem;
-    padding-bottom:1rem;
-    border-bottom:2px solid var(--border);
+    background:#fff;
+    border-radius:20px 20px 0 0;
+    padding:1.25rem;
+    padding-bottom:calc(1.25rem + env(safe-area-inset-bottom));
   }
   
   .bottom-menu-header h3{
-    margin:0;
-    font-size:1.4rem;
-    color:var(--navy);
-  }
-  
-  .bottom-menu-close{
-    background:var(--background);
-    border:none;
-    width:36px;
-    height:36px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:1.5rem;
-    color:var(--muted);
-    cursor:pointer;
-    transition:all .2s;
-  }
-  
-  .bottom-menu-close:active{
-    background:var(--border);
-    transform:scale(0.9);
-  }
-  
-  .bottom-menu-items{
-    display:flex;
-    flex-direction:column;
-    gap:.75rem;
+    font-size:1.25rem;
   }
   
   .bottom-menu-item{
-    display:flex;
-    align-items:center;
-    gap:1rem;
-    padding:1rem 1.25rem;
-    background:var(--background);
-    border-radius:16px;
-    text-decoration:none;
-    color:var(--navy);
-    font-weight:600;
-    font-size:1.05rem;
-    transition:all .2s;
-    border:2px solid transparent;
-  }
-  
-  .bottom-menu-item:active{
-    background:var(--border);
-    border-color:var(--navy);
-    transform:scale(0.98);
-  }
-  
-  .bottom-menu-icon{
-    font-size:1.75rem;
-    line-height:1;
-  }
-  
-  /* Agregar padding bottom al main para espacio de la barra */
-  main{
-    padding-bottom:calc(80px + env(safe-area-inset-bottom)) !important;
-  }
-  
-  /* Ajustar WhatsApp flotante */
-  .whatsapp-flotante{
-    bottom:calc(70px + env(safe-area-inset-bottom)) !important;
-  }
-  
-  /* ===== FIN NAVEGACIÓN INFERIOR ===== */
-  
-  /* Flashes sin overflow */
-  .flashes{
-    width:100%;
-    max-width:100%;
-    padding:0 1rem;
-    margin:1rem 0;
-  }
-  
-  .flash{
-    padding:1rem;
-    font-size:.95rem;
-    margin:.5rem 0;
-  }
-  
-  /* Hero responsive */
-  .hero{
-    width:100%;
-    max-width:100%;
-    padding:2rem 1rem 1.5rem;
-    margin:0;
-  }
-  
-  .hero h1{
-    font-size:clamp(1.8rem, 8vw, 2.5rem);
-  }
-  
-  .sub{
+    padding:.9rem 1.1rem;
     font-size:1rem;
   }
   
-  /* Buscador en columna */
-  .busca{
-    width:100%;
-    max-width:100%;
-    flex-direction:column;
-    padding:.7rem;
-    gap:.7rem;
-    margin:0;
-  }
-  
-  .busca input{
-    width:100%;
-    padding:.9rem 1rem;
-    font-size:1rem;
-  }
-  
-  .busca button{
-    width:100%;
-    padding:1rem;
-    font-size:1.05rem;
-  }
-  
-  /* Chips sin overflow */
-  .chips{
-    width:100%;
-    max-width:100%;
-    padding:1rem 1rem 1.5rem;
-    margin:0;
-    gap:.8rem;
-    overflow-x:auto;
-    overflow-y:hidden;
-    -webkit-overflow-scrolling:touch;
-  }
-  
-  .chip{
-    flex-shrink:0;
-    padding:.75rem 1.2rem;
-    font-size:.95rem;
-    min-height:44px;
-  }
-  
-  /* Secciones responsive */
-  .seccion{
-    width:100%;
-    max-width:100%;
-    margin:2rem 0;
-    padding:0;
-  }
-  
-  .seccion>h2{
-    font-size:1.4rem;
-    padding:0 1rem;
-  }
-  
-  .seccion.urgente{
-    margin:1.5rem 1rem;
-    padding:1.5rem;
-  }
-  
-  /* Fila scroll sin overflow */
-  .fila-scroll{
-    width:100%;
-    max-width:100%;
-    padding:1rem;
-    margin:0;
-    gap:1rem;
-    overflow-x:auto;
-    overflow-y:hidden;
-    -webkit-overflow-scrolling:touch;
-  }
-  
-  .fila-scroll .card{
-    flex:0 0 min(280px, 85vw);
-  }
-  
-  /* ===== CARDS OPTIMIZADAS PARA ANDROID ===== */
-  
-  /* Grid de cards en 1 columna */
+  /* ===== CARDS ===== */
   .grid{
-    width:100%;
-    max-width:100%;
     grid-template-columns:1fr;
-    gap:1rem;
-    padding:0;
-    margin:0;
+    gap:.9rem;
   }
   
-  /* Cards compactas pero legibles */
   .card{
-    width:100%;
-    max-width:100%;
     border-width:2px;
-    border-radius:16px;
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
-    transition:transform .2s, box-shadow .2s;
+    border-radius:14px;
   }
   
-  .card:active{
-    transform:scale(0.98);
-    box-shadow:0 4px 12px rgba(0,0,0,.12);
-  }
-  
-  /* Área de arte compacta */
   .card .arte{
-    height:140px;
+    height:130px;
   }
   
   .card .emoji{
-    font-size:4rem;
-    filter:drop-shadow(0 4px 0 rgba(18,24,58,.18));
+    font-size:3.5rem;
   }
   
-  /* Cuerpo de la card con padding ajustado */
   .card .cuerpo{
-    padding:1rem 1.1rem 1.2rem;
+    padding:.9rem 1rem;
   }
   
   .card h3{
-    font-size:1.05rem;
-    letter-spacing:-.01em;
-    margin-bottom:.4rem;
-    line-height:1.25;
+    font-size:1rem;
+    margin-bottom:.35rem;
   }
   
-  /* Precios legibles pero no enormes */
   .card .quien{
-    font-size:.85rem;
-    margin-bottom:.4rem;
-    color:var(--gris);
-  }
-  
-  .card .precio{
-    margin:.5rem 0;
+    font-size:.8rem;
   }
   
   .card .precio s{
-    font-size:.85rem;
-    margin-right:.4rem;
+    font-size:.8rem;
   }
   
   .card .precio strong{
-    font-size:1.15rem;
-    font-weight:800;
+    font-size:1.1rem;
   }
   
-  /* Meta info compacta */
   .card .meta{
-    font-size:.8rem;
-    margin-top:.35rem;
+    font-size:.75rem;
   }
   
-  /* Stickers proporcionados */
   .card .sticker{
-    font-size:1rem;
-    padding:.25rem .7rem;
-    top:.75rem;
-    right:.75rem;
-    border-width:2px;
+    font-size:.9rem;
+    padding:.2rem .6rem;
     white-space:nowrap;
     max-width:calc(100% - 1.5rem);
     overflow:hidden;
     text-overflow:ellipsis;
   }
   
-  .card .sticker.grande{
-    font-size:1.2rem;
-    padding:.3rem .8rem;
-  }
-  
-  /* Badge urgente más compacto */
-  .badge-urgente{
-    font-size:.75rem;
-    padding:.3rem .7rem;
-    bottom:.75rem;
-    left:.75rem;
-    white-space:nowrap;
-  }
-  
-  /* ===== CARDS DESTACADA ===== */
+  /* Cards destacadas */
   .destacada{
-    width:100%;
-    max-width:100%;
     grid-template-columns:1fr;
-    margin:0 0 1.25rem;
-    border-radius:16px;
-    border-width:2px;
-    box-shadow:0 4px 12px rgba(0,0,0,.1);
+    border-radius:14px;
   }
   
   .d-arte{
-    min-height:180px;
+    min-height:160px;
   }
   
   .d-arte .emoji{
-    font-size:5rem;
+    font-size:4.5rem;
+  }
+  
+  .d-arte .sticker{
+    font-size:1.05rem;
+    padding:.25rem .75rem;
+    white-space:nowrap;
+    max-width:calc(100% - 2rem);
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
   
   .d-texto{
-    padding:1.25rem 1.2rem;
+    padding:1.15rem 1.1rem;
   }
   
   .d-texto h3{
-    font-size:clamp(1.4rem, 4vw, 1.8rem);
-    margin-bottom:.5rem;
+    font-size:clamp(1.3rem, 4vw, 1.6rem);
   }
   
-  .d-texto .boton{
-    margin-top:.75rem;
-    padding:.85rem 1.5rem;
-    font-size:1rem;
-  }
-  
-  /* ===== CARDS DE CUPONES ===== */
+  /* Cards cupones */
   .grid-cupones{
-    width:100%;
-    max-width:100%;
     grid-template-columns:1fr;
-    gap:1rem;
-    padding:0;
+    gap:.9rem;
   }
   
   .card-cupon{
-    width:100%;
-    max-width:100%;
     border-width:2px;
-    border-radius:16px;
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
-  }
-  
-  .card-cupon:active{
-    transform:scale(0.98);
-    box-shadow:0 4px 12px rgba(0,0,0,.12);
+    border-radius:14px;
   }
   
   .card-cupon-imagen{
-    height:160px;
+    height:150px;
   }
   
   .emoji-grande{
-    font-size:4rem;
-  }
-  
-  .card-cupon-descuento{
-    font-size:1.15rem;
-    padding:.4rem .8rem;
-    top:.75rem;
-    right:.75rem;
+    font-size:3.5rem;
   }
   
   .card-cupon-body{
-    padding:1.1rem 1.2rem;
-    min-height:auto;
+    padding:1rem 1.1rem;
   }
   
   .card-cupon-body h3{
-    font-size:1.05rem;
-    margin-bottom:.5rem;
-    line-height:1.25;
-  }
-  
-  .card-comercio{
-    font-size:.9rem;
-    margin:.3rem 0;
-  }
-  
-  .card-ciudad{
-    font-size:.8rem;
-  }
-  
-  .card-cupon-footer{
-    padding:1rem 1.2rem;
-    gap:.75rem;
+    font-size:1rem;
   }
   
   .codigo-mini{
-    font-size:1rem;
-    letter-spacing:.1em;
+    font-size:.95rem;
   }
   
-  .fecha-mini{
-    font-size:.8rem;
-  }
-  
-  /* ===== CARDS PROFESIONALES (grid-pro) ===== */
+  /* Cards profesionales */
   .grid-pro{
     grid-template-columns:1fr;
-    gap:1rem;
+    gap:.9rem;
   }
   
   .card-pro{
     border-width:2px;
-    border-radius:16px;
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
-  }
-  
-  .card-pro:active{
-    transform:scale(0.98);
-    box-shadow:0 4px 12px rgba(0,0,0,.12);
+    border-radius:14px;
   }
   
   .arte-pro{
-    aspect-ratio:16/10;
-    min-height:160px;
-  }
-  
-  .emoji-large{
-    font-size:4rem;
+    min-height:150px;
   }
   
   .cuerpo-pro{
-    padding:1.1rem 1.2rem;
-    gap:.7rem;
+    padding:1rem 1.1rem;
   }
   
   .titulo-oferta-pro{
-    font-size:1.15rem;
-    line-height:1.25;
-  }
-  
-  .precio-pro{
-    gap:.7rem;
-    margin:.5rem 0;
-  }
-  
-  .precio-anterior{
-    font-size:.9rem;
+    font-size:1.08rem;
   }
   
   .precio-actual{
-    font-size:1.6rem;
-    font-weight:900;
+    font-size:1.5rem;
   }
   
-  .descuento-solo{
-    font-size:1.15rem;
-    margin:.5rem 0;
-  }
-  
-  .meta-pro{
-    gap:1rem;
-    padding-top:.7rem;
-  }
-  
-  .meta-item-card{
-    font-size:.85rem;
-  }
-  
-  .sticker-pro{
-    font-size:1rem;
-    padding:.4rem .8rem;
-    top:.75rem;
-    right:.75rem;
-    border-width:2px;
-    white-space:nowrap;
-    max-width:calc(100% - 1.5rem);
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  
-  /* Badge principal compacto */
-  .badge-principal{
-    font-size:.7rem;
-    padding:.3rem .7rem;
-    top:.75rem;
-    left:.75rem;
-  }
-  
-  /* Badge urgente en cards pro */
-  .card-pro .badge-urgente{
-    font-size:.75rem;
-    padding:.3rem .7rem;
-    bottom:.75rem;
-    left:.75rem;
-  }
-  
-  /* ===== FILA SCROLL HORIZONTAL ===== */
+  /* Scroll horizontal */
   .fila-scroll{
-    width:100%;
-    max-width:100%;
-    padding:.75rem 1rem 1rem;
-    margin:0;
-    gap:1rem;
-    overflow-x:auto;
-    overflow-y:hidden;
-    -webkit-overflow-scrolling:touch;
-    scroll-snap-type:x mandatory;
-    scroll-padding-left:1rem;
+    padding:.7rem 1rem .9rem;
+    gap:.9rem;
   }
   
   .fila-scroll .card{
-    flex:0 0 min(260px, 82vw);
-    scroll-snap-align:start;
+    flex:0 0 min(250px, 80vw);
   }
   
-  /* Indicador de scroll más sutil */
-  .fila-scroll::after{
-    content:'→';
-    position:sticky;
-    right:0;
-    padding:0 1rem;
-    background:linear-gradient(to left, var(--background) 65%, transparent);
-    pointer-events:none;
-    font-size:1.4rem;
-    color:var(--muted);
-    display:flex;
-    align-items:center;
-    font-weight:700;
+  /* ===== OTRAS SECCIONES ===== */
+  .hero{
+    padding:1.5rem 1rem 1.25rem;
   }
   
-  /* ===== SECCIONES CON ESPACIADO AJUSTADO ===== */
+  .hero h1{
+    font-size:clamp(1.6rem, 7vw, 2.2rem);
+  }
+  
+  .sub{
+    font-size:.95rem;
+  }
+  
+  .busca{
+    flex-direction:column;
+    padding:.6rem;
+    gap:.6rem;
+  }
+  
+  .chips{
+    padding:.85rem 1rem 1.25rem;
+    gap:.7rem;
+  }
+  
+  .chip{
+    padding:.65rem 1rem;
+    font-size:.85rem;
+    min-height:40px;
+    border-radius:10px;
+  }
+  
   .seccion{
-    width:100%;
-    max-width:100%;
-    margin:2rem 0;
-    padding:0;
+    margin:1.75rem 0;
   }
   
   .seccion>h2{
-    font-size:1.4rem;
+    font-size:1.3rem;
     padding:0 1rem;
-    margin-bottom:1rem;
-    font-weight:800;
   }
   
   .seccion.urgente{
     margin:1.25rem 1rem;
-    padding:1.4rem 1.3rem;
-    border-radius:16px;
+    padding:1.25rem;
+    border-radius:14px;
   }
   
-  .seccion.urgente>h2{
-    font-size:1.5rem;
-    padding:0;
-  }
-  
-  /* Detalle responsive */
-  .detalle{
-    width:100%;
-    max-width:100%;
-    padding:0;
-  }
-  
+  /* Detalle */
   .detalle-arte{
-    height:260px;
-    margin:1rem 0;
+    height:240px;
+    border-radius:14px;
   }
   
   .detalle h1{
-    font-size:1.75rem;
+    font-size:1.6rem;
   }
   
-  /* Cupones responsive */
+  /* Cupón */
   .cupon-wrap{
-    width:100%;
-    max-width:100%;
-    padding:1rem;
+    padding:.85rem;
   }
   
   .ticket{
-    width:100%;
-    max-width:100%;
-    border-width:3px;
+    border-width:2px;
+    border-radius:16px;
   }
   
   .codigo-qr{
-    width:min(280px, 80vw);
-    height:min(280px, 80vw);
+    width:min(260px, 78vw);
+    height:min(260px, 78vw);
   }
   
   .codigo{
-    font-size:clamp(2rem, 8vw, 2.8rem);
+    font-size:clamp(1.9rem, 8vw, 2.6rem);
   }
   
-  /* Mis cupones grid */
-  .grid-cupones{
-    width:100%;
-    max-width:100%;
-    grid-template-columns:1fr;
-    gap:1.5rem;
-    padding:0;
-  }
-  
-  .card-cupon{
-    width:100%;
-    max-width:100%;
-  }
-  
-  /* Modal full screen */
-  .modal-cupon-content{
-    width:100%;
-    max-width:100%;
-    max-height:100%;
-    border-radius:0;
-  }
-  
-  /* Panel responsive */
-  .panel{
-    width:100%;
-    max-width:100%;
-    padding:0;
-  }
-  
+  /* Panel */
   .panel-container{
-    width:100%;
-    max-width:100%;
-    padding:1rem;
+    padding:.95rem;
   }
   
-  .encabezado{
-    flex-direction:column;
-    align-items:flex-start;
-    gap:1rem;
+  .encabezado h2{
+    font-size:1.3rem;
   }
   
   .fila-oferta{
     flex-direction:column;
-    padding:1rem;
-    gap:.75rem;
+    padding:.9rem;
+    gap:.65rem;
   }
   
-  .fila-oferta .acciones{
-    width:100%;
-    flex-wrap:wrap;
-  }
-  
-  /* Formularios responsive */
-  .formulario{
-    width:100%;
-    max-width:100%;
-    padding:0;
-  }
-  
-  .dos{
-    grid-template-columns:1fr;
-  }
-  
-  /* Stats responsive */
+  /* Stats */
   .stats-grid{
-    width:100%;
-    max-width:100%;
     grid-template-columns:1fr;
-    gap:1rem;
-  }
-  
-  .stat-card{
-    padding:1.25rem;
+    gap:.85rem;
   }
   
   .stat-icon{
-    font-size:2.5rem;
+    font-size:2.3rem;
   }
   
   .stat-content h3{
-    font-size:2rem;
+    font-size:1.9rem;
   }
   
-  /* Charts responsive */
+  /* Charts */
   .charts-row{
     grid-template-columns:1fr;
-    gap:1.5rem;
+    gap:1.25rem;
   }
   
   .chart-box{
-    padding:1.5rem;
+    padding:1.3rem;
   }
   
   .chart-box canvas{
-    max-height:280px;
+    max-height:260px;
   }
   
-  /* Página de negocio responsive */
-  .negocio-pagina{
-    width:100%;
-    max-width:100%;
-    overflow-x:hidden;
-  }
-  
+  /* Página de negocio */
   .negocio-hero-pro{
-    width:100%;
-    max-width:100%;
-    padding:1.75rem 1rem 2rem;
+    padding:1.5rem 1rem;
   }
   
   .negocio-portada-pro{
     flex-direction:column;
     text-align:center;
-    gap:1.5rem;
   }
   
-  .negocio-logo-pro,
-  .negocio-logo-placeholder-pro{
-    width:120px;
-    height:120px;
+  .negocio-logo-pro{
+    width:110px;
+    height:110px;
   }
   
   .negocio-nombre-pro{
-    font-size:1.75rem;
+    font-size:1.6rem;
   }
   
-  .negocio-descripcion-pro{
-    font-size:1rem;
-    padding:1rem;
-  }
-  
-  .negocio-stats-pro{
-    grid-template-columns:1fr;
-    gap:1rem;
-  }
-  
-  .negocio-ofertas-pro{
-    width:100%;
-    max-width:100%;
-    padding:0 1rem 2rem;
-  }
-  
-  .grid-pro{
-    grid-template-columns:1fr;
-    gap:1.5rem;
-  }
-  
-  /* Mapa responsive */
-  .mapa-iframe{
-    height:350px;
-  }
-  
-  /* WhatsApp flotante */
-  .whatsapp-flotante{
-    bottom:1.25rem;
-    right:1.25rem;
-    padding:.9rem;
-  }
-  
-  .whatsapp-flotante svg{
-    width:26px;
-    height:26px;
-  }
-  
-  .whatsapp-flotante span{
-    display:none;
-  }
-  
-  /* Botones grandes para táctil */
+  /* Botones e inputs */
   .boton, button{
-    min-height:48px;
-    padding:1rem 1.5rem;
-    font-size:1rem;
+    min-height:44px;
+    padding:.9rem 1.4rem;
+    font-size:.95rem;
+    border-radius:10px;
   }
   
-  /* Inputs grandes */
   input, select, textarea{
-    min-height:48px;
-    padding:1rem;
+    min-height:44px;
+    padding:.9rem;
     font-size:16px;
+    border-radius:10px;
   }
   
-  /* Tablas responsive */
-  .stats-table{
+  /* Footer */
+  .foot{
+    padding:1.75rem 1rem;
     font-size:.85rem;
-    overflow-x:auto;
-    width:100%;
+  }
+  
+  /* Mapa */
+  .mapa-iframe{
+    height:320px;
+  }
+  
+  /* WhatsApp */
+  .whatsapp-flotante{
+    bottom:calc(65px + env(safe-area-inset-bottom)) !important;
+  }
+  
+  /* Tablas */
+  .stats-table{
+    font-size:.8rem;
   }
   
   .stats-table th,
   .stats-table td{
-    padding:.7rem .5rem;
+    padding:.65rem .4rem;
   }
   
-  /* Pestañas scrollables */
-  .pestanas{
-    overflow-x:auto;
-    overflow-y:hidden;
-    gap:.5rem;
-    width:100%;
+  /* Formularios */
+  .dos{
+    grid-template-columns:1fr;
   }
   
-  .pestana{
-    white-space:nowrap;
-    font-size:.9rem;
-    padding:.7rem 1rem;
+  label{
+    font-size:.85rem;
   }
   
-  /* Footer responsive */
-  .foot{
-    width:100%;
-    max-width:100%;
-    padding:2rem 1rem;
+  /* Modals */
+  .modal-cupon-content{
+    max-height:100%;
+    border-radius:0;
   }
   
-  /* Tarjeta de acceso */
-  .tarjeta-acceso{
-    margin:1rem;
-    padding:1.25rem;
+  .qr-grande{
+    width:min(280px, 80vw);
+    height:min(280px, 80vw);
   }
   
-  .fila-botones{
-    flex-direction:column;
-    gap:.75rem;
+  /* ===== EVENTOS ===== */
+  .eventos-grid{
+    grid-template-columns:1fr !important;
+    gap:.9rem !important;
   }
   
-  .boton-tarjeta,
-  .boton-pagina{
-    width:100%;
-    justify-content:center;
+  .evento-card{
+    border-width:2px;
+    border-radius:14px;
   }
   
-  /* Tabla de negocios */
-  .tabla-negocios,
-  .fila-negocio{
-    width:100%;
-    max-width:100%;
+  .evento-foto img{
+    height:160px !important;
+  }
+  
+  .evento-info{
+    padding:1rem !important;
+  }
+  
+  .evento-card h3{
+    font-size:1.1rem !important;
+  }
+  
+  .evento-desc{
+    font-size:.85rem !important;
+  }
+  
+  .evento-categoria,
+  .evento-destacado{
+    font-size:.75rem !important;
+    padding:.3rem .65rem !important;
+  }
+  
+  .evento-detalles{
+    padding:.65rem !important;
+    gap:.4rem !important;
+  }
+  
+  .evento-fecha,
+  .evento-hora,
+  .evento-lugar{
+    font-size:.8rem !important;
+  }
+  
+  .btn-ver-evento{
+    padding:.7rem 1.1rem !important;
+    font-size:.9rem !important;
+  }
+  
+  /* ===== PROFESIONALES ===== */
+  .profesionales-grid{
+    grid-template-columns:1fr !important;
+    gap:.9rem !important;
+  }
+  
+  .profesional-card{
+    padding:1.1rem !important;
+    border-width:2px;
+    border-radius:14px;
+  }
+  
+  .profesional-avatar,
+  .profesional-avatar-placeholder{
+    width:50px !important;
+    height:50px !important;
+    font-size:1.6rem !important;
+  }
+  
+  .profesional-titular h3{
+    font-size:1.05rem !important;
+  }
+  
+  .profesional-categoria{
+    font-size:.8rem !important;
+  }
+  
+  .badge-verificado{
+    width:24px !important;
+    height:24px !important;
+    font-size:.9rem !important;
+  }
+  
+  .profesional-desc{
+    font-size:.85rem !important;
+  }
+  
+  .stat{
+    font-size:.75rem !important;
+    padding:.35rem .65rem !important;
+  }
+  
+  .profesional-ubicacion{
+    font-size:.8rem !important;
+  }
+  
+  .profesional-precio{
+    padding:.65rem !important;
+    font-size:.85rem !important;
+  }
+  
+  .profesional-acciones{
+    gap:.65rem !important;
+  }
+  
+  .btn-ver,
+  .btn-contacto{
+    padding:.7rem .9rem !important;
+    font-size:.85rem !important;
+    min-height:44px;
   }
 }
 
-/* Safe area para notch/punch-hole */
+/* Safe areas */
 @supports (padding:max(0px)){
   @media (max-width:768px){
-    body{
-      padding-top:max(0px, env(safe-area-inset-top));
-      padding-bottom:max(0px, env(safe-area-inset-bottom));
-    }
-    
     .top{
-      padding-top:max(.9rem, env(safe-area-inset-top));
-      padding-left:max(1rem, env(safe-area-inset-left));
-      padding-right:max(1rem, env(safe-area-inset-right));
-    }
-    
-    .whatsapp-flotante{
-      bottom:max(1.25rem, calc(env(safe-area-inset-bottom) + .5rem));
-      right:max(1.25rem, calc(env(safe-area-inset-right) + .5rem));
+      padding-top:max(.8rem, env(safe-area-inset-top));
     }
   }
 }
 
-/* Mejoras táctiles */
+/* Táctil */
 @media (hover: none) and (pointer: coarse){
-  .boton:active, button:active{
+  .boton:active, button:active, .card:active, .chip:active{
     transform:scale(0.97);
-  }
-  
-  .card:active, .card-cupon:active, .chip:active{
-    transform:scale(0.98);
   }
 }
