@@ -2209,6 +2209,57 @@ a, button, .boton, .chip, .card, .card-cupon, input, select, textarea{
 
 /* Área táctil mínima de 44x44px (recomendación de Google) */
 @media (max-width:768px){
+  /* Forzar que nada se salga de la pantalla */
+  html, body{
+    overflow-x:hidden !important;
+    max-width:100vw !important;
+    position:relative;
+  }
+  
+  *{
+    max-width:100% !important;
+  }
+  
+  /* Contenedores principales */
+  .top, main, .hero, .seccion, .panel-container, .negocio-pagina{
+    width:100% !important;
+    max-width:100vw !important;
+    overflow-x:hidden !important;
+    box-sizing:border-box !important;
+  }
+  
+  /* Grids y flex que pueden causar overflow */
+  .grid, .grid-pro, .grid-cupones, .stats-grid, .charts-row{
+    width:100% !important;
+    max-width:100% !important;
+  }
+  
+  /* Cards y elementos que se salen */
+  .card, .card-cupon, .card-pro, .destacada{
+    max-width:100% !important;
+    width:100% !important;
+  }
+  
+  /* Fila scroll debe contener sus elementos */
+  .fila-scroll{
+    width:100vw !important;
+    max-width:100vw !important;
+    box-sizing:border-box !important;
+  }
+  
+  /* Chips scroll debe contener */
+  .chips{
+    width:100vw !important;
+    max-width:100vw !important;
+    box-sizing:border-box !important;
+  }
+  
+  /* Imágenes y media */
+  img, video, iframe, canvas{
+    max-width:100% !important;
+    height:auto !important;
+  }
+  
   .boton, button, .chip, .pestana, .top nav a{
     min-height:44px;
     min-width:44px;
