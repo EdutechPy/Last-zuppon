@@ -109,13 +109,6 @@
     Zuppon<span>Py</span>
   </a>
   
-  <!-- Botón hamburguesa para móvil -->
-  <button class="menu-toggle" id="menuToggle" aria-label="Menú">
-    <span></span>
-    <span></span>
-    <span></span>
-  </button>
-  
   <form class="lugar" method="get" action="{{ url_for('index') }}">
     <span aria-hidden="true">📍</span>
     <select name="ciudad" aria-label="Tu ciudad" onchange="this.form.submit()">
@@ -134,23 +127,69 @@
     <span>Mapa</span>
   </a>
   
-  <!-- Navegación principal - enlaces visibles en móvil -->
-  <nav class="nav-main" id="navMain">
+  <!-- Navegación principal para desktop -->
+  <nav class="nav-desktop">
     <a href="{{ url_for('eventos') }}">📅 Eventos</a>
     <a href="{{ url_for('profesionales') }}">🛠️ Profesionales</a>
     <a href="{{ url_for('mis_cupones') }}">📱 Mis cupones</a>
-  </nav>
-  
-  <!-- Menú hamburguesa - solo Admin y Login -->
-  <nav class="nav-drawer" id="navDrawer">
-    <a href="{{ url_for('panel') }}">🔐 Admin</a>
+    <a href="{{ url_for('panel') }}">Admin</a>
     {% if session.comercio_id %}
-      <a href="{{ url_for('salir') }}">👋 Salir</a>
+      <a href="{{ url_for('salir') }}">Salir</a>
     {% else %}
-      <a href="{{ url_for('login') }}">🏪 Soy comercio</a>
+      <a href="{{ url_for('login') }}">Soy comercio</a>
     {% endif %}
   </nav>
 </header>
+
+<!-- Barra de navegación inferior para móviles -->
+<nav class="bottom-nav" id="bottomNav">
+  <a href="{{ url_for('eventos') }}" class="bottom-nav-item">
+    <span class="bottom-nav-icon">📅</span>
+    <span class="bottom-nav-label">Eventos</span>
+  </a>
+  
+  <a href="{{ url_for('profesionales') }}" class="bottom-nav-item">
+    <span class="bottom-nav-icon">🛠️</span>
+    <span class="bottom-nav-label">Profesionales</span>
+  </a>
+  
+  <a href="{{ url_for('mis_cupones') }}" class="bottom-nav-item">
+    <span class="bottom-nav-icon">📱</span>
+    <span class="bottom-nav-label">Cupones</span>
+  </a>
+  
+  <button class="bottom-nav-item" id="bottomMenuToggle">
+    <span class="bottom-nav-icon">☰</span>
+    <span class="bottom-nav-label">Menú</span>
+  </button>
+</nav>
+
+<!-- Menú emergente desde abajo -->
+<div class="bottom-menu" id="bottomMenu">
+  <div class="bottom-menu-content">
+    <div class="bottom-menu-header">
+      <h3>Menú</h3>
+      <button class="bottom-menu-close" id="bottomMenuClose">✕</button>
+    </div>
+    <div class="bottom-menu-items">
+      <a href="{{ url_for('panel') }}" class="bottom-menu-item">
+        <span class="bottom-menu-icon">🔐</span>
+        <span>Admin</span>
+      </a>
+      {% if session.comercio_id %}
+        <a href="{{ url_for('salir') }}" class="bottom-menu-item">
+          <span class="bottom-menu-icon">👋</span>
+          <span>Salir</span>
+        </a>
+      {% else %}
+        <a href="{{ url_for('login') }}" class="bottom-menu-item">
+          <span class="bottom-menu-icon">🏪</span>
+          <span>Soy comercio</span>
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
 
 <!-- Overlay para cerrar menú -->
 <div class="menu-overlay" id="menuOverlay"></div>
@@ -171,33 +210,42 @@
 </footer>
 
 <script>
-// Menú hamburguesa para móviles
+// Menú inferior para móviles
 (function() {
-  const menuToggle = document.getElementById('menuToggle');
-  const navDrawer = document.getElementById('navDrawer');
+  const bottomMenuToggle = document.getElementById('bottomMenuToggle');
+  const bottomMenu = document.getElementById('bottomMenu');
+  const bottomMenuClose = document.getElementById('bottomMenuClose');
   const menuOverlay = document.getElementById('menuOverlay');
   
-  if (menuToggle && navDrawer) {
-    menuToggle.addEventListener('click', function() {
-      navDrawer.classList.toggle('active');
-      menuToggle.classList.toggle('active');
-      menuOverlay.classList.toggle('active');
-      document.body.style.overflow = navDrawer.classList.contains('active') ? 'hidden' : '';
+  if (bottomMenuToggle && bottomMenu) {
+    // Abrir menú
+    bottomMenuToggle.addEventListener('click', function(e) {
+      e.preventDefault();
+      bottomMenu.classList.add('active');
+      menuOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
     });
+    
+    // Cerrar menú con botón X
+    if (bottomMenuClose) {
+      bottomMenuClose.addEventListener('click', function() {
+        bottomMenu.classList.remove('active');
+        menuOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      });
+    }
     
     // Cerrar al hacer click en el overlay
     menuOverlay.addEventListener('click', function() {
-      navDrawer.classList.remove('active');
-      menuToggle.classList.remove('active');
+      bottomMenu.classList.remove('active');
       menuOverlay.classList.remove('active');
       document.body.style.overflow = '';
     });
     
-    // Cerrar al hacer click en un enlace
-    navDrawer.querySelectorAll('a').forEach(link => {
+    // Cerrar al hacer click en un enlace del menú
+    bottomMenu.querySelectorAll('.bottom-menu-item').forEach(link => {
       link.addEventListener('click', function() {
-        navDrawer.classList.remove('active');
-        menuToggle.classList.remove('active');
+        bottomMenu.classList.remove('active');
         menuOverlay.classList.remove('active');
         document.body.style.overflow = '';
       });
