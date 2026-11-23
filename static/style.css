@@ -2884,6 +2884,291 @@ label small,.chico{
     font-size:.85rem !important;
     min-height:44px;
   }
+  
+  /* ===== PÁGINA DE NEGOCIO ===== */
+  .negocio-hero-pro{
+    padding:1.5rem 1rem 2rem !important;
+    margin-bottom:2rem !important;
+    border-radius:0 0 24px 24px !important;
+  }
+  
+  .volver-pro{
+    padding:.65rem 1rem !important;
+    font-size:.85rem !important;
+    margin-bottom:1.25rem !important;
+  }
+  
+  .negocio-portada-pro{
+    flex-direction:column !important;
+    align-items:center !important;
+    text-align:center !important;
+    gap:1.5rem !important;
+    margin:1rem 0 2rem !important;
+  }
+  
+  .negocio-logo-wrapper{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  
+  .negocio-logo-pro,
+  .negocio-logo-placeholder-pro{
+    width:120px !important;
+    height:120px !important;
+    border-radius:20px !important;
+    border-width:3px !important;
+  }
+  
+  .negocio-logo-placeholder-pro svg{
+    width:48px !important;
+    height:48px !important;
+  }
+  
+  .logo-badge{
+    font-size:.7rem !important;
+    padding:.3rem .65rem !important;
+    bottom:-8px !important;
+    right:50% !important;
+    transform:translateX(50%);
+  }
+  
+  .negocio-nombre-pro{
+    font-size:clamp(1.6rem, 7vw, 2.2rem) !important;
+    margin:0 0 1rem !important;
+  }
+  
+  .negocio-meta-info{
+    gap:.6rem !important;
+    margin-bottom:1.25rem !important;
+    width:100%;
+  }
+  
+  .meta-item{
+    font-size:.9rem !important;
+    gap:.6rem !important;
+    justify-content:center;
+  }
+  
+  .meta-item svg{
+    width:16px !important;
+    height:16px !important;
+  }
+  
+  .negocio-descripcion-pro{
+    font-size:.95rem !important;
+    line-height:1.6 !important;
+    padding:1rem !important;
+    margin:1rem 0 0 !important;
+  }
+  
+  .negocio-stats-pro{
+    grid-template-columns:1fr !important;
+    gap:1rem !important;
+    margin-top:2rem !important;
+  }
+  
+  .stat-card{
+    padding:1.1rem !important;
+    gap:1rem !important;
+    border-radius:16px !important;
+  }
+  
+  .stat-icon{
+    width:44px !important;
+    height:44px !important;
+  }
+  
+  .stat-icon svg{
+    width:20px !important;
+    height:20px !important;
+  }
+  
+  .stat-numero-pro{
+    font-size:1.9rem !important;
+  }
+  
+  .stat-numero-pro.texto{
+    font-size:1rem !important;
+  }
+  
+  .stat-label-pro{
+    font-size:.8rem !important;
+  }
+  
+  /* Sección ofertas negocio */
+  .negocio-ofertas-pro{
+    padding:0 1rem 2rem !important;
+  }
+  
+  .seccion-header{
+    margin-bottom:2rem !important;
+  }
+  
+  .seccion-titulo-pro{
+    font-size:1.4rem !important;
+    flex-direction:column !important;
+    gap:.5rem !important;
+  }
+  
+  .seccion-titulo-pro svg{
+    width:24px !important;
+    height:24px !important;
+  }
+  
+  .seccion-subtitulo{
+    font-size:.9rem !important;
+  }
+  
+  .grid-pro{
+    grid-template-columns:1fr !important;
+    gap:.9rem !important;
+  }
+  
+  .card-pro{
+    border-radius:14px !important;
+    border-width:2px !important;
+  }
+  
+  .badge-principal{
+    top:10px !important;
+    left:10px !important;
+    font-size:.7rem !important;
+    padding:.3rem .65rem !important;
+    border-radius:10px !important;
+  }
+  
+  .arte-pro{
+    min-height:160px !important;
+    aspect-ratio:auto !important;
+  }
+  
+  .emoji-large{
+    font-size:3.5rem !important;
+  }
+  
+  .sticker-pro{
+    top:12px !important;
+    right:12px !important;
+    font-size:.95rem !important;
+    padding:.45rem .8rem !important;
+    border-radius:12px !important;
+  }
+  
+  .badge-urgente{
+    bottom:10px !important;
+    left:10px !important;
+    font-size:.7rem !important;
+    padding:.3rem .65rem !important;
+    border-radius:10px !important;
+  }
+  
+  .cuerpo-pro{
+    padding:1.1rem !important;
+    gap:.6rem !important;
+  }
+  
+  .categoria-badge{
+    font-size:.75rem !important;
+    padding:.3rem .7rem !important;
+  }
+  
+  .titulo-oferta-pro{
+    font-size:1.08rem !important;
+  }
+  
+  .precio-pro{
+    gap:.6rem !important;
+  }
+  
+  .precio-anterior{
+    font-size:.85rem !important;
+  }
+  
+  .precio-actual{
+    font-size:1.4rem !important;
+  }
+  
+  .descuento-solo{
+    font-size:1.05rem !important;
+  }
+  
+  .meta-pro{
+    gap:.75rem !important;
+    padding-top:.6rem !important;
+  }
+  
+  .meta-item-card{
+    font-size:.8rem !important;
+    gap:.35rem !important;
+  }
+  
+  .meta-item-card svg{
+    width:14px !important;
+    height:14px !important;
+  }
+  
+  /* Mapa negocio */
+  .negocio-mapa-seccion{
+    padding:0 1rem 2rem !important;
+  }
+  
+  .mapa-wrapper{
+    border-radius:14px !important;
+    overflow:hidden;
+  }
+  
+  .mapa-iframe{
+    height:280px !important;
+  }
+  
+  .btn-abrir-mapa{
+    padding:.75rem 1.1rem !important;
+    font-size:.85rem !important;
+  }
+  
+  .btn-abrir-mapa svg{
+    width:16px !important;
+    height:16px !important;
+  }
+  
+  /* Footer negocio */
+  .negocio-footer-pro{
+    padding:2rem 1rem 1.5rem !important;
+  }
+  
+  .boton-volver-pro{
+    padding:.9rem 1.3rem !important;
+    font-size:.9rem !important;
+  }
+  
+  .boton-volver-pro svg{
+    width:18px !important;
+    height:18px !important;
+  }
+  
+  .footer-copy{
+    font-size:.8rem !important;
+  }
+  
+  /* Vacio pro */
+  .vacio-pro{
+    padding:3rem 1.5rem !important;
+  }
+  
+  .vacio-pro svg{
+    width:60px !important;
+    height:60px !important;
+  }
+  
+  .vacio-pro h3{
+    font-size:1.3rem !important;
+  }
+  
+  .vacio-pro p{
+    font-size:.95rem !important;
+  }
 }
 
 /* Safe areas */
